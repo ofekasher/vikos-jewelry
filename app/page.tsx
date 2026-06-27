@@ -1,65 +1,282 @@
-import Image from "next/image";
+"use client";
+import { useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { toast } from "sonner";
+import Navbar from "@/components/Navbar";
+import CartDrawer from "@/components/CartDrawer";
+import Footer from "@/components/Footer";
+import HeroVideo from "@/components/HeroVideo";
+import ReviewsCarousel from "@/components/home/ReviewsCarousel";
+import InstagramGallery from "@/components/home/InstagramGallery";
+import { products } from "@/lib/products";
+import { useStore } from "@/lib/store";
 
-export default function Home() {
+/* ── Design tokens ── */
+const T = {
+  gold:    "#C9A96E",
+  black:   "#111111",
+  gray:    "#6B6B6B",
+  light:   "#AAAAAA",
+  border:  "#E8E8E8",
+  warm:    "#F9F7F4",
+  serif:   "'Cormorant Garamond', Georgia, serif",
+  sans:    "'Inter', system-ui, sans-serif",
+};
+
+/* ── Reusable section header ── */
+function SectionHeader({ eyebrow, title, cta }: { eyebrow: string; title: string; cta?: { label: string; href: string } }) {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "32px" }}>
+      <div>
+        <p style={{ fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: T.gold, marginBottom: "8px" }}>
+          {eyebrow}
+        </p>
+        <h2 style={{ fontFamily: T.serif, fontSize: "clamp(1.5rem,2.8vw,2.2rem)", fontWeight: 400, color: T.black, lineHeight: 1.15, margin: 0 }}>
+          {title}
+        </h2>
+      </div>
+      {cta && (
+        <Link href={cta.href} style={{
+          fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase",
+          color: T.gray, textDecoration: "none", borderBottom: `1px solid ${T.border}`,
+          paddingBottom: "2px", transition: "color 0.2s, border-color 0.2s", whiteSpace: "nowrap",
+        }}
+        onMouseEnter={e => { e.currentTarget.style.color = T.gold; e.currentTarget.style.borderBottomColor = T.gold; }}
+        onMouseLeave={e => { e.currentTarget.style.color = T.gray; e.currentTarget.style.borderBottomColor = T.border; }}
+        >
+          {cta.label} →
+        </Link>
+      )}
+    </div>
+  );
+}
+
+const categories = [
+  {
+    label: "עגילים",
+    sub: "אלגנטיות עדינה",
+    href: "/shop?cat=earrings",
+    images: [
+      "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&q=85",
+      "https://images.unsplash.com/photo-1573408301185-9519f94816b4?w=500&q=85",
+    ],
+  },
+  {
+    label: "טבעות",
+    sub: "סמל נצחי",
+    href: "/shop?cat=rings",
+    images: [
+      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500&q=85",
+      "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=500&q=85",
+    ],
+  },
+  {
+    label: "צמידים",
+    sub: "יוקרה על הפרק",
+    href: "/shop?cat=bracelets",
+    images: [
+      "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500&q=85",
+      "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=500&q=85",
+    ],
+  },
+];
+
+export default function HomePage() {
+  const { addToCart } = useStore();
+  const newest = products.slice(0, 3);
+  const [hovered, setHovered] = useState<string | null>(null);
+
+  return (
+    <div style={{ background: "#fff", minHeight: "100vh" }} dir="rtl">
+      <Navbar />
+      <CartDrawer />
+
+      {/* ══════════════════════════════════════
+          HERO — video crossfade
+      ══════════════════════════════════════ */}
+      <HeroVideo />
+
+      {/* ══════════════════════════════════════
+          NEWEST COLLECTION
+      ══════════════════════════════════════ */}
+      <section style={{ maxWidth: "1160px", margin: "0 auto", padding: "72px 32px 0" }}>
+        <SectionHeader
+          eyebrow="טרי מהסדנה"
+          title="הקולקציה החדשה ביותר"
+          cta={{ label: "ראה הכל", href: "/shop" }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "24px" }}>
+          {newest.map((p, i) => (
+            <motion.div key={p.id}
+              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: i * 0.08 }}
+              onMouseEnter={() => setHovered(p.id)}
+              onMouseLeave={() => setHovered(null)}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              <Link href={`/product/${p.id}`} style={{ textDecoration: "none", display: "block" }}>
+                {/* Image */}
+                <div style={{ position: "relative", overflow: "hidden", background: T.warm, marginBottom: "14px" }}>
+                  <img src={p.image} alt={p.nameHe} loading={i === 0 ? "eager" : "lazy"}
+                    style={{
+                      width: "100%", aspectRatio: "1/1", objectFit: "cover", display: "block",
+                      transition: "transform 0.6s ease",
+                      transform: hovered === p.id ? "scale(1.06)" : "scale(1)",
+                    }}
+                  />
+                  {/* Quick add */}
+                  <button
+                    onClick={e => { e.preventDefault(); e.stopPropagation(); addToCart(p); toast.success(`${p.nameHe} נוסף לסל`, { duration: 2000 }); }}
+                    style={{
+                      position: "absolute", bottom: 0, left: 0, right: 0,
+                      background: "rgba(17,17,17,0.88)",
+                      border: "none", cursor: "pointer", padding: "13px",
+                      fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase",
+                      color: "#fff",
+                      transform: hovered === p.id ? "translateY(0)" : "translateY(100%)",
+                      transition: "transform 0.28s ease",
+                    }}
+                  >
+                    הוסף לסל
+                  </button>
+                  {/* Badge */}
+                  {p.isNew && (
+                    <span style={{
+                      position: "absolute", top: "12px", right: "12px",
+                      background: T.black, color: "#fff",
+                      fontFamily: T.sans, fontSize: "8px", letterSpacing: "0.15em", textTransform: "uppercase",
+                      padding: "3px 8px",
+                    }}>חדש</span>
+                  )}
+                </div>
+
+                {/* Product info */}
+                <p style={{ fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.15em", textTransform: "uppercase", color: T.light, marginBottom: "5px" }}>
+                  {p.material.split("|")[0].trim()}
+                </p>
+                <p style={{ fontFamily: T.serif, fontSize: "1.05rem", fontWeight: 400, color: T.black, marginBottom: "5px", lineHeight: 1.3 }}>
+                  {p.nameHe}
+                </p>
+                <p style={{ fontFamily: T.sans, fontSize: "13px", color: T.gray, fontWeight: 300 }}>
+                  ₪{p.price.toLocaleString()}
+                </p>
+              </Link>
+            </motion.div>
+          ))}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+      </section>
+
+      {/* ══════════════════════════════════════
+          THIN DIVIDER
+      ══════════════════════════════════════ */}
+      <div style={{ maxWidth: "1160px", margin: "64px auto 0", padding: "0 32px" }}>
+        <div style={{ height: "1px", background: T.border }} />
+      </div>
+
+      {/* ══════════════════════════════════════
+          SHOP BY CATEGORY
+      ══════════════════════════════════════ */}
+      <section style={{ maxWidth: "1160px", margin: "0 auto", padding: "64px 32px 0" }}>
+        <SectionHeader eyebrow="לפי סגנון" title="קנה לפי קטגוריה" />
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "20px" }}>
+          {categories.map((cat, i) => (
+            <motion.div key={cat.label}
+              initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.5, delay: i * 0.06 }}
+            >
+              <Link href={cat.href} style={{ textDecoration: "none", display: "block" }}
+                onMouseEnter={e => { const img = e.currentTarget.querySelector("img") as HTMLImageElement; if (img) img.style.transform = "scale(1.05)"; }}
+                onMouseLeave={e => { const img = e.currentTarget.querySelector("img") as HTMLImageElement; if (img) img.style.transform = "scale(1)"; }}
+              >
+                {/* Collage grid */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gridTemplateRows: "1fr 1fr", gap: "3px", aspectRatio: "1/1", marginBottom: "14px", overflow: "hidden", background: T.warm }}>
+                  <img src={cat.images[0]} alt={cat.label}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", gridRow: "1 / 3", transition: "transform 0.6s ease" }} />
+                  <img src={cat.images[1]} alt={cat.label}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.6s ease" }} />
+                  <div style={{ background: T.warm }} />
+                </div>
+                <p style={{ fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: T.light, marginBottom: "4px" }}>
+                  {cat.sub}
+                </p>
+                <p style={{ fontFamily: T.serif, fontSize: "1.1rem", fontWeight: 400, color: T.black }}>
+                  {cat.label}
+                </p>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════
+          BRAND STORY
+      ══════════════════════════════════════ */}
+      <section style={{ background: T.warm, padding: "80px 32px" }}>
+        <div style={{ maxWidth: "1160px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "72px", alignItems: "center" }}
+          className="brand-story-grid">
+          {/* Video */}
+          <div style={{ overflow: "hidden", borderRadius: "2px", background: "#1a1a1a" }}>
+            <video
+              src="/videos/brand-story.mp4"
+              autoPlay
+              muted
+              loop
+              playsInline
+              style={{ width: "100%", aspectRatio: "4/5", objectFit: "cover", display: "block" }}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
+
+          {/* Text */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
+            <p style={{ fontFamily: T.sans, fontSize: "9px", letterSpacing: "0.38em", textTransform: "uppercase", color: T.gold }}>
+              הסיפור שלנו
+            </p>
+            <h2 style={{ fontFamily: T.serif, fontSize: "clamp(1.8rem, 2.8vw, 2.8rem)", fontWeight: 300, color: T.black, lineHeight: 1.15, margin: 0 }}>
+              מידה אחת<br />
+              <em style={{ fontStyle: "italic", fontWeight: 400 }}>מתאימה לכולן</em>
+            </h2>
+            <div style={{ width: "40px", height: "1px", background: T.gold }} />
+            <p style={{ fontFamily: T.sans, fontSize: "13px", color: T.gray, lineHeight: 1.9, fontWeight: 300, maxWidth: "380px" }}>
+              הטבעות שלנו מעוצבות להתאים בדיוק — ניתנות לכיוון, ללא צורך בידיעת המידה מראש. כי היופי האמיתי הוא זה שמרגיש כמו שנתפר עבורך.
+            </p>
+            <Link href="/shop" style={{
+              display: "inline-block", alignSelf: "flex-start", marginTop: "4px",
+              padding: "13px 32px",
+              background: T.gold, color: "#fff",
+              fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase",
+              textDecoration: "none", transition: "background 0.25s",
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = "#b8924f")}
+            onMouseLeave={e => (e.currentTarget.style.background = T.gold)}
+            >
+              לחנות →
+            </Link>
+          </div>
         </div>
-      </main>
+      </section>
+
+      {/* ══════════════════════════════════════
+          REVIEWS CAROUSEL
+      ══════════════════════════════════════ */}
+      <ReviewsCarousel />
+
+      {/* ══════════════════════════════════════
+          INSTAGRAM GALLERY
+      ══════════════════════════════════════ */}
+      <InstagramGallery />
+
+      <Footer />
+
+      <style>{`
+        @media (max-width: 768px) {
+          .brand-story-grid {
+            grid-template-columns: 1fr !important;
+            gap: 40px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

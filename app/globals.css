@@ -1,26 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500&family=Frank+Ruhl+Libre:wght@300;400;500;700&display=swap');
 @import "tailwindcss";
 
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --gold:   #C9A96E;
+  --black:  #111111;
+  --gray:   #888888;
+  --border: #E5E5E5;
+  --bg:     #FFFFFF;
+  --warm:   #F7F5F2;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+html { scroll-behavior: smooth; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--black);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Hebrew body font */
+[lang="he"] body,
+[dir="rtl"] body {
+  font-family: 'Frank Ruhl Libre', serif;
+}
+
+/* Mixed-weight heading pattern: "Word *Italic* Word" */
+.mixed-heading {
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  color: var(--black);
+  line-height: 1.15;
+}
+.mixed-heading em {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 400;
+}
+[dir="rtl"] .mixed-heading {
+  font-family: 'Frank Ruhl Libre', serif;
+}
+
+/* Label style: "COLLECTION" */
+.eyebrow {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gray);
+}
+
+/* Gold horizontal rule */
+.rule-gold {
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  border: none;
+}
+
+/* Arch container */
+.arch {
+  border-radius: 999px 999px 0 0;
+  overflow: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Underline link */
+.underline-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.underline-link::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0;
+  width: 0; height: 1px;
+  background: var(--black);
+  transition: width .35s ease;
+}
+.underline-link:hover::after { width: 100%; }
+
+/* ── Glass Button ── */
+.glass-button-wrap {
+  position: relative;
+  display: inline-block;
+}
+.glass-button {
+  position: relative;
+  z-index: 1;
+  display: block;
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.22) 0%,
+    rgba(255,255,255,0.08) 100%
+  );
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.4);
+  border-bottom-color: rgba(255,255,255,0.15);
+  border-right-color: rgba(255,255,255,0.15);
+  color: inherit;
+  transition: background 0.25s ease, border-color 0.25s ease, transform 0.15s ease;
+}
+.glass-button:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(201,169,110,0.28) 0%,
+    rgba(201,169,110,0.10) 100%
+  );
+  border-color: rgba(201,169,110,0.6);
+}
+.glass-button:active {
+  transform: scale(0.97);
+}
+.glass-button-shadow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.14), 0 1px 4px rgba(0,0,0,0.08);
+  pointer-events: none;
+}
+
+/* ── Gold divider (used in custom page) ── */
+.gold-divider {
+  height: 1px;
+  width: 48px;
+  background: var(--gold);
+  margin: 0 auto;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
 }

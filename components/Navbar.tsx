@@ -5,7 +5,8 @@ import { useStore } from "@/lib/store";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
-  const { cartCount, toggleCart } = useStore();
+  const { cartCount, toggleCart, wishlistCount } = useStore();
+  const wCount = wishlistCount();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const count = cartCount();
@@ -22,11 +23,11 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { href: "/",       label: "בית" },
-    { href: "/shop",   label: "חנות" },
-    { href: "/gallery",label: "גלריה" },
-    { href: "/about",  label: "המותג" },
-    { href: "/custom", label: "צור קשר" },
+    { href: "/",        label: "בית" },
+    { href: "/shop",    label: "חנות" },
+    { href: "/gallery", label: "גלריה" },
+    { href: "/about",   label: "המותג" },
+    { href: "/custom",  label: "צור קשר" },
   ];
 
   return (
@@ -71,12 +72,15 @@ export default function Navbar() {
 
         {/* Left: icons only */}
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          {/* Search */}
-          <button aria-label="חיפוש" style={{ background: "none", border: "none", cursor: "pointer", color: "#444", padding: "4px", display: "flex" }}>
+          {/* Wishlist */}
+          <Link href="/wishlist" aria-label="מועדפים" style={{ background: "none", border: "none", cursor: "pointer", color: "#444", padding: "4px", display: "flex", position: "relative", textDecoration: "none" }}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
-          </button>
+            {wCount > 0 && (
+              <span style={{ position: "absolute", top: 0, insetInlineEnd: 0, width: "14px", height: "14px", borderRadius: "50%", background: "#C9A96E", color: "#fff", fontSize: "7px", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif" }}>{wCount}</span>
+            )}
+          </Link>
 
           {/* Cart */}
           <button onClick={toggleCart} aria-label="סל קניות" style={{ background: "none", border: "none", cursor: "pointer", color: "#444", padding: "4px", position: "relative", display: "flex" }}>
@@ -87,7 +91,7 @@ export default function Navbar() {
             </svg>
             {count > 0 && (
               <span style={{
-                position: "absolute", top: 0, insetInlineEnd: 0,
+                position: "absolute", top: "-2px", insetInlineEnd: "-2px",
                 width: "14px", height: "14px", borderRadius: "50%",
                 background: "#C9A96E", color: "#fff",
                 fontSize: "7px", display: "flex", alignItems: "center", justifyContent: "center",

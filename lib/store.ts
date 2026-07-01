@@ -10,6 +10,7 @@ interface CartItem {
 
 interface StoreState {
   cart: CartItem[];
+  wishlist: Product[];
   isCartOpen: boolean;
   addToCart: (product: Product) => void;
   removeFromCart: (id: string) => void;
@@ -17,12 +18,16 @@ interface StoreState {
   toggleCart: () => void;
   cartTotal: () => number;
   cartCount: () => number;
+  toggleWishlist: (product: Product) => void;
+  isWishlisted: (id: string) => boolean;
+  wishlistCount: () => number;
 }
 
 export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
       cart: [],
+      wishlist: [],
       isCartOpen: false,
 
       addToCart: (product) => {
@@ -51,7 +56,17 @@ export const useStore = create<StoreState>()(
 
       cartCount: () =>
         get().cart.reduce((sum, i) => sum + i.quantity, 0),
+
+      toggleWishlist: (product) => {
+        const wishlist = get().wishlist;
+        const exists = wishlist.find((p) => p.id === product.id);
+        set({ wishlist: exists ? wishlist.filter((p) => p.id !== product.id) : [...wishlist, product] });
+      },
+
+      isWishlisted: (id) => !!get().wishlist.find((p) => p.id === id),
+
+      wishlistCount: () => get().wishlist.length,
     }),
-    { name: "vikos-store", partialize: (s) => ({ cart: s.cart }) }
+    { name: "vikos-store", partialize: (s) => ({ cart: s.cart, wishlist: s.wishlist }) }
   )
 );

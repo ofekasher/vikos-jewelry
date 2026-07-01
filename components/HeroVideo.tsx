@@ -51,6 +51,8 @@ export default function HeroVideo() {
           muted
           loop
           playsInline
+          preload={i === 0 ? "auto" : "none"}
+          poster={i === 0 ? "/posters/ring-poster.jpg" : "/posters/necklace-poster.jpg"}
           animate={{ opacity: i === active ? 1 : 0 }}
           transition={{ duration: 1, ease: "easeInOut" }}
           style={{
@@ -65,8 +67,16 @@ export default function HeroVideo() {
       {/* ── Dark overlay ── */}
       <div style={{
         position: "absolute", inset: 0,
-        background: "linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.15) 100%)",
+        background: "linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.45) 50%, rgba(0,0,0,0.2) 100%)",
         pointerEvents: "none",
+      }} />
+
+      {/* ── Corner vignette to cover watermark ── */}
+      <div style={{
+        position: "absolute", inset: 0,
+        background: "radial-gradient(ellipse 30% 20% at 100% 100%, rgba(0,0,0,0.95) 0%, transparent 100%)",
+        pointerEvents: "none",
+        zIndex: 1,
       }} />
 
       {/* ── Centered text ── */}

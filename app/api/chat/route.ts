@@ -1,7 +1,7 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 const SYSTEM = `אתה עוזר אישי של VIKOS Jewelry — מותג תכשיטים יוקרתי ישראלי.
 תפקידך לעזור ללקוחות בעברית בצורה חמה, מקצועית ותמציתית.
@@ -21,15 +21,30 @@ const SYSTEM = `אתה עוזר אישי של VIKOS Jewelry — מותג תכש�
 - אל תמציא מידע שאין לך`;
 
 export async function POST(req: NextRequest) {
-  const { messages } = await req.json();
+  try {
+    const { messages } = await req.json();
 
-  const response = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 400,
-    system: SYSTEM,
-    messages,
-  });
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: SYSTEM,
+    });
 
-  const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return NextResponse.json({ text });
+    const history = messages.slice(0, -1).map((m: { role: string; content: string }) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    }));
+
+    const chat = model.startChat({ history });
+    const lastMessage = messages[messages.length - 1].content;
+    const result = await chat.sendMessage(lastMessage);
+    const text = result.response.text();
+
+    return NextResponse.json({ text });
+  } catch (err) {
+    console.error("Chat API error:", err);
+    return NextResponse.json(
+      { text: "מצטערת, לא הצלחתי להתחבר כרגע. נסה שוב בעוד רגע." },
+      { status: 500 }
+    );
+  }
 }

@@ -17,17 +17,13 @@ export default function ProductViewer360({ images, alt }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Auto-rotate once on mount
+  // Auto-rotate continuously until user interacts
   useEffect(() => {
     if (!autoRotate || frames < 2) return;
     autoRef.current = setInterval(() => {
       setCurrentFrame(f => (f + 1) % frames);
-    }, 120);
-    const stop = setTimeout(() => {
-      if (autoRef.current) clearInterval(autoRef.current);
-      setAutoRotate(false);
-    }, frames * 120 + 200);
-    return () => { if (autoRef.current) clearInterval(autoRef.current); clearTimeout(stop); };
+    }, 80);
+    return () => { if (autoRef.current) clearInterval(autoRef.current); };
   }, [frames, autoRotate]);
 
   const stopAuto = useCallback(() => {
@@ -116,20 +112,24 @@ export default function ProductViewer360({ images, alt }: Props) {
         </span>
       </div>
 
-      {/* Drag hint — only before first interaction */}
-      {!hasInteracted && !autoRotate && (
-        <div style={{
-          position: "absolute", bottom: "54px", left: "50%", transform: "translateX(-50%)",
-          background: "rgba(17,17,17,0.65)", borderRadius: "20px", padding: "5px 14px",
-          display: "flex", alignItems: "center", gap: "6px",
-        }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="1.5" strokeLinecap="round">
-            <path d="M5 12h14M15 7l5 5-5 5"/>
+      {/* Hint / resume button */}
+      {hasInteracted && (
+        <button
+          onClick={() => { setHasInteracted(false); setAutoRotate(false); setTimeout(() => setAutoRotate(true), 0); }}
+          style={{
+            position: "absolute", bottom: "54px", left: "50%", transform: "translateX(-50%)",
+            background: "rgba(17,17,17,0.65)", borderRadius: "20px", padding: "5px 14px",
+            display: "flex", alignItems: "center", gap: "6px",
+            border: "none", cursor: "pointer",
+          }}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="1.5" strokeLinecap="round">
+            <path d="M5 3l14 9-14 9V3z"/>
           </svg>
           <span style={{ fontFamily:"'Inter',sans-serif", fontSize:"9px", color:"rgba(255,255,255,0.8)", letterSpacing:"0.12em" }}>
-            גרור לסיבוב
+            המשך סיבוב
           </span>
-        </div>
+        </button>
       )}
 
       {/* Frame progress bar */}

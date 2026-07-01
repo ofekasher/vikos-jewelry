@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.106.0",
+    "@google/generative-ai": "^0.24.1",
+    "@paypal/react-paypal-js": "^10.1.0",
     "@radix-ui/react-dialog": "^1.1.17",
     "@radix-ui/react-select": "^2.3.1",
     "@react-three/drei": "^10.7.7",

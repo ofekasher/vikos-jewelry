@@ -107,7 +107,7 @@ export default function HomePage() {
           cta={{ label: "ראה הכל", href: "/shop" }}
         />
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "24px" }}>
+        <div className="newest-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "24px" }}>
           {newest.map((p, i) => (
             <motion.div key={p.id}
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
@@ -158,7 +158,7 @@ export default function HomePage() {
                 <p style={{ fontFamily: T.serif, fontSize: "1.05rem", fontWeight: 400, color: T.black, marginBottom: "5px", lineHeight: 1.3 }}>
                   {p.nameHe}
                 </p>
-                <p style={{ fontFamily: T.sans, fontSize: "13px", color: T.gray, fontWeight: 300 }}>
+                <p style={{ fontFamily: T.sans, fontSize: "13px", color: T.gold, fontWeight: 500, letterSpacing: "0.03em" }}>
                   ₪{p.price.toLocaleString()}
                 </p>
               </Link>
@@ -180,7 +180,7 @@ export default function HomePage() {
       <section style={{ maxWidth: "1160px", margin: "0 auto", padding: "64px 32px 0" }}>
         <SectionHeader eyebrow="לפי סגנון" title="קנה לפי קטגוריה" />
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "20px" }}>
+        <div className="category-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "20px" }}>
           {categories.map((cat, i) => (
             <motion.div key={cat.label}
               initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
@@ -190,13 +190,10 @@ export default function HomePage() {
                 onMouseEnter={e => { const img = e.currentTarget.querySelector("img") as HTMLImageElement; if (img) img.style.transform = "scale(1.05)"; }}
                 onMouseLeave={e => { const img = e.currentTarget.querySelector("img") as HTMLImageElement; if (img) img.style.transform = "scale(1)"; }}
               >
-                {/* Collage grid */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gridTemplateRows: "1fr 1fr", gap: "3px", aspectRatio: "1/1", marginBottom: "14px", overflow: "hidden", background: T.warm }}>
+                {/* Single image card */}
+                <div style={{ aspectRatio: "3/4", overflow: "hidden", background: T.warm, marginBottom: "14px" }}>
                   <img src={cat.images[0]} alt={cat.label}
-                    style={{ width: "100%", height: "100%", objectFit: "cover", gridRow: "1 / 3", transition: "transform 0.6s ease" }} />
-                  <img src={cat.images[1]} alt={cat.label}
-                    style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.6s ease" }} />
-                  <div style={{ background: T.warm }} />
+                    style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.6s ease", display: "block" }} />
                 </div>
                 <p style={{ fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: T.light, marginBottom: "4px" }}>
                   {cat.sub}
@@ -274,6 +271,19 @@ export default function HomePage() {
           .brand-story-grid {
             grid-template-columns: 1fr !important;
             gap: 40px !important;
+          }
+          .newest-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 14px !important;
+          }
+          .category-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 14px !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .newest-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
           }
         }
       `}</style>

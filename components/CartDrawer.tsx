@@ -1,6 +1,7 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Minus, Plus, ShoppingBag } from "lucide-react";
+import Link from "next/link";
 import { useStore } from "@/lib/store";
 
 export default function CartDrawer() {
@@ -112,14 +113,11 @@ export default function CartDrawer() {
                     ₪{total.toLocaleString()}
                   </span>
                 </div>
-                <button className="w-full py-3.5 bg-[#111] text-white text-[11px] tracking-[.22em] uppercase hover:bg-[#C9A96E] transition-colors duration-300 cursor-pointer min-h-[48px]"
-                  style={{ fontFamily:"'Inter',sans-serif" }}>
+                <Link href="/checkout" onClick={toggleCart}
+                  className="w-full py-3.5 bg-[#111] text-white text-[11px] tracking-[.22em] uppercase hover:bg-[#C9A96E] transition-colors duration-300 cursor-pointer min-h-[48px] flex items-center justify-center"
+                  style={{ fontFamily:"'Inter',sans-serif", textDecoration:"none" }}>
                   לתשלום
-                </button>
-                <p className="text-center text-[11px] text-[#AAA] mt-3"
-                  style={{ fontFamily:"'Inter',sans-serif", fontWeight:300 }}>
-                  משלוח חינם בישראל
-                </p>
+                </Link>
               </div>
             )}
           </motion.aside>

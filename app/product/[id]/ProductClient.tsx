@@ -11,8 +11,8 @@ import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
+  hidden: { opacity: 0, y: 16 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.23, 1, 0.32, 1] as const } },
 };
 
 const catLabels: Record<string, string> = {
@@ -112,8 +112,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
           {/* ── Image Gallery ── */}
           <motion.div
-            initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
+            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
             className="flex flex-col gap-3"
           >
             {/* Badges row above viewer */}
@@ -129,12 +129,19 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             </div>
 
             {/* Main image + gallery */}
-            <div style={{ background: "#FAFAFA", border: "1px solid #E8E8E8", aspectRatio: "1/1", overflow: "hidden" }}>
-              <img
-                src={allImages[selectedImg] ?? product.image}
-                alt={product.nameHe}
-                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "opacity 0.2s" }}
-              />
+            <div style={{ background: "#FAFAFA", border: "1px solid #E8E8E8", aspectRatio: "1/1", overflow: "hidden", position: "relative" }}>
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={allImages[selectedImg] ?? product.image}
+                  src={allImages[selectedImg] ?? product.image}
+                  alt={product.nameHe}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", position: "absolute", inset: 0 }}
+                />
+              </AnimatePresence>
             </div>
 
             {/* Thumbnails — only when more than 1 image */}
@@ -146,10 +153,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     onClick={() => setSelectedImg(i)}
                     style={{
                       width: "64px", height: "64px", padding: 0, border: "none", cursor: "pointer",
-                      outline: selectedImg === i ? "2px solid #C9A96E" : "2px solid transparent",
-                      outlineOffset: "2px",
+                      boxShadow: selectedImg === i ? "0 0 0 2px #C9A96E" : "0 0 0 2px transparent",
                       background: "#FAFAFA", overflow: "hidden", flexShrink: 0,
-                      transition: "outline 0.15s",
+                      transition: "box-shadow 120ms ease-out",
                     }}
                   >
                     <img src={src} alt={`תמונה ${i + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
@@ -163,7 +169,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <button
                 onClick={() => setWishlisted(w => !w)}
                 aria-label="רשימת משאלות"
-                className="w-9 h-9 rounded-full bg-[#F5F5F5] flex items-center justify-center cursor-pointer transition-colors hover:bg-[#EEECE8]"
+                className="w-9 h-9 rounded-full bg-[#F5F5F5] flex items-center justify-center cursor-pointer icon-btn"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill={wishlisted ? "#C9A96E" : "none"} stroke={wishlisted ? "#C9A96E" : "#666"} strokeWidth="1.5">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
@@ -172,7 +178,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <button
                 onClick={handleShare}
                 aria-label="שתף"
-                className="w-9 h-9 rounded-full bg-[#F5F5F5] flex items-center justify-center cursor-pointer transition-colors hover:bg-[#EEECE8]"
+                className="w-9 h-9 rounded-full bg-[#F5F5F5] flex items-center justify-center cursor-pointer icon-btn"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.5" strokeLinecap="round">
                   <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
@@ -184,8 +190,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
           {/* ── Product details ── */}
           <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.08, ease: [0.23, 1, 0.32, 1] }}
             className="flex flex-col pt-2">
 
             <p className="text-[10px] tracking-[.3em] uppercase text-[#999] mb-3"
@@ -274,7 +280,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     <button
                       key={size}
                       onClick={() => setSelectedSize(size)}
-                      className={`w-10 h-10 text-[12px] border transition-all duration-150 cursor-pointer ${
+                      className={`w-10 h-10 text-[12px] border cursor-pointer size-btn ${
                         selectedSize === size
                           ? "border-[#C9A96E] bg-[#C9A96E] text-white"
                           : "border-[#E5E5E5] text-[#555] hover:border-[#C9A96E]"
@@ -420,6 +426,21 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         )}
       </main>
       <Footer />
+
+      <style>{`
+        .icon-btn {
+          transition: background-color 120ms ease-out;
+        }
+        @media (hover: hover) and (pointer: fine) {
+          .icon-btn:hover { background-color: #EEECE8; }
+        }
+        .icon-btn:active { transform: scale(0.94); transition: transform 100ms ease-out; }
+
+        .size-btn {
+          transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
+        }
+        .size-btn:active { transform: scale(0.94); }
+      `}</style>
     </div>
   );
 }

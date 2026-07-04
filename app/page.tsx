@@ -37,14 +37,7 @@ function SectionHeader({ eyebrow, title, cta }: { eyebrow: string; title: string
         </h2>
       </div>
       {cta && (
-        <Link href={cta.href} style={{
-          fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase",
-          color: T.gray, textDecoration: "none", borderBottom: `1px solid ${T.border}`,
-          paddingBottom: "2px", transition: "color 0.2s, border-color 0.2s", whiteSpace: "nowrap",
-        }}
-        onMouseEnter={e => { e.currentTarget.style.color = T.gold; e.currentTarget.style.borderBottomColor = T.gold; }}
-        onMouseLeave={e => { e.currentTarget.style.color = T.gray; e.currentTarget.style.borderBottomColor = T.border; }}
-        >
+        <Link href={cta.href} className="section-cta-link" style={{ whiteSpace: "nowrap" }}>
           {cta.label} →
         </Link>
       )}
@@ -111,7 +104,7 @@ export default function HomePage() {
           {newest.map((p, i) => (
             <motion.div key={p.id}
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
+              transition={{ duration: 0.28, delay: i * 0.07, ease: [0.23, 1, 0.32, 1] }}
               onMouseEnter={() => setHovered(p.id)}
               onMouseLeave={() => setHovered(null)}
             >
@@ -184,16 +177,13 @@ export default function HomePage() {
           {categories.map((cat, i) => (
             <motion.div key={cat.label}
               initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.5, delay: i * 0.06 }}
+              viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.28, delay: i * 0.06, ease: [0.23, 1, 0.32, 1] }}
             >
-              <Link href={cat.href} style={{ textDecoration: "none", display: "block" }}
-                onMouseEnter={e => { const img = e.currentTarget.querySelector("img") as HTMLImageElement; if (img) img.style.transform = "scale(1.05)"; }}
-                onMouseLeave={e => { const img = e.currentTarget.querySelector("img") as HTMLImageElement; if (img) img.style.transform = "scale(1)"; }}
-              >
+              <Link href={cat.href} style={{ textDecoration: "none", display: "block" }} className="category-card-link">
                 {/* Single image card */}
                 <div style={{ aspectRatio: "3/4", overflow: "hidden", background: T.warm, marginBottom: "14px" }}>
-                  <img src={cat.images[0]} alt={cat.label}
-                    style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.6s ease", display: "block" }} />
+                  <img src={cat.images[0]} alt={cat.label} className="category-card-img"
+                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                 </div>
                 <p style={{ fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: T.light, marginBottom: "4px" }}>
                   {cat.sub}
@@ -238,16 +228,7 @@ export default function HomePage() {
             <p style={{ fontFamily: T.sans, fontSize: "13px", color: T.gray, lineHeight: 1.9, fontWeight: 300, maxWidth: "380px" }}>
               הטבעות שלנו מעוצבות להתאים בדיוק — ניתנות לכיוון, ללא צורך בידיעת המידה מראש. כי היופי האמיתי הוא זה שמרגיש כמו שנתפר עבורך.
             </p>
-            <Link href="/shop" style={{
-              display: "inline-block", alignSelf: "flex-start", marginTop: "4px",
-              padding: "13px 32px",
-              background: T.gold, color: "#fff",
-              fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase",
-              textDecoration: "none", transition: "background 0.25s",
-            }}
-            onMouseEnter={e => (e.currentTarget.style.background = "#b8924f")}
-            onMouseLeave={e => (e.currentTarget.style.background = T.gold)}
-            >
+            <Link href="/shop" className="brand-cta-btn">
               לחנות →
             </Link>
           </div>
@@ -286,6 +267,55 @@ export default function HomePage() {
             grid-template-columns: repeat(2, 1fr) !important;
           }
         }
+
+        /* Section CTA link */
+        .section-cta-link {
+          font-family: 'Inter', system-ui, sans-serif;
+          font-size: 10px;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          color: #6B6B6B;
+          text-decoration: none;
+          border-bottom: 1px solid #E8E8E8;
+          padding-bottom: 2px;
+          transition: color 180ms ease-out, border-color 180ms ease-out;
+        }
+        @media (hover: hover) and (pointer: fine) {
+          .section-cta-link:hover { color: #C9A96E; border-bottom-color: #C9A96E; }
+        }
+
+        /* Category card image hover */
+        .category-card-img {
+          transition: transform 400ms ease-out;
+        }
+        @media (hover: hover) and (pointer: fine) {
+          .category-card-link:hover .category-card-img { transform: scale(1.05); }
+        }
+
+        /* Newest grid image hover */
+        @media (hover: hover) and (pointer: fine) {
+          .newest-product-img:hover { transform: scale(1.06); }
+        }
+
+        /* Brand story CTA */
+        .brand-cta-btn {
+          display: inline-block;
+          align-self: flex-start;
+          margin-top: 4px;
+          padding: 13px 32px;
+          background: #C9A96E;
+          color: #fff;
+          font-family: 'Inter', system-ui, sans-serif;
+          font-size: 10px;
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+          text-decoration: none;
+          transition: background 180ms ease-out;
+        }
+        @media (hover: hover) and (pointer: fine) {
+          .brand-cta-btn:hover { background: #b8924f; }
+        }
+        .brand-cta-btn:active { transform: scale(0.97); }
       `}</style>
     </div>
   );

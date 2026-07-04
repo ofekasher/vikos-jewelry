@@ -41,7 +41,7 @@ function ProductCard({ p, index }: { p: typeof products[0]; index: number }) {
     <motion.article
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, delay: Math.min(index * 0.04, 0.4), ease: "easeOut" }}
+      transition={{ duration: 0.28, delay: Math.min(index * 0.04, 0.4), ease: [0.23, 1, 0.32, 1] }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{ cursor: "pointer" }}

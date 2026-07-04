@@ -27,27 +27,26 @@ export default function EditorialHero() {
 
           <h2 style={{
             fontFamily: "'Cormorant Garamond', Georgia, serif",
-            fontSize: "clamp(3.5rem, 7vw, 6rem)",
+            fontSize: "clamp(2.6rem, 5vw, 4.2rem)",
             fontWeight: 400,
             fontStyle: "italic",
             color: "#111111",
-            lineHeight: 1.05,
-            margin: "0 0 28px",
+            lineHeight: 1.1,
+            margin: "0 0 20px",
           }}>
-            יופי שנולד<br />
-            מידיים
+            יופי שנולד<br />מידיים
           </h2>
 
           <p style={{
             fontFamily: "'Frank Ruhl Libre', serif",
-            fontSize: "14px",
+            fontSize: "13px",
             color: "#6B6B6B",
-            lineHeight: 1.85,
+            lineHeight: 1.75,
             fontWeight: 300,
-            maxWidth: "340px",
-            marginBottom: "40px",
+            maxWidth: "300px",
+            marginBottom: "32px",
           }}>
-            כל תכשיט הוא סיפור — מעוצב ומיוצר ביד, עם חומרים שנבחרו בקפידה ועם תשומת לב לכל פרט.
+            כל תכשיט מעוצב ומיוצר ביד, עם חומרים שנבחרו בקפידה ותשומת לב לכל פרט.
           </p>
 
           <Link href="/shop" className="editorial-hero-cta">
@@ -64,7 +63,7 @@ export default function EditorialHero() {
           className="editorial-hero-img-wrap"
         >
           <img
-            src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=1200&q=90"
+            src="/necklaces/pe7k_neck_03.png"
             alt="תכשיטי ויקוס"
             className="editorial-hero-img"
           />
@@ -75,13 +74,13 @@ export default function EditorialHero() {
         .editorial-hero-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          min-height: 580px;
+          min-height: 480px;
         }
         .editorial-hero-text {
           display: flex;
           flex-direction: column;
           justify-content: center;
-          padding: 80px 64px;
+          padding: 56px 48px;
           background: #F9F7F4;
         }
         .editorial-hero-img-wrap {

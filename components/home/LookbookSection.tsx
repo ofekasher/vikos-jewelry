@@ -1,17 +1,15 @@
 "use client";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 
 export default function LookbookSection() {
-  const reduce = useReducedMotion();
-
   return (
     <section style={{ overflow: "hidden", background: "#111111" }} dir="rtl">
       <div className="lookbook-grid">
 
         {/* Image — 60% */}
         <motion.div
-          initial={reduce ? false : { opacity: 0 }}
+          initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.9, ease: "easeOut" }}
@@ -26,7 +24,7 @@ export default function LookbookSection() {
 
         {/* Text — 40% */}
         <motion.div
-          initial={reduce ? false : { opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.55, delay: 0.15, ease: [0.23, 1, 0.32, 1] }}

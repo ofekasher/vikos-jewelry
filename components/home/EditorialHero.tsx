@@ -1,16 +1,14 @@
 "use client";
 import Link from "next/link";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 
 export default function EditorialHero() {
-  const reduce = useReducedMotion();
-
   return (
     <section style={{ overflow: "hidden" }} dir="rtl">
       <div className="editorial-hero-grid">
         {/* Text side — right in RTL */}
         <motion.div
-          initial={reduce ? false : { opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
@@ -59,7 +57,7 @@ export default function EditorialHero() {
 
         {/* Image side — left in RTL */}
         <motion.div
-          initial={reduce ? false : { opacity: 0 }}
+          initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.9, ease: "easeOut" }}

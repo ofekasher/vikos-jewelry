@@ -1,264 +1,192 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 const T = {
-  gold:   "#C9A96E",
-  black:  "#111111",
-  gray:   "#6B6B6B",
-  light:  "#AAAAAA",
-  border: "rgba(201,169,110,0.25)",
-  warm:   "#FAFAF8",
-  serif:  "'Cormorant Garamond', Georgia, serif",
-  sans:   "'Inter', system-ui, sans-serif",
+  gold:  "#C9A96E",
+  black: "#111111",
+  gray:  "#6B6B6B",
+  warm:  "#F9F7F4",
+  serif: "'Cormorant Garamond', Georgia, serif",
+  sans:  "'Inter', system-ui, sans-serif",
 };
 
 const reviews = [
   {
-    name: "מיכל כ.",
-    initials: "מ",
-    date: "מרץ 2025",
-    stars: 5,
-    text: "קיבלתי את הטבעת כמתנה ליום הנישואים שלי ואני פשוט לא מצליחה להוריד אותה. עבודת יד מדהימה, איכות שמרגישים בה מיד.",
+    name: "מיכל כ., תל אביב",
     product: "טבעת ערוגה",
+    text: "הטבעת מגיעה בדיוק כמו שמתוארת. עבודת יד מדהימה, איכות שמרגישים בה מיד.",
   },
   {
-    name: "שירה ל.",
-    initials: "ש",
-    date: "פברואר 2025",
-    stars: 5,
-    text: "השרשרת הכי יפה שקיבלתי אי פעם. כל מי שרואה אותה שואלת מאיפה. שירות מדהים ומשלוח מהיר מהצפוי.",
+    name: "שירה ל., ירושלים",
     product: "שרשרת שחר",
+    text: "השרשרת הכי יפה שקיבלתי אי פעם. כל מי שרואה אותה שואלת מאיפה.",
   },
   {
-    name: "רותם א.",
-    initials: "ר",
-    date: "ינואר 2025",
-    stars: 5,
-    text: "הזמנתי עגילים לאמא שלי ליום הולדת — היא פרצה בבכי מרוב שמחה. התכשיט נראה יקר פי עשרה ממחירו.",
+    name: "רותם א., חיפה",
     product: "עגילי פנינה",
+    text: "הזמנתי עגילים לאמא שלי ליום הולדת — היא פרצה בבכי מרוב שמחה.",
   },
   {
-    name: "דנה מ.",
-    initials: "ד",
-    date: "אפריל 2025",
-    stars: 5,
-    text: "הטבעת המתכווננת מתאימה בדיוק — לא צריך לדעת מידה מראש! עבודת היד מרהיבה והאריזה הרגישה יוקרתית ממש.",
+    name: "דנה מ., רעננה",
     product: "טבעת שחר",
+    text: "הטבעת המתכווננת מתאימה בדיוק. לא צריך לדעת מידה מראש — פשוט מושלם.",
   },
   {
-    name: "נועה ס.",
-    initials: "נ",
-    date: "מרץ 2025",
-    stars: 5,
-    text: "קניתי תכשיטים בהרבה מקומות אבל ויקוס זה ברמה אחרת לגמרי. השרשרת שקיבלתי עדינה, אלגנטית, ובדיוק כמו שתואר.",
+    name: "נועה ס., תל אביב",
     product: "שרשרת לונה",
-  },
-  {
-    name: "תמר ב.",
-    initials: "ת",
-    date: "פברואר 2025",
-    stars: 5,
-    text: "הצמיד היה מתנה לחתונת אחותי. כולם שאלו מאיפה — כבר שלחנו 4 חברות אליכם. מוצר מדהים ושירות יוצא מן הכלל.",
-    product: "צמיד שקט",
+    text: "ויקוס זה ברמה אחרת לגמרי. השרשרת עדינה, אלגנטית, ובדיוק כמו שתואר.",
   },
 ];
 
-function Stars({ count }: { count: number }) {
-  return (
-    <div style={{ display: "flex", gap: "2px", marginBottom: "12px" }}>
-      {Array.from({ length: count }).map((_, i) => (
-        <span key={i} style={{ color: T.gold, fontSize: "13px" }}>★</span>
-      ))}
-    </div>
-  );
-}
-
-function ReviewCard({ review, delay }: { review: typeof reviews[0]; delay: number }) {
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background: "#fff",
-        border: `1px solid ${hovered ? "rgba(201,169,110,0.5)" : T.border}`,
-        padding: "28px 24px",
-        display: "flex", flexDirection: "column", gap: "8px",
-        boxShadow: hovered ? "0 8px 32px rgba(201,169,110,0.12)" : "0 2px 12px rgba(0,0,0,0.04)",
-        transition: "box-shadow 0.3s, border-color 0.3s",
-        height: "100%",
-      }}
-    >
-      {/* Avatar + name + date */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "4px" }}>
-        <div style={{
-          width: "40px", height: "40px", borderRadius: "50%",
-          background: T.gold, color: "#fff",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontFamily: T.serif, fontSize: "1.1rem", fontWeight: 500,
-          flexShrink: 0,
-        }}>
-          {review.initials}
-        </div>
-        <div>
-          <p style={{ fontFamily: T.sans, fontSize: "13px", fontWeight: 500, color: T.black, margin: 0 }}>
-            {review.name}
-          </p>
-          <p style={{ fontFamily: T.sans, fontSize: "10px", color: T.light, margin: 0 }}>
-            {review.date}
-          </p>
-        </div>
-      </div>
-
-      <Stars count={review.stars} />
-
-      <p style={{
-        fontFamily: T.sans, fontSize: "13px", color: T.gray, lineHeight: 1.8, fontWeight: 300,
-        display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden",
-        flexGrow: 1,
-      }}>
-        {review.text}
-      </p>
-
-      {/* Product tag */}
-      <div style={{ marginTop: "8px" }}>
-        <span style={{
-          fontFamily: T.sans, fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase",
-          color: T.gold, border: `1px solid ${T.border}`, padding: "3px 10px",
-        }}>
-          {review.product}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-const VISIBLE = 3;
-const AUTO_INTERVAL = 4000;
+const AUTO = 5000;
 
 export default function ReviewsCarousel() {
-  const [index, setIndex] = useState(0);
-  const [direction, setDirection] = useState(1);
+  const reduce = useReducedMotion();
+  const [idx, setIdx] = useState(0);
+  const [dir, setDir] = useState(1);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
-
   const total = reviews.length;
-  const maxIndex = total - VISIBLE;
 
-  const go = useCallback((dir: 1 | -1) => {
-    setDirection(dir);
-    setIndex(prev => {
-      let next = prev + dir;
-      if (next > maxIndex) next = 0;
-      if (next < 0) next = maxIndex;
-      return next;
-    });
-  }, [maxIndex]);
+  const go = useCallback((d: 1 | -1) => {
+    setDir(d);
+    setIdx(prev => (prev + d + total) % total);
+  }, [total]);
 
-  const resetTimer = () => {
+  const reset = () => {
     if (timer.current) clearInterval(timer.current);
-    timer.current = setInterval(() => go(1), AUTO_INTERVAL);
+    timer.current = setInterval(() => go(1), AUTO);
   };
 
   useEffect(() => {
-    timer.current = setInterval(() => go(1), AUTO_INTERVAL);
+    if (reduce) return;
+    timer.current = setInterval(() => go(1), AUTO);
     return () => { if (timer.current) clearInterval(timer.current); };
-  }, [go]);
+  }, [go, reduce]);
 
-  const visible = reviews.slice(index, index + VISIBLE);
+  const variants = {
+    enter: (d: number) => ({ opacity: 0, x: d > 0 ? -40 : 40 }),
+    center: { opacity: 1, x: 0 },
+    exit: (d: number) => ({ opacity: 0, x: d > 0 ? 40 : -40 }),
+  };
 
   return (
-    <section style={{ background: "#fff", padding: "96px 32px" }}>
-      <div style={{ maxWidth: "1160px", margin: "0 auto" }}>
+    <section style={{ background: T.warm, padding: "96px 32px" }} dir="rtl">
+      <div style={{ maxWidth: "760px", margin: "0 auto", textAlign: "center" }}>
 
-        {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: "56px" }}>
-          <p style={{ fontFamily: T.sans, fontSize: "9px", letterSpacing: "0.36em", textTransform: "uppercase", color: T.gold, marginBottom: "14px" }}>
-            ביקורות אמיתיות
-          </p>
-          <h2 style={{ fontFamily: T.serif, fontSize: "clamp(1.8rem, 3vw, 2.6rem)", fontWeight: 300, color: T.black, margin: "0 0 16px" }}>
-            מה הלקוחות אומרים
-          </h2>
-          <div style={{ width: "40px", height: "1px", background: T.gold, margin: "0 auto" }} />
+        {/* Stars */}
+        <div style={{ display: "flex", justifyContent: "center", gap: "4px", marginBottom: "40px" }}>
+          {[1,2,3,4,5].map(s => (
+            <svg key={s} width="14" height="14" viewBox="0 0 24 24" fill={T.gold}>
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          ))}
         </div>
 
-        {/* Carousel */}
-        <div style={{ position: "relative" }}>
-          {/* Desktop: 3 cards */}
-          <div className="reviews-desktop"
-            style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "20px" }}
-          >
-            {visible.map((r, i) => (
-              <ReviewCard key={r.name} review={r} delay={i * 0.08} />
-            ))}
-          </div>
+        {/* Quote */}
+        <div style={{ position: "relative", minHeight: "120px" }}>
+          <AnimatePresence mode="wait" custom={dir}>
+            <motion.div
+              key={idx}
+              custom={dir}
+              variants={reduce ? {} : variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+            >
+              <p style={{
+                fontFamily: T.serif,
+                fontSize: "1.4rem",
+                fontStyle: "italic",
+                fontWeight: 400,
+                color: T.black,
+                lineHeight: 1.55,
+                margin: "0 0 24px",
+              }}>
+                &ldquo;{reviews[idx].text}&rdquo;
+              </p>
 
-          {/* Mobile: 1 card */}
-          <div className="reviews-mobile">
-            <ReviewCard review={reviews[index]} delay={0} />
-          </div>
+              <p style={{
+                fontFamily: T.sans,
+                fontSize: "10px",
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: T.gray,
+                margin: "0 0 4px",
+              }}>
+                {reviews[idx].name}
+              </p>
+
+              <p style={{
+                fontFamily: T.sans,
+                fontSize: "9px",
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: T.gold,
+                margin: 0,
+              }}>
+                {reviews[idx].product}
+              </p>
+            </motion.div>
+          </AnimatePresence>
         </div>
 
-        {/* Controls */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "20px", marginTop: "40px" }}>
-          <button
-            aria-label="ביקורת קודמת"
-            onClick={() => { go(-1); resetTimer(); }}
-            style={{
-              width: "44px", height: "44px", borderRadius: "50%",
-              border: `1px solid ${T.border}`, background: "none", cursor: "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              transition: "border-color 0.2s, background 0.2s",
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = T.gold; (e.currentTarget as HTMLElement).style.background = "rgba(201,169,110,0.06)"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = T.border; (e.currentTarget as HTMLElement).style.background = "none"; }}
-          >
-            <ChevronRight size={16} color={T.gold} strokeWidth={1.5} />
-          </button>
+        {/* Dot nav */}
+        <div style={{ display: "flex", justifyContent: "center", gap: "10px", marginTop: "40px" }}>
+          {reviews.map((_, i) => (
+            <button
+              key={i}
+              aria-label={`ביקורת ${i + 1}`}
+              onClick={() => { setDir(i > idx ? 1 : -1); setIdx(i); reset(); }}
+              style={{
+                width: i === idx ? "22px" : "6px",
+                height: "6px",
+                borderRadius: "3px",
+                background: i === idx ? T.gold : "rgba(201,169,110,0.3)",
+                border: "none",
+                cursor: "pointer",
+                padding: 0,
+                transition: "width 250ms ease-out, background 250ms ease-out",
+              }}
+            />
+          ))}
+        </div>
 
-          {/* Dots */}
-          <div style={{ display: "flex", gap: "8px" }}>
-            {Array.from({ length: maxIndex + 1 }).map((_, i) => (
-              <button
-                key={i}
-                aria-label={`עמוד ${i + 1}`}
-                onClick={() => { setDirection(i > index ? 1 : -1); setIndex(i); resetTimer(); }}
-                style={{
-                  width: i === index ? "20px" : "6px", height: "6px",
-                  borderRadius: "3px",
-                  background: i === index ? T.gold : "rgba(201,169,110,0.3)",
-                  border: "none", cursor: "pointer", padding: 0,
-                  transition: "all 0.3s ease",
-                }}
-              />
-            ))}
-          </div>
-
-          <button
-            aria-label="ביקורת הבאה"
-            onClick={() => { go(1); resetTimer(); }}
-            style={{
-              width: "44px", height: "44px", borderRadius: "50%",
-              border: `1px solid ${T.border}`, background: "none", cursor: "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              transition: "border-color 0.2s, background 0.2s",
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = T.gold; (e.currentTarget as HTMLElement).style.background = "rgba(201,169,110,0.06)"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = T.border; (e.currentTarget as HTMLElement).style.background = "none"; }}
-          >
-            <ChevronLeft size={16} color={T.gold} strokeWidth={1.5} />
-          </button>
+        {/* Prev / Next */}
+        <div style={{ display: "flex", justifyContent: "center", gap: "16px", marginTop: "24px" }}>
+          {([-1, 1] as const).map((d) => (
+            <button
+              key={d}
+              aria-label={d === -1 ? "ביקורת קודמת" : "ביקורת הבאה"}
+              onClick={() => { go(d); reset(); }}
+              className="review-nav-btn"
+              style={{
+                width: "40px", height: "40px", borderRadius: "50%",
+                border: "1px solid rgba(201,169,110,0.3)",
+                background: "none", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={T.gold} strokeWidth="1.5" strokeLinecap="round">
+                {d === 1 ? <polyline points="15 18 9 12 15 6"/> : <polyline points="9 18 15 12 9 6"/>}
+              </svg>
+            </button>
+          ))}
         </div>
       </div>
 
       <style>{`
-        .reviews-desktop { display: block; }
-        .reviews-mobile  { display: none; }
-        @media (max-width: 768px) {
-          .reviews-desktop { display: none; }
-          .reviews-mobile  { display: block; }
+        .review-nav-btn {
+          transition: border-color 150ms ease-out, background 150ms ease-out;
         }
+        @media (hover: hover) and (pointer: fine) {
+          .review-nav-btn:hover {
+            border-color: #C9A96E;
+            background: rgba(201,169,110,0.06);
+          }
+        }
+        .review-nav-btn:active { transform: scale(0.94); }
       `}</style>
     </section>
   );

@@ -7,6 +7,10 @@ import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
 import HeroVideo from "@/components/HeroVideo";
+import EditorialHero from "@/components/home/EditorialHero";
+import BrandMarquee from "@/components/home/BrandMarquee";
+import LookbookSection from "@/components/home/LookbookSection";
+import CategoryAccordion from "@/components/home/CategoryAccordion";
 import ReviewsCarousel from "@/components/home/ReviewsCarousel";
 import InstagramGallery from "@/components/home/InstagramGallery";
 import { products } from "@/lib/products";
@@ -45,40 +49,11 @@ function SectionHeader({ eyebrow, title, cta }: { eyebrow: string; title: string
   );
 }
 
-const categories = [
-  {
-    label: "עגילים",
-    sub: "אלגנטיות עדינה",
-    href: "/shop?cat=earrings",
-    images: [
-      "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&q=85",
-      "https://images.unsplash.com/photo-1573408301185-9519f94816b4?w=500&q=85",
-    ],
-  },
-  {
-    label: "טבעות",
-    sub: "סמל נצחי",
-    href: "/shop?cat=rings",
-    images: [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500&q=85",
-      "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=500&q=85",
-    ],
-  },
-  {
-    label: "צמידים",
-    sub: "יוקרה על הפרק",
-    href: "/shop?cat=bracelets",
-    images: [
-      "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500&q=85",
-      "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=500&q=85",
-    ],
-  },
-];
 
 export default function HomePage() {
   const { addToCart } = useStore();
   const newest = products.slice(0, 3);
-  const [hovered, setHovered] = useState<string | null>(null);
+  const [hovered, setHovered] = useState<string | null>(null); // for newest grid hover
 
   return (
     <div style={{ background: "#fff", minHeight: "100vh" }} dir="rtl">
@@ -89,6 +64,16 @@ export default function HomePage() {
           HERO — video crossfade
       ══════════════════════════════════════ */}
       <HeroVideo />
+
+      {/* ══════════════════════════════════════
+          EDITORIAL SPLIT — breaks layout repetition
+      ══════════════════════════════════════ */}
+      <EditorialHero />
+
+      {/* ══════════════════════════════════════
+          BRAND MARQUEE
+      ══════════════════════════════════════ */}
+      <BrandMarquee />
 
       {/* ══════════════════════════════════════
           NEWEST COLLECTION
@@ -168,34 +153,9 @@ export default function HomePage() {
       </div>
 
       {/* ══════════════════════════════════════
-          SHOP BY CATEGORY
+          SHOP BY CATEGORY — accordion slider
       ══════════════════════════════════════ */}
-      <section style={{ maxWidth: "1160px", margin: "0 auto", padding: "64px 32px 0" }}>
-        <SectionHeader eyebrow="לפי סגנון" title="קנה לפי קטגוריה" />
-
-        <div className="category-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "20px" }}>
-          {categories.map((cat, i) => (
-            <motion.div key={cat.label}
-              initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.28, delay: i * 0.06, ease: [0.23, 1, 0.32, 1] }}
-            >
-              <Link href={cat.href} style={{ textDecoration: "none", display: "block" }} className="category-card-link">
-                {/* Single image card */}
-                <div style={{ aspectRatio: "3/4", overflow: "hidden", background: T.warm, marginBottom: "14px" }}>
-                  <img src={cat.images[0]} alt={cat.label} className="category-card-img"
-                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                </div>
-                <p style={{ fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: T.light, marginBottom: "4px" }}>
-                  {cat.sub}
-                </p>
-                <p style={{ fontFamily: T.serif, fontSize: "1.1rem", fontWeight: 400, color: T.black }}>
-                  {cat.label}
-                </p>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+      <CategoryAccordion />
 
       {/* ══════════════════════════════════════
           BRAND STORY
@@ -236,6 +196,11 @@ export default function HomePage() {
       </section>
 
       {/* ══════════════════════════════════════
+          LOOKBOOK — editorial full-bleed
+      ══════════════════════════════════════ */}
+      <LookbookSection />
+
+      {/* ══════════════════════════════════════
           REVIEWS CAROUSEL
       ══════════════════════════════════════ */}
       <ReviewsCarousel />
@@ -254,10 +219,6 @@ export default function HomePage() {
             gap: 40px !important;
           }
           .newest-grid {
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 14px !important;
-          }
-          .category-grid {
             grid-template-columns: repeat(2, 1fr) !important;
             gap: 14px !important;
           }

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import { useT } from "@/lib/LanguageContext";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
 
@@ -36,6 +37,7 @@ const IMAGES = [
 
 export default function GalleryPage() {
   const [selected, setSelected] = useState<string | null>(null);
+  const g = useT().gallery;
 
   return (
     <main style={{ minHeight: "100vh", background: "#0a0a0a" }}>
@@ -57,7 +59,7 @@ export default function GalleryPage() {
             marginBottom: "18px",
           }}
         >
-          גלריית VIKOS
+          {g.eyebrow}
         </motion.p>
 
         <motion.h1
@@ -73,7 +75,7 @@ export default function GalleryPage() {
             margin: 0,
           }}
         >
-          הגלריה
+          {g.title}
         </motion.h1>
 
         <motion.div
@@ -153,7 +155,7 @@ export default function GalleryPage() {
             />
             <button
               onClick={() => setSelected(null)}
-              aria-label="סגור"
+              aria-label={g.close}
               style={{
                 position: "absolute",
                 top: "24px",

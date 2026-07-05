@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import SplashScreen from "@/components/SplashScreen";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import AiChat from "@/components/AiChat";
+import { LanguageProvider } from "@/lib/LanguageContext";
 
 export const metadata: Metadata = {
   title: "Vikos Jewelry | תכשיטים יוקרתיים",
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="he" dir="rtl">
+    <html lang="en" dir="ltr">
       <head>
         <meta name="referrer" content="no-referrer" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="antialiased">
+        <LanguageProvider>
         <SplashScreen />
         {children}
         <WhatsAppButton />
@@ -42,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             },
           }}
         />
+        </LanguageProvider>
       </body>
     </html>
   );

@@ -1,18 +1,10 @@
 "use client";
 import Marquee from "react-fast-marquee";
-
-const ITEMS = [
-  "זהב 14K",
-  "מיוצר ביד",
-  "משלוח חינם",
-  "30 יום החזרה",
-  "גודל מתכוונן",
-  "עיצוב ישראלי",
-  "אריזת מתנה",
-  "תעודת אמינות",
-];
+import { useT } from "@/lib/LanguageContext";
 
 export default function BrandMarquee() {
+  const t = useT();
+
   return (
     <div style={{
       borderTop: "1px solid #E8E8E8",
@@ -22,7 +14,7 @@ export default function BrandMarquee() {
       overflow: "hidden",
     }}>
       <Marquee speed={22} gradient={false} direction="right">
-        {ITEMS.map((item) => (
+        {t.marquee.map((item) => (
           <span
             key={item}
             style={{

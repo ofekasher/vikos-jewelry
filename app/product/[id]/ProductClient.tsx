@@ -10,27 +10,9 @@ import { useStore } from "@/lib/store";
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
-
-const catLabels: Record<string, string> = {
-  rings: "טבעות", necklaces: "שרשראות", bracelets: "צמידים", earrings: "עגילים",
-};
+import { useT } from "@/lib/LanguageContext";
 
 const RING_SIZES = ["46", "48", "50", "52", "54", "56", "58"];
-
-const ACCORDION_ITEMS = [
-  {
-    title: "פרטי המוצר",
-    content: "כל תכשיט מעוצב ומיוצר ביד בסדנת ויקוס. הטבעות שלנו מתכווננות ומתאימות למגוון מידות ללא צורך במדידה מוקדמת. מסופק עם תעודת אמינות ואריזת מתנה יוקרתית.",
-  },
-  {
-    title: "הוראות טיפול",
-    content: "• שמרו הרחק מכימיקלים, בשמים ומים\n• נקו בעדינות עם מטלית רכה ויבשה\n• אחסנו בקופסת התכשיט המצורפת\n• הימנעו ממגע עם תרסיסים ודאודורנט",
-  },
-  {
-    title: "משלוח והחזרות",
-    content: "• משלוח חינם בהזמנות מעל ₪299\n• אספקה תוך 2–4 ימי עסקים\n• החזרה חינם תוך 30 יום\n• כל המוצרים מגיעים עם תעודת אותנטיות",
-  },
-];
 
 export default function ProductPage({
   productId,
@@ -40,6 +22,13 @@ export default function ProductPage({
   staticProduct: Product | null;
 }) {
   const { addToCart } = useStore();
+  const p_t = useT().product;
+
+  const ACCORDION_ITEMS = [
+    { title: p_t.productDetails,    content: p_t.productDetailsContent },
+    { title: p_t.careInstructions,  content: p_t.careContent },
+    { title: p_t.shippingReturns,   content: p_t.shippingContent },
+  ];
 
   // All hooks at top — never after a conditional return
   const [product, setProduct]           = useState<Product | null>(staticProduct);
@@ -74,7 +63,7 @@ export default function ProductPage({
       .catch(() => {
         if (!staticProduct) setNotFoundState(true);
       });
-  }, [productId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [productId, p_t]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (notFoundState) notFound();
   if (!product) return (
@@ -93,12 +82,12 @@ export default function ProductPage({
 
   const handleAddToCart = async () => {
     if (isRing && !selectedSize) {
-      toast.error("אנא בחרי מידה לפני הוספה לסל", { duration: 2500 });
+      toast.error(p_t.selectSizeError, { duration: 2500 });
       return;
     }
     setAdding(true);
     addToCart(product);
-    toast.success(`${product.nameHe} נוסף לסל`, {
+    toast.success(p_t.addedToCart(product.nameHe), {
       description: `₪${product.price.toLocaleString()}`,
       duration: 3000,
     });
@@ -112,7 +101,7 @@ export default function ProductPage({
         await navigator.share({ title: product.nameHe, url: window.location.href });
       } else {
         await navigator.clipboard.writeText(window.location.href);
-        toast.success("הקישור הועתק", { duration: 2000 });
+        toast.success(p_t.linkCopied, { duration: 2000 });
       }
     } catch {}
   };
@@ -120,7 +109,7 @@ export default function ProductPage({
   const materialDisplay = product.material.split("|")[0].trim();
 
   return (
-    <div className="bg-white" dir="rtl">
+    <div className="bg-white">
       <Navbar />
       <CartDrawer />
 
@@ -130,9 +119,9 @@ export default function ProductPage({
         <nav aria-label="breadcrumb" className="mb-10">
           <ol className="flex items-center gap-2 text-[11px] tracking-[.18em] uppercase text-[#AAA]"
             style={{ fontFamily: "'Inter',sans-serif" }}>
-            <li><Link href="/" className="hover:text-[#111] transition-colors">בית</Link></li>
+            <li><Link href="/" className="hover:text-[#111] transition-colors">{p_t.breadcrumbHome}</Link></li>
             <li aria-hidden>·</li>
-            <li><Link href="/shop" className="hover:text-[#111] transition-colors">חנות</Link></li>
+            <li><Link href="/shop" className="hover:text-[#111] transition-colors">{p_t.breadcrumbShop}</Link></li>
             <li aria-hidden>·</li>
             <li className="text-[#C9A96E]" aria-current="page">{product.nameHe}</li>
           </ol>
@@ -181,17 +170,17 @@ export default function ProductPage({
                   <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                   <line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
                 </svg>
-                <span style={{ fontFamily: "'Inter',sans-serif", fontSize: "9px", letterSpacing: "0.16em", color: "#666" }}>הגדל</span>
+                <span style={{ fontFamily: "'Inter',sans-serif", fontSize: "9px", letterSpacing: "0.16em", color: "#666" }}>{p_t.zoom}</span>
               </div>
 
               {/* Badges overlay */}
               {(product.isNew || product.isBestseller) && (
                 <div style={{ position: "absolute", top: "12px", right: "12px", display: "flex", flexDirection: "column", gap: "4px" }}>
                   {product.isNew && (
-                    <span style={{ background: "#111", color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", padding: "3px 8px" }}>חדש</span>
+                    <span style={{ background: "#111", color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", padding: "3px 8px" }}>{p_t.new}</span>
                   )}
                   {product.isBestseller && (
-                    <span style={{ background: "#C9A96E", color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", padding: "3px 8px" }}>נמכר ביותר</span>
+                    <span style={{ background: "#C9A96E", color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", padding: "3px 8px" }}>{p_t.bestseller}</span>
                   )}
                 </div>
               )}
@@ -230,7 +219,7 @@ export default function ProductPage({
             {/* 1. Category + badge inline */}
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
               <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#999", margin: 0 }}>
-                {catLabels[product.category]}
+                {p_t.catLabels[product.category as keyof typeof p_t.catLabels]}
               </p>
             </div>
 
@@ -267,7 +256,7 @@ export default function ProductPage({
                 ₪{product.price.toLocaleString()}
               </p>
               <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "11px", color: "#C9A96E", margin: 0 }}>
-                או 3 תשלומים של ₪{Math.round(product.price / 3).toLocaleString()} ללא ריבית
+                {p_t.installments(Math.round(product.price / 3))}
               </p>
             </div>
 
@@ -281,9 +270,9 @@ export default function ProductPage({
               padding: "10px 0",
             }}>
               {[
-                { icon: "M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z", label: "ייצור ישראלי" },
-                { icon: "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z M12 7v6 M9 10h6", label: "אריזת מתנה" },
-                { icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6", label: "החזרה 30 יום" },
+                { icon: "M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z", label: p_t.trust[0] },
+                { icon: "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z M12 7v6 M9 10h6", label: p_t.trust[1] },
+                { icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6", label: p_t.trust[2] },
               ].map((t, i) => (
                 <div key={i} style={{
                   flex: 1,
@@ -307,13 +296,13 @@ export default function ProductPage({
               <div style={{ marginBottom: "22px" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
                   <span style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: "#AAA" }}>
-                    בחרי מידה
+                    {p_t.selectSize}
                   </span>
                   <button
-                    onClick={() => toast("מדריך מידות: מדדי את היקף אצבעך במ״מ. רוב הנשים בין 48–54.", { duration: 5000 })}
+                    onClick={() => toast(p_t.sizeGuideText, { duration: 5000 })}
                     style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", color: "#C9A96E", textDecoration: "underline", textUnderlineOffset: "2px", background: "none", border: "none", cursor: "pointer" }}
                   >
-                    מדריך מידות
+                    {p_t.sizeGuide}
                   </button>
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
@@ -336,7 +325,7 @@ export default function ProductPage({
                   ))}
                 </div>
                 {!selectedSize && (
-                  <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", color: "#AAA", marginTop: "6px" }}>* אנא בחרי מידה</p>
+                  <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", color: "#AAA", marginTop: "6px" }}>{p_t.sizeHint}</p>
                 )}
               </div>
             )}
@@ -368,7 +357,7 @@ export default function ProductPage({
                     transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
                     style={{ display: "inline-block", width: "14px", height: "14px", border: "1.5px solid rgba(255,255,255,0.35)", borderTopColor: "#fff", borderRadius: "50%" }}
                   />
-                  מוסיף...
+                  {p_t.adding}
                 </>
               ) : (
                 <>
@@ -377,7 +366,7 @@ export default function ProductPage({
                     <line x1="3" y1="6" x2="21" y2="6"/>
                     <path d="M16 10a4 4 0 01-8 0"/>
                   </svg>
-                  הוספה לסל
+                  {p_t.addToCart}
                 </>
               )}
             </button>
@@ -396,7 +385,7 @@ export default function ProductPage({
                 }}
                 className="custom-btn"
               >
-                הזמנה אישית
+                {p_t.customOrder}
               </Link>
 
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", paddingTop: "4px" }}>
@@ -404,7 +393,7 @@ export default function ProductPage({
                   <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                 </svg>
                 <span style={{ fontFamily: "'Inter',sans-serif", fontSize: "11px", color: "#999" }}>
-                  הזמיני עד 14:00 — אספקה <strong style={{ color: "#111" }}>מחר</strong>
+                  {p_t.deliveryHint(p_t.deliveryDay)}
                 </span>
               </div>
             </div>
@@ -420,7 +409,7 @@ export default function ProductPage({
                 <svg width="15" height="15" viewBox="0 0 24 24" fill={wishlisted ? "#C9A96E" : "none"} stroke={wishlisted ? "#C9A96E" : "#888"} strokeWidth="1.5">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                 </svg>
-                <span style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", letterSpacing: "0.12em", color: "#888" }}>שמירה למועדפים</span>
+                <span style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", letterSpacing: "0.12em", color: "#888" }}>{p_t.saveWishlist}</span>
               </button>
               <div style={{ width: "1px", background: "#EBEBEB", margin: "0 4px" }} />
               <button
@@ -433,7 +422,7 @@ export default function ProductPage({
                   <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
                   <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
                 </svg>
-                <span style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", letterSpacing: "0.12em", color: "#888" }}>שיתוף</span>
+                <span style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", letterSpacing: "0.12em", color: "#888" }}>{p_t.share}</span>
               </button>
             </div>
 
@@ -500,10 +489,10 @@ export default function ProductPage({
         {related.length > 0 && (
           <section style={{ marginTop: "80px", borderTop: "1px solid #EFEFEF", paddingTop: "60px" }}>
             <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: "#999", marginBottom: "6px" }}>
-              אולי תאהבי גם
+              {p_t.relatedEyebrow}
             </p>
             <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(1.4rem,2.4vw,2rem)", fontWeight: 400, fontStyle: "italic", color: "#111", marginBottom: "36px" }}>
-              עוד מהקולקציה
+              {p_t.relatedTitle}
             </h2>
             <div className="related-grid">
               {related.map(p => (

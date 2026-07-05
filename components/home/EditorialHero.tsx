@@ -1,12 +1,16 @@
 "use client";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useT } from "@/lib/LanguageContext";
 
 export default function EditorialHero() {
+  const t = useT();
+  const e = t.editorial;
+
   return (
-    <section style={{ overflow: "hidden" }} dir="rtl">
+    <section style={{ overflow: "hidden" }}>
       <div className="editorial-hero-grid">
-        {/* Text side — right in RTL */}
+        {/* Text side */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -21,7 +25,7 @@ export default function EditorialHero() {
             color: "#C9A96E",
             marginBottom: "14px",
           }}>
-            קולקציית 2026
+            {e.eyebrow}
           </p>
 
           <h2 style={{
@@ -32,8 +36,9 @@ export default function EditorialHero() {
             color: "#111111",
             lineHeight: 1.1,
             margin: "0 0 14px",
+            whiteSpace: "pre-line",
           }}>
-            יופי שנולד<br />מידיים
+            {e.title}
           </h2>
 
           <p style={{
@@ -45,15 +50,15 @@ export default function EditorialHero() {
             maxWidth: "300px",
             marginBottom: "20px",
           }}>
-            כל תכשיט מעוצב ומיוצר ביד, עם חומרים שנבחרו בקפידה ותשומת לב לכל פרט.
+            {e.body}
           </p>
 
           <Link href="/shop" className="editorial-hero-cta">
-            גלי את הקולקציה &rarr;
+            {e.cta} →
           </Link>
         </motion.div>
 
-        {/* Image side — left in RTL */}
+        {/* Image side */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -62,7 +67,7 @@ export default function EditorialHero() {
         >
           <img
             src="/rings/vopf_hand_01.png"
-            alt="תכשיטי ויקוס"
+            alt="VIKOS Jewelry"
             className="editorial-hero-img"
           />
         </motion.div>
@@ -116,6 +121,7 @@ export default function EditorialHero() {
         @media (max-width: 768px) {
           .editorial-hero-grid {
             grid-template-columns: 1fr;
+            height: auto;
           }
           .editorial-hero-img-wrap {
             min-height: 280px;

@@ -15,6 +15,7 @@ import ReviewsCarousel from "@/components/home/ReviewsCarousel";
 import InstagramGallery from "@/components/home/InstagramGallery";
 import type { Product } from "@/lib/products";
 import { useStore } from "@/lib/store";
+import { useT } from "@/lib/LanguageContext";
 
 /* ── Design tokens ── */
 const T = {
@@ -52,15 +53,17 @@ function SectionHeader({ eyebrow, title, cta }: { eyebrow: string; title: string
 
 export default function HomePage() {
   const { addToCart } = useStore();
+  const t = useT();
+  const h = t.home;
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   useEffect(() => {
     fetch("/api/products").then(r => r.json()).then(setAllProducts).catch(() => {});
   }, []);
   const newest = allProducts.slice(0, 3);
-  const [hovered, setHovered] = useState<string | null>(null); // for newest grid hover
+  const [hovered, setHovered] = useState<string | null>(null);
 
   return (
-    <div style={{ background: "#fff", minHeight: "100vh" }} dir="rtl">
+    <div style={{ background: "#fff", minHeight: "100vh" }}>
       <Navbar />
       <CartDrawer />
 
@@ -84,9 +87,9 @@ export default function HomePage() {
       ══════════════════════════════════════ */}
       <section style={{ maxWidth: "1160px", margin: "0 auto", padding: "72px 32px 0" }}>
         <SectionHeader
-          eyebrow="טרי מהסדנה"
-          title="הקולקציה החדשה ביותר"
-          cta={{ label: "ראה הכל", href: "/shop" }}
+          eyebrow={h.freshEyebrow}
+          title={h.freshTitle}
+          cta={{ label: h.freshCta, href: "/shop" }}
         />
 
         <div className="newest-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "24px" }}>
@@ -109,7 +112,7 @@ export default function HomePage() {
                   />
                   {/* Quick add */}
                   <button
-                    onClick={e => { e.preventDefault(); e.stopPropagation(); addToCart(p); toast.success(`${p.nameHe} נוסף לסל`, { duration: 2000 }); }}
+                    onClick={e => { e.preventDefault(); e.stopPropagation(); addToCart(p); toast.success(t.product.addedToCart(p.nameHe), { duration: 2000 }); }}
                     style={{
                       position: "absolute", bottom: 0, left: 0, right: 0,
                       background: "rgba(17,17,17,0.88)",
@@ -120,7 +123,7 @@ export default function HomePage() {
                       transition: "transform 0.28s ease",
                     }}
                   >
-                    הוסף לסל
+                    {h.quickAdd}
                   </button>
                   {/* Badge */}
                   {p.isNew && (
@@ -129,7 +132,7 @@ export default function HomePage() {
                       background: T.black, color: "#fff",
                       fontFamily: T.sans, fontSize: "8px", letterSpacing: "0.15em", textTransform: "uppercase",
                       padding: "3px 8px",
-                    }}>חדש</span>
+                    }}>{h.new}</span>
                   )}
                 </div>
 
@@ -182,18 +185,18 @@ export default function HomePage() {
           {/* Text */}
           <div style={{ display: "flex", flexDirection: "column", gap: "22px" }}>
             <p style={{ fontFamily: T.sans, fontSize: "9px", letterSpacing: "0.38em", textTransform: "uppercase", color: T.gold }}>
-              הסיפור שלנו
+              {h.storyEyebrow}
             </p>
             <h2 style={{ fontFamily: T.serif, fontSize: "clamp(1.8rem, 2.8vw, 2.8rem)", fontWeight: 300, color: T.black, lineHeight: 1.15, margin: 0 }}>
-              מידה אחת<br />
-              <em style={{ fontStyle: "italic", fontWeight: 400 }}>מתאימה לכולן</em>
+              {h.storyTitle}<br />
+              <em style={{ fontStyle: "italic", fontWeight: 400 }}>{h.storyTitleEm}</em>
             </h2>
             <div style={{ width: "40px", height: "1px", background: T.gold }} />
             <p style={{ fontFamily: T.sans, fontSize: "13px", color: T.gray, lineHeight: 1.9, fontWeight: 300, maxWidth: "380px" }}>
-              הטבעות שלנו מעוצבות להתאים בדיוק — ניתנות לכיוון, ללא צורך בידיעת המידה מראש. כי היופי האמיתי הוא זה שמרגיש כמו שנתפר עבורך.
+              {h.storyBody}
             </p>
             <Link href="/shop" className="brand-cta-btn">
-              לחנות →
+              {h.storyCta} →
             </Link>
           </div>
         </div>

@@ -1,43 +1,32 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import { useT } from "@/lib/LanguageContext";
 
-const cats = [
-  {
-    id: "earrings",
-    label: "עגילים",
-    sub: "אלגנטיות עדינה",
-    href: "/shop?cat=earrings",
-    img: "/instagram/ig16.jpeg",
-  },
-  {
-    id: "rings",
-    label: "טבעות",
-    sub: "סמל נצחי",
-    href: "/shop?cat=rings",
-    img: "/rings/vopf_hand_01.png",
-  },
-  {
-    id: "necklaces",
-    label: "שרשראות",
-    sub: "קסם עדין",
-    href: "/shop?cat=necklaces",
-    img: "/necklaces/pe7k_neck_01.png",
-  },
-  {
-    id: "bracelets",
-    label: "צמידים",
-    sub: "יוקרה על הפרק",
-    href: "/shop?cat=bracelets",
-    img: "/bracelets/br_01.png",
-  },
-];
+const CAT_IDS = ["earrings", "rings", "necklaces", "bracelets"] as const;
+
+const IMGS: Record<string, string> = {
+  earrings:  "/instagram/ig16.jpeg",
+  rings:     "/rings/vopf_hand_01.png",
+  necklaces: "/necklaces/pe7k_neck_01.png",
+  bracelets: "/bracelets/br_01.png",
+};
 
 export default function CategoryAccordion() {
   const [active, setActive] = useState<string | null>(null);
+  const t = useT();
+  const c = t.categories;
+
+  const cats = CAT_IDS.map(id => ({
+    id,
+    label: c[id].label,
+    sub:   c[id].sub,
+    href:  `/shop?cat=${id}`,
+    img:   IMGS[id],
+  }));
 
   return (
-    <section style={{ padding: "72px 0 0" }} dir="rtl">
+    <section style={{ padding: "72px 0 0" }}>
       <div style={{ maxWidth: "1160px", margin: "0 auto", padding: "0 32px 0" }}>
         <p style={{
           fontFamily: "'Inter', system-ui, sans-serif",
@@ -47,7 +36,7 @@ export default function CategoryAccordion() {
           color: "#C9A96E",
           marginBottom: "8px",
         }}>
-          לפי סגנון
+          {c.eyebrow}
         </p>
         <h2 style={{
           fontFamily: "'Cormorant Garamond', Georgia, serif",
@@ -57,18 +46,13 @@ export default function CategoryAccordion() {
           lineHeight: 1.15,
           marginBottom: "36px",
         }}>
-          קנה לפי קטגוריה
+          {c.title}
         </h2>
       </div>
 
-      {/*
-        onMouseLeave on the container resets to null — mouseleave does NOT
-        bubble, so moving between strips never fires this. Only a true exit
-        from the accordion triggers it.
-      */}
       <div
         className="cat-accordion"
-        aria-label="קטגוריות"
+        aria-label={c.title}
         onMouseLeave={() => setActive(null)}
       >
         {cats.map((cat) => {
@@ -87,22 +71,17 @@ export default function CategoryAccordion() {
               onMouseEnter={() => setActive(cat.id)}
               style={{ textDecoration: "none" }}
             >
-              <div
-                className="cat-img"
-                style={{ backgroundImage: `url(${cat.img})` }}
-              />
+              <div className="cat-img" style={{ backgroundImage: `url(${cat.img})` }} />
               <div className="cat-overlay" />
 
-              {/* Vertical label — fades out when strip expands */}
               <div className="cat-label-v">
                 <span>{cat.label}</span>
               </div>
 
-              {/* Expanded content — fades in after the strip is open */}
               <div className="cat-content">
                 <p className="cat-sub">{cat.sub}</p>
                 <p className="cat-name">{cat.label}</p>
-                <span className="cat-cta">גלי עוד →</span>
+                <span className="cat-cta">{c.cta} →</span>
               </div>
             </Link>
           );
@@ -110,37 +89,24 @@ export default function CategoryAccordion() {
       </div>
 
       <style>{`
-        /* ─── Layout ──────────────────────────────────────────── */
         .cat-accordion {
           display: flex;
           height: 480px;
           overflow: hidden;
         }
-
-        /*
-          flex-grow IS an animatable CSS property.
-          flex shorthand (transition: flex) is NOT reliably animated
-          across browsers — which caused the stuck-open bug.
-          Using flex-grow + fixed shrink/basis fixes it.
-        */
         .cat-strip {
           position: relative;
           overflow: hidden;
           cursor: pointer;
-
           flex-grow: 1;
           flex-shrink: 0;
           flex-basis: 0%;
           min-width: 0;
-
-          transition:
-            flex-grow    660ms cubic-bezier(0.76, 0, 0.24, 1);
+          transition: flex-grow 660ms cubic-bezier(0.76, 0, 0.24, 1);
         }
-
         .cat-strip--active { flex-grow: 3.2; }
         .cat-strip--shrunk { flex-grow: 0.55; }
 
-        /* ─── Background image ────────────────────────────────── */
         .cat-img {
           position: absolute;
           inset: 0;
@@ -149,11 +115,8 @@ export default function CategoryAccordion() {
           transform: scale(1.06);
           transition: transform 660ms cubic-bezier(0.76, 0, 0.24, 1);
         }
-        .cat-strip--active .cat-img {
-          transform: scale(1);
-        }
+        .cat-strip--active .cat-img { transform: scale(1); }
 
-        /* ─── Dark overlay ────────────────────────────────────── */
         .cat-overlay {
           position: absolute;
           inset: 0;
@@ -168,7 +131,6 @@ export default function CategoryAccordion() {
         }
         .cat-strip--active .cat-overlay { opacity: 1; }
 
-        /* ─── Vertical label (collapsed state) ───────────────── */
         .cat-label-v {
           position: absolute;
           inset: 0;
@@ -178,9 +140,7 @@ export default function CategoryAccordion() {
           opacity: 1;
           transition: opacity 300ms cubic-bezier(0.76, 0, 0.24, 1);
         }
-        .cat-strip--active .cat-label-v {
-          opacity: 0;
-        }
+        .cat-strip--active .cat-label-v { opacity: 0; }
 
         .cat-label-v span {
           font-family: 'Inter', system-ui, sans-serif;
@@ -192,15 +152,13 @@ export default function CategoryAccordion() {
           text-orientation: mixed;
         }
 
-        /* ─── Expanded content ────────────────────────────────── */
         .cat-content {
           position: absolute;
           bottom: 40px;
-          right: 32px;
+          inset-inline-end: 32px;
           opacity: 0;
           transform: translateY(10px);
           pointer-events: none;
-          /* fades in only after the strip has had time to open */
           transition:
             opacity   280ms ease-out 280ms,
             transform 280ms cubic-bezier(0.76, 0, 0.24, 1) 280ms;
@@ -219,7 +177,6 @@ export default function CategoryAccordion() {
           color: rgba(255, 255, 255, 0.5);
           margin: 0 0 10px;
         }
-
         .cat-name {
           font-family: 'Cormorant Garamond', Georgia, serif;
           font-size: clamp(1.8rem, 2.6vw, 2.4rem);
@@ -230,7 +187,6 @@ export default function CategoryAccordion() {
           margin: 0 0 22px;
           white-space: nowrap;
         }
-
         .cat-cta {
           font-family: 'Inter', system-ui, sans-serif;
           font-size: 9px;
@@ -241,7 +197,6 @@ export default function CategoryAccordion() {
           padding-bottom: 2px;
         }
 
-        /* ─── Mobile ──────────────────────────────────────────── */
         @media (max-width: 768px) {
           .cat-accordion {
             flex-direction: column;
@@ -257,7 +212,7 @@ export default function CategoryAccordion() {
           .cat-strip--active  { height: 280px; }
           .cat-strip--shrunk  { height: 100px; }
           .cat-label-v span   { writing-mode: horizontal-tb; }
-          .cat-content        { bottom: 20px; right: 20px; }
+          .cat-content        { bottom: 20px; inset-inline-end: 20px; }
           .cat-name           { font-size: 1.6rem; }
         }
       `}</style>

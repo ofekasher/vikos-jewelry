@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { useT } from "@/lib/LanguageContext";
 
 const T = {
   gold:  "#C9A96E",
@@ -11,38 +12,12 @@ const T = {
   sans:  "'Inter', system-ui, sans-serif",
 };
 
-const reviews = [
-  {
-    name: "מיכל כ., תל אביב",
-    product: "טבעת ערוגה",
-    text: "הטבעת מגיעה בדיוק כמו שמתוארת. עבודת יד מדהימה, איכות שמרגישים בה מיד.",
-  },
-  {
-    name: "שירה ל., ירושלים",
-    product: "שרשרת שחר",
-    text: "השרשרת הכי יפה שקיבלתי אי פעם. כל מי שרואה אותה שואלת מאיפה.",
-  },
-  {
-    name: "רותם א., חיפה",
-    product: "עגילי פנינה",
-    text: "הזמנתי עגילים לאמא שלי ליום הולדת — היא פרצה בבכי מרוב שמחה.",
-  },
-  {
-    name: "דנה מ., רעננה",
-    product: "טבעת שחר",
-    text: "הטבעת המתכווננת מתאימה בדיוק. לא צריך לדעת מידה מראש — פשוט מושלם.",
-  },
-  {
-    name: "נועה ס., תל אביב",
-    product: "שרשרת לונה",
-    text: "ויקוס זה ברמה אחרת לגמרי. השרשרת עדינה, אלגנטית, ובדיוק כמו שתואר.",
-  },
-];
-
 const AUTO = 5000;
 
 export default function ReviewsCarousel() {
-  const reduce = useReducedMotion();
+  const t       = useT();
+  const reviews = t.reviews.items;
+  const reduce  = useReducedMotion();
   const [idx, setIdx] = useState(0);
   const [dir, setDir] = useState(1);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -65,13 +40,13 @@ export default function ReviewsCarousel() {
   }, [go, reduce]);
 
   const variants = {
-    enter: (d: number) => ({ opacity: 0, x: d > 0 ? -40 : 40 }),
+    enter:  (d: number) => ({ opacity: 0, x: d > 0 ? -40 : 40 }),
     center: { opacity: 1, x: 0 },
-    exit: (d: number) => ({ opacity: 0, x: d > 0 ? 40 : -40 }),
+    exit:   (d: number) => ({ opacity: 0, x: d > 0 ? 40 : -40 }),
   };
 
   return (
-    <section style={{ background: T.warm, padding: "96px 32px" }} dir="rtl">
+    <section style={{ background: T.warm, padding: "96px 32px" }}>
       <div style={{ maxWidth: "760px", margin: "0 auto", textAlign: "center" }}>
 
         {/* Stars */}
@@ -106,7 +81,6 @@ export default function ReviewsCarousel() {
               }}>
                 &ldquo;{reviews[idx].text}&rdquo;
               </p>
-
               <p style={{
                 fontFamily: T.sans,
                 fontSize: "10px",
@@ -117,7 +91,6 @@ export default function ReviewsCarousel() {
               }}>
                 {reviews[idx].name}
               </p>
-
               <p style={{
                 fontFamily: T.sans,
                 fontSize: "9px",
@@ -137,7 +110,6 @@ export default function ReviewsCarousel() {
           {reviews.map((_, i) => (
             <button
               key={i}
-              aria-label={`ביקורת ${i + 1}`}
               onClick={() => { setDir(i > idx ? 1 : -1); setIdx(i); reset(); }}
               style={{
                 width: i === idx ? "22px" : "6px",
@@ -158,7 +130,6 @@ export default function ReviewsCarousel() {
           {([-1, 1] as const).map((d) => (
             <button
               key={d}
-              aria-label={d === -1 ? "ביקורת קודמת" : "ביקורת הבאה"}
               onClick={() => { go(d); reset(); }}
               className="review-nav-btn"
               style={{

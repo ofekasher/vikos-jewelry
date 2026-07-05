@@ -1,10 +1,14 @@
 "use client";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useT } from "@/lib/LanguageContext";
 
 export default function LookbookSection() {
+  const t = useT();
+  const l = t.lookbook;
+
   return (
-    <section style={{ overflow: "hidden", background: "#111111" }} dir="rtl">
+    <section style={{ overflow: "hidden", background: "#111111" }}>
       <div className="lookbook-grid">
 
         {/* Image — 60% */}
@@ -16,7 +20,7 @@ export default function LookbookSection() {
         >
           <img
             src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=1400&q=90"
-            alt="לוקבוק ויקוס"
+            alt="VIKOS Lookbook"
             style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
           />
         </motion.div>
@@ -36,7 +40,7 @@ export default function LookbookSection() {
             color: "#C9A96E",
             marginBottom: "20px",
           }}>
-            לוקבוק 2026
+            {l.eyebrow}
           </p>
 
           <h2 style={{
@@ -47,9 +51,9 @@ export default function LookbookSection() {
             color: "#ffffff",
             lineHeight: 1.1,
             margin: "0 0 20px",
+            whiteSpace: "pre-line",
           }}>
-            הקולקציה<br />
-            החדשה
+            {l.title}
           </h2>
 
           <div style={{ width: "32px", height: "1px", background: "#C9A96E", marginBottom: "20px" }} />
@@ -62,11 +66,11 @@ export default function LookbookSection() {
             fontWeight: 300,
             marginBottom: "40px",
           }}>
-            טבעות, שרשראות ועגילים שמספרים סיפור של עדינות ויוקרה — מעוצבים בסדנת ויקוס.
+            {l.body}
           </p>
 
           <Link href="/shop" className="lookbook-cta">
-            לצפייה בקולקציה &rarr;
+            {l.cta} →
           </Link>
         </motion.div>
       </div>

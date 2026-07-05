@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
 import { products } from "@/lib/products";
+import type { Product } from "@/lib/products";
 import ProductClient from "./ProductClient";
+
+// Pre-generate a static page for every product in lib/products.ts at build time.
+// New products added only via Supabase (not in the static list) are still handled
+// at runtime via the dynamic fallback.
+export async function generateStaticParams() {
+  return products.map((p) => ({ id: p.id }));
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -28,7 +36,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const p = products.find((x) => x.id === id);
+  const p = products.find((x) => x.id === id) ?? null;
   const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://vikos-jewelry.com";
 
   const jsonLd = p ? {
@@ -60,7 +68,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
-      <ProductClient params={params} />
+      <ProductClient productId={id} staticProduct={p} />
     </>
   );
 }

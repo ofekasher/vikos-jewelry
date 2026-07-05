@@ -1,5 +1,5 @@
 "use client";
-import { use, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -32,32 +32,56 @@ const ACCORDION_ITEMS = [
   },
 ];
 
-export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function ProductPage({
+  productId,
+  staticProduct,
+}: {
+  productId: string;
+  staticProduct: Product | null;
+}) {
   const { addToCart } = useStore();
-  const [product, setProduct] = useState<Product | null>(null);
+
+  // Initialise immediately from static lib/products.ts data so every
+  // product in the catalogue works even when Supabase is unconfigured.
+  const [product, setProduct] = useState<Product | null>(staticProduct);
   const [notFoundState, setNotFoundState] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/admin/products/${id}`)
+    // Try to refresh with live Supabase data. If the fetch fails (Supabase
+    // not configured, network error, product not in DB), fall back silently
+    // to the static data we already have. Only 404 if we have no data at all.
+    fetch(`/api/admin/products/${productId}`)
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(raw => {
-        // Map DbProduct → Product shape
         const p: Product = {
-          id: raw.id, nameHe: raw.name, nameEn: raw.name,
-          descriptionHe: raw.description ?? "", descriptionEn: raw.description ?? "",
-          price: raw.price, category: raw.category,
-          image: raw.images?.[0] ?? "", images: raw.images ?? [],
+          id: raw.id,
+          nameHe: raw.name,
+          nameEn: raw.name,
+          descriptionHe: raw.description ?? "",
+          descriptionEn: raw.description ?? "",
+          price: raw.price,
+          category: raw.category,
+          image: raw.images?.[0] ?? "",
+          images: raw.images ?? [],
           material: raw.material ?? "",
-          isNew: raw.badge === "חדש", isBestseller: raw.badge === "נמכר ביותר",
+          isNew: raw.badge === "חדש",
+          isBestseller: raw.badge === "נמכר ביותר",
         };
         setProduct(p);
       })
-      .catch(() => setNotFoundState(true));
-  }, [id]);
+      .catch(() => {
+        // Supabase unavailable — keep static data if we have it, 404 only
+        // if there was no static product for this ID either.
+        if (!staticProduct) setNotFoundState(true);
+      });
+  }, [productId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (notFoundState) notFound();
-  if (!product) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: "#aaa" }}>טוען...</div>;
+  if (!product) return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: "#aaa" }}>
+      טוען...
+    </div>
+  );
 
   const allImages = product.images.length > 0 ? product.images : [product.image];
   const [adding, setAdding] = useState(false);

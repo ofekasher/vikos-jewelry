@@ -9,10 +9,35 @@ async function isAuthed() {
 
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const db = createServerClient();
-  const { data, error } = await db.from("products").select("*").eq("id", id).single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 404 });
-  return NextResponse.json(data);
+
+  try {
+    const db = createServerClient();
+    const { data, error } = await db.from("products").select("*").eq("id", id).single();
+    if (!error && data) return NextResponse.json(data);
+  } catch {
+    // Supabase not configured — fall through to static data
+  }
+
+  // Fallback: find in static product catalogue so every listed product
+  // always has a working API response even without a database.
+  const { products } = await import("@/lib/products");
+  const p = products.find((x) => x.id === id);
+  if (!p) return NextResponse.json({ error: "Product not found" }, { status: 404 });
+
+  // Shape static Product → DbProduct-compatible response
+  return NextResponse.json({
+    id: p.id,
+    name: p.nameHe,
+    price: p.price,
+    category: p.category,
+    images: p.images,
+    badge: p.isBestseller ? "נמכר ביותר" : p.isNew ? "חדש" : null,
+    description: p.descriptionHe,
+    in_stock: true,
+    sizes: null,
+    material: p.material,
+    created_at: new Date().toISOString(),
+  });
 }
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {

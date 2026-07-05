@@ -26,7 +26,7 @@ export default function EditorialHero() {
 
           <h2 style={{
             fontFamily: "'Cormorant Garamond', Georgia, serif",
-            fontSize: "clamp(1.4rem, 2.5vw, 2.2rem)",
+            fontSize: "clamp(1.1rem, 1.8vw, 1.6rem)",
             fontWeight: 400,
             fontStyle: "italic",
             color: "#111111",
@@ -72,7 +72,7 @@ export default function EditorialHero() {
         .editorial-hero-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          height: 320px;
+          height: 260px;
         }
         .editorial-hero-text {
           display: flex;

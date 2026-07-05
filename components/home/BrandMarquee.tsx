@@ -21,23 +21,23 @@ export default function BrandMarquee() {
       padding: "14px 0",
       overflow: "hidden",
     }}>
-      <Marquee speed={8} gradient={false} direction="right">
+      <Marquee speed={22} gradient={false} direction="right">
         {ITEMS.map((item) => (
           <span
             key={item}
             style={{
               fontFamily: "'Inter', system-ui, sans-serif",
-              fontSize: "9px",
-              letterSpacing: "0.3em",
+              fontSize: "11px",
+              letterSpacing: "0.28em",
               textTransform: "uppercase",
               color: "#888888",
               display: "inline-flex",
               alignItems: "center",
-              gap: "20px",
-              marginRight: "48px",
+              gap: "28px",
+              marginRight: "80px",
             }}
           >
-            <span style={{ color: "#C9A96E", fontSize: "7px", flexShrink: 0 }}>✦</span>
+            <span style={{ color: "#C9A96E", fontSize: "8px", flexShrink: 0 }}>✦</span>
             {item}
           </span>
         ))}

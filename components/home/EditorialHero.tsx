@@ -72,7 +72,7 @@ export default function EditorialHero() {
         .editorial-hero-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          height: 260px;
+          height: 400px;
         }
         .editorial-hero-text {
           display: flex;

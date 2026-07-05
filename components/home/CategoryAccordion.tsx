@@ -8,7 +8,7 @@ const cats = [
     label: "עגילים",
     sub: "אלגנטיות עדינה",
     href: "/shop?cat=earrings",
-    img: "https://images.pexels.com/photos/20943476/pexels-photo-20943476.jpeg?auto=compress&cs=tinysrgb&w=900",
+    img: "/instagram/ig16.jpeg",
   },
   {
     id: "rings",

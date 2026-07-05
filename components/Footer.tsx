@@ -6,9 +6,9 @@ const cols = [
     links: [
       { href: "/shop",              label: "כל הפריטים" },
       { href: "/shop?cat=rings",    label: "טבעות" },
-      { href: "/shop?cat=neck",     label: "שרשראות" },
-      { href: "/shop?cat=ear",      label: "עגילים" },
-      { href: "/shop?cat=brac",     label: "צמידים" },
+      { href: "/shop?cat=necklaces", label: "שרשראות" },
+      { href: "/shop?cat=earrings", label: "עגילים" },
+      { href: "/shop?cat=bracelets",label: "צמידים" },
     ],
   },
   {

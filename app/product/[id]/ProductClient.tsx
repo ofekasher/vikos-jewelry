@@ -4,16 +4,12 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { products as allProducts } from "@/lib/products";
 import type { Product } from "@/lib/products";
 import { useStore } from "@/lib/store";
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.23, 1, 0.32, 1] as const } },
-};
 
 const catLabels: Record<string, string> = {
   rings: "טבעות", necklaces: "שרשראות", bracelets: "צמידים", earrings: "עגילים",
@@ -30,6 +26,10 @@ const ACCORDION_ITEMS = [
     title: "הוראות טיפול",
     content: "• שמרו הרחק מכימיקלים, בשמים ומים\n• נקו בעדינות עם מטלית רכה ויבשה\n• אחסנו בקופסת התכשיט המצורפת\n• הימנעו ממגע עם תרסיסים ודאודורנט",
   },
+  {
+    title: "משלוח והחזרות",
+    content: "• משלוח חינם בהזמנות מעל ₪299\n• אספקה תוך 2–4 ימי עסקים\n• החזרה חינם תוך 30 יום\n• כל המוצרים מגיעים עם תעודת אותנטיות",
+  },
 ];
 
 export default function ProductPage({
@@ -41,15 +41,17 @@ export default function ProductPage({
 }) {
   const { addToCart } = useStore();
 
-  // Initialise immediately from static lib/products.ts data so every
-  // product in the catalogue works even when Supabase is unconfigured.
-  const [product, setProduct] = useState<Product | null>(staticProduct);
+  // All hooks at top — never after a conditional return
+  const [product, setProduct]           = useState<Product | null>(staticProduct);
   const [notFoundState, setNotFoundState] = useState(false);
+  const [adding, setAdding]             = useState(false);
+  const [selectedImg, setSelectedImg]   = useState(0);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [openAccordion, setOpenAccordion] = useState<number | null>(0);
+  const [wishlisted, setWishlisted]     = useState(false);
+  const [lightbox, setLightbox]         = useState(false);
 
   useEffect(() => {
-    // Try to refresh with live Supabase data. If the fetch fails (Supabase
-    // not configured, network error, product not in DB), fall back silently
-    // to the static data we already have. Only 404 if we have no data at all.
     fetch(`/api/admin/products/${productId}`)
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(raw => {
@@ -70,8 +72,6 @@ export default function ProductPage({
         setProduct(p);
       })
       .catch(() => {
-        // Supabase unavailable — keep static data if we have it, 404 only
-        // if there was no static product for this ID either.
         if (!staticProduct) setNotFoundState(true);
       });
   }, [productId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -84,27 +84,12 @@ export default function ProductPage({
   );
 
   const allImages = product.images.length > 0 ? product.images : [product.image];
-  const [adding, setAdding] = useState(false);
-  const [selectedImg, setSelectedImg] = useState(0);
-  const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [openAccordion, setOpenAccordion] = useState<number | null>(0);
-  const [wishlisted, setWishlisted] = useState(false);
+  const isRing    = product.category === "rings";
 
-  const related: Product[] = [];
-
-  const isRing = product.category === "rings";
-
-  // Simulated live viewers (cycles between realistic numbers)
-  const [viewers, setViewers] = useState(11);
-  useEffect(() => {
-    const id = setInterval(() => {
-      setViewers(v => {
-        const delta = Math.random() > 0.5 ? 1 : -1;
-        return Math.max(7, Math.min(18, v + delta));
-      });
-    }, 4500);
-    return () => clearInterval(id);
-  }, []);
+  // Up to 4 related products from same category, excluding self
+  const related = allProducts
+    .filter(p => p.category === product.category && p.id !== product.id)
+    .slice(0, 4);
 
   const handleAddToCart = async () => {
     if (isRing && !selectedSize) {
@@ -117,7 +102,7 @@ export default function ProductPage({
       description: `₪${product.price.toLocaleString()}`,
       duration: 3000,
     });
-    await new Promise((r) => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 600));
     setAdding(false);
   };
 
@@ -132,6 +117,8 @@ export default function ProductPage({
     } catch {}
   };
 
+  const materialDisplay = product.material.split("|")[0].trim();
+
   return (
     <div className="bg-white" dir="rtl">
       <Navbar />
@@ -142,63 +129,87 @@ export default function ProductPage({
         {/* Breadcrumb */}
         <nav aria-label="breadcrumb" className="mb-10">
           <ol className="flex items-center gap-2 text-[11px] tracking-[.18em] uppercase text-[#AAA]"
-            style={{ fontFamily:"'Inter',sans-serif" }}>
+            style={{ fontFamily: "'Inter',sans-serif" }}>
             <li><Link href="/" className="hover:text-[#111] transition-colors">בית</Link></li>
             <li aria-hidden>·</li>
             <li><Link href="/shop" className="hover:text-[#111] transition-colors">חנות</Link></li>
             <li aria-hidden>·</li>
-            <li className="text-[#111]" aria-current="page">{product.nameHe}</li>
+            <li className="text-[#C9A96E]" aria-current="page">{product.nameHe}</li>
           </ol>
         </nav>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12" style={{ alignItems: "start" }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16" style={{ alignItems: "start" }}>
 
-          {/* ── Image Gallery ── */}
+          {/* ── Image Gallery ─────────────────────────────────────── */}
           <motion.div
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
             className="flex flex-col gap-3"
           >
-            {/* Badges row above viewer */}
-            <div className="flex gap-2">
-              {product.isNew && (
-                <span className="bg-[#111] text-white text-[9px] tracking-[.2em] uppercase px-2.5 py-1"
-                  style={{ fontFamily:"'Inter',sans-serif" }}>חדש</span>
-              )}
-              {product.isBestseller && (
-                <span className="bg-[#C9A96E] text-white text-[9px] tracking-[.2em] uppercase px-2.5 py-1"
-                  style={{ fontFamily:"'Inter',sans-serif" }}>נמכר ביותר</span>
-              )}
-            </div>
-
-            {/* Main image + gallery */}
-            <div style={{ background: "#FAFAFA", border: "1px solid #E8E8E8", aspectRatio: "1/1", overflow: "hidden", position: "relative" }}>
+            {/* Main image — click to open lightbox */}
+            <div
+              onClick={() => setLightbox(true)}
+              style={{
+                background: "#FAFAFA",
+                border: "1px solid #E8E8E8",
+                aspectRatio: "3/4",
+                overflow: "hidden",
+                position: "relative",
+                cursor: "zoom-in",
+              }}
+            >
               <AnimatePresence mode="wait">
                 <motion.img
-                  key={allImages[selectedImg] ?? product.image}
-                  src={allImages[selectedImg] ?? product.image}
+                  key={allImages[selectedImg]}
+                  src={allImages[selectedImg]}
                   alt={product.nameHe}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  transition={{ duration: 0.18, ease: "easeOut" }}
                   style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", position: "absolute", inset: 0 }}
                 />
               </AnimatePresence>
+
+              {/* Zoom hint */}
+              <div style={{
+                position: "absolute", bottom: "12px", left: "12px",
+                background: "rgba(255,255,255,0.88)", backdropFilter: "blur(4px)",
+                padding: "4px 10px", display: "flex", alignItems: "center", gap: "5px",
+              }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.8" strokeLinecap="round">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  <line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
+                </svg>
+                <span style={{ fontFamily: "'Inter',sans-serif", fontSize: "9px", letterSpacing: "0.16em", color: "#666" }}>הגדל</span>
+              </div>
+
+              {/* Badges overlay */}
+              {(product.isNew || product.isBestseller) && (
+                <div style={{ position: "absolute", top: "12px", right: "12px", display: "flex", flexDirection: "column", gap: "4px" }}>
+                  {product.isNew && (
+                    <span style={{ background: "#111", color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", padding: "3px 8px" }}>חדש</span>
+                  )}
+                  {product.isBestseller && (
+                    <span style={{ background: "#C9A96E", color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", padding: "3px 8px" }}>נמכר ביותר</span>
+                  )}
+                </div>
+              )}
             </div>
 
-            {/* Thumbnails — only when more than 1 image */}
+            {/* Thumbnails */}
             {allImages.length > 1 && (
-              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
                 {allImages.map((src, i) => (
                   <button
                     key={i}
                     onClick={() => setSelectedImg(i)}
                     style={{
-                      width: "64px", height: "64px", padding: 0, border: "none", cursor: "pointer",
-                      boxShadow: selectedImg === i ? "0 0 0 2px #C9A96E" : "0 0 0 2px transparent",
+                      width: "60px", height: "60px", padding: 0, border: "none", cursor: "pointer",
+                      outline: selectedImg === i ? "2px solid #C9A96E" : "2px solid transparent",
+                      outlineOffset: "1px",
                       background: "#FAFAFA", overflow: "hidden", flexShrink: 0,
-                      transition: "box-shadow 120ms ease-out",
+                      transition: "outline-color 120ms ease-out",
                     }}
                   >
                     <img src={src} alt={`תמונה ${i + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
@@ -206,207 +217,255 @@ export default function ProductPage({
                 ))}
               </div>
             )}
-
-            {/* Wishlist + Share */}
-            <div className="flex gap-2 justify-end mt-1">
-              <button
-                onClick={() => setWishlisted(w => !w)}
-                aria-label="רשימת משאלות"
-                className="w-9 h-9 rounded-full bg-[#F5F5F5] flex items-center justify-center cursor-pointer icon-btn"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill={wishlisted ? "#C9A96E" : "none"} stroke={wishlisted ? "#C9A96E" : "#666"} strokeWidth="1.5">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                </svg>
-              </button>
-              <button
-                onClick={handleShare}
-                aria-label="שתף"
-                className="w-9 h-9 rounded-full bg-[#F5F5F5] flex items-center justify-center cursor-pointer icon-btn"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="1.5" strokeLinecap="round">
-                  <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-                </svg>
-              </button>
-            </div>
           </motion.div>
 
-          {/* ── Product details ── */}
+          {/* ── Product Details ────────────────────────────────────── */}
           <motion.div
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.08, ease: [0.23, 1, 0.32, 1] }}
-            className="flex flex-col pt-2">
+            className="flex flex-col"
+            style={{ paddingTop: "4px" }}
+          >
 
-            <p className="text-[10px] tracking-[.3em] uppercase text-[#999] mb-3"
-              style={{ fontFamily:"'Inter',sans-serif" }}>
-              {catLabels[product.category]}
-            </p>
+            {/* 1. Category + badge inline */}
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+              <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#999", margin: 0 }}>
+                {catLabels[product.category]}
+              </p>
+            </div>
 
-            <h1 style={{ fontFamily:"'Inter',sans-serif", fontSize:"clamp(1.6rem,3vw,2.4rem)", fontWeight:300, color:"#111", lineHeight:1.15 }}>
+            {/* 2. Product name — Cormorant Garamond */}
+            <h1 style={{
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontSize: "clamp(1.8rem, 3.2vw, 2.6rem)",
+              fontWeight: 400,
+              fontStyle: "italic",
+              color: "#111",
+              lineHeight: 1.1,
+              marginBottom: "12px",
+            }}>
               {product.nameHe}
             </h1>
 
-            {/* Rating stars */}
-            <div className="flex items-center gap-2 mt-3">
-              <div className="flex gap-0.5">
-                {[1,2,3,4,5].map(s => (
-                  <svg key={s} width="13" height="13" viewBox="0 0 24 24" fill="#C9A96E">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                  </svg>
-                ))}
-              </div>
-              <span className="text-[12px] text-[#555] font-medium" style={{ fontFamily:"'Inter',sans-serif" }}>5.0</span>
-              <span className="text-[11px] text-[#C9A96E] underline underline-offset-2 cursor-pointer" style={{ fontFamily:"'Inter',sans-serif" }}>48 ביקורות</span>
-              <span className="text-[#E5E5E5]">·</span>
-              <span className="text-[11px] text-[#888]" style={{ fontFamily:"'Inter',sans-serif" }}>הוזמן 23 פעמים החודש</span>
-            </div>
+            {/* 3. Material — prominent, near name */}
+            {materialDisplay && (
+              <p style={{
+                fontFamily: "'Inter',sans-serif",
+                fontSize: "11px",
+                letterSpacing: "0.14em",
+                color: "#888",
+                marginBottom: "18px",
+                textTransform: "uppercase",
+              }}>
+                {materialDisplay}
+              </p>
+            )}
 
-            {/* Price + installments */}
-            <div className="mt-5">
-              <p className="text-[1.55rem] text-[#111]"
-                style={{ fontFamily:"'Inter',sans-serif", fontWeight:400, letterSpacing:"-0.01em" }}>
+            {/* 4. Price + installments */}
+            <div style={{ marginBottom: "20px" }}>
+              <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "1.6rem", fontWeight: 400, color: "#111", letterSpacing: "-0.01em", margin: "0 0 4px" }}>
                 ₪{product.price.toLocaleString()}
               </p>
-              <p className="text-[12px] text-[#C9A96E] mt-1" style={{ fontFamily:"'Inter',sans-serif" }}>
+              <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "11px", color: "#C9A96E", margin: 0 }}>
                 או 3 תשלומים של ₪{Math.round(product.price / 3).toLocaleString()} ללא ריבית
               </p>
             </div>
 
-            {/* Live viewers urgency strip */}
-            <div className="mt-4 flex items-center gap-3 py-2.5 px-3 bg-[#FAFAF8] border border-[#EFEFEF]">
-              <span className="relative flex h-2 w-2 flex-shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C9A96E] opacity-60" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#C9A96E]" />
-              </span>
-              <span className="text-[11px] text-[#666]" style={{ fontFamily:"'Inter',sans-serif" }}>
-                <span className="font-semibold text-[#111]">{viewers} אנשים</span> צופים כרגע במוצר זה
-              </span>
-              <span className="mr-auto text-[11px] text-[#E05A5A] font-medium" style={{ fontFamily:"'Inter',sans-serif" }}>
-                נותרו 3 יחידות בלבד
-              </span>
+            {/* 5. Trust strip */}
+            <div style={{
+              display: "flex",
+              gap: "0",
+              marginBottom: "22px",
+              borderTop: "1px solid #EFEFEF",
+              borderBottom: "1px solid #EFEFEF",
+              padding: "10px 0",
+            }}>
+              {[
+                { icon: "M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z", label: "ייצור ישראלי" },
+                { icon: "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z M12 7v6 M9 10h6", label: "אריזת מתנה" },
+                { icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6", label: "החזרה 30 יום" },
+              ].map((t, i) => (
+                <div key={i} style={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "4px",
+                  padding: "4px 8px",
+                  borderLeft: i < 2 ? "1px solid #EFEFEF" : "none",
+                }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d={t.icon} />
+                  </svg>
+                  <span style={{ fontFamily: "'Inter',sans-serif", fontSize: "9px", letterSpacing: "0.12em", color: "#666", textAlign: "center" }}>{t.label}</span>
+                </div>
+              ))}
             </div>
 
-            <div className="my-5 h-px bg-[#E5E5E5]" />
-
-            <p className="text-[#555] leading-relaxed"
-              style={{ fontFamily:"'Frank Ruhl Libre',serif", fontSize:"14px", fontWeight:300, lineHeight:1.75 }}>
-              {product.descriptionHe}
-            </p>
-
-            {/* Material row */}
-            <div className="mt-5 flex items-center gap-2">
-              <span className="text-[10px] tracking-[.2em] uppercase text-[#AAA]"
-                style={{ fontFamily:"'Inter',sans-serif" }}>חומר</span>
-              <span className="h-px flex-1 bg-[#E5E5E5]" />
-              <span className="text-[12px] text-[#555]"
-                style={{ fontFamily:"'Inter',sans-serif", fontWeight:300 }}>
-                {product.material.split("|")[0].trim()}
-              </span>
-            </div>
-
-            {/* Size selector — rings only */}
+            {/* 6. Size selector — rings only */}
             {isRing && (
-              <div className="mt-6">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[10px] tracking-[.2em] uppercase text-[#AAA]"
-                    style={{ fontFamily:"'Inter',sans-serif" }}>בחרי מידה</span>
+              <div style={{ marginBottom: "22px" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
+                  <span style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: "#AAA" }}>
+                    בחרי מידה
+                  </span>
                   <button
-                    onClick={() => toast("מדריך מידות: מדדי את היקף אצבעך במ״מ. רוב הנשים בין 48-54.", { duration: 5000 })}
-                    className="text-[10px] text-[#C9A96E] underline underline-offset-2 cursor-pointer"
-                    style={{ fontFamily:"'Inter',sans-serif", background:"none", border:"none" }}
+                    onClick={() => toast("מדריך מידות: מדדי את היקף אצבעך במ״מ. רוב הנשים בין 48–54.", { duration: 5000 })}
+                    style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", color: "#C9A96E", textDecoration: "underline", textUnderlineOffset: "2px", background: "none", border: "none", cursor: "pointer" }}
                   >
                     מדריך מידות
                   </button>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
                   {RING_SIZES.map(size => (
                     <button
                       key={size}
                       onClick={() => setSelectedSize(size)}
-                      className={`w-10 h-10 text-[12px] border cursor-pointer size-btn ${
-                        selectedSize === size
-                          ? "border-[#C9A96E] bg-[#C9A96E] text-white"
-                          : "border-[#E5E5E5] text-[#555] hover:border-[#C9A96E]"
-                      }`}
-                      style={{ fontFamily:"'Inter',sans-serif", fontWeight:300 }}
+                      className="size-btn"
+                      style={{
+                        width: "40px", height: "40px",
+                        fontFamily: "'Inter',sans-serif", fontSize: "12px", fontWeight: 300,
+                        border: selectedSize === size ? "1px solid #C9A96E" : "1px solid #E5E5E5",
+                        background: selectedSize === size ? "#C9A96E" : "transparent",
+                        color: selectedSize === size ? "#fff" : "#555",
+                        cursor: "pointer",
+                      }}
                     >
                       {size}
                     </button>
                   ))}
                 </div>
                 {!selectedSize && (
-                  <p className="text-[10px] text-[#AAA] mt-2" style={{ fontFamily:"'Inter',sans-serif" }}>
-                    * אנא בחרי מידה
-                  </p>
+                  <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", color: "#AAA", marginTop: "6px" }}>* אנא בחרי מידה</p>
                 )}
               </div>
             )}
 
-            {/* Add to cart */}
-            <div className="mt-8 flex flex-col gap-3">
-              <button onClick={handleAddToCart} disabled={adding}
-                className="w-full flex items-center justify-center gap-3 transition-all duration-200 px-8 py-4 text-[12px] tracking-[.18em] uppercase cursor-pointer min-h-[56px] font-medium"
-                style={{
-                  fontFamily:"'Inter',sans-serif",
-                  background: adding ? "#B89355" : "#C9A96E",
-                  color: "#fff",
-                  border: "none",
-                  boxShadow: adding ? "none" : "0 4px 20px rgba(201,169,110,0.35)",
-                  transform: adding ? "none" : undefined,
-                  letterSpacing: ".2em",
-                }}>
-                {adding ? (
-                  <>
-                    <motion.span animate={{ rotate: 360 }}
-                      transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
-                      className="inline-block w-3.5 h-3.5 border border-white/40 border-t-white rounded-full" />
-                    מוסיף...
-                  </>
-                ) : (
-                  <>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                      <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>
-                    </svg>
-                    הוספה לסל
-                  </>
-                )}
-              </button>
+            {/* 7. Add to cart */}
+            <button
+              onClick={handleAddToCart}
+              disabled={adding}
+              className="add-btn"
+              style={{
+                width: "100%",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
+                padding: "16px 32px",
+                fontFamily: "'Inter',sans-serif",
+                fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", fontWeight: 500,
+                background: adding ? "#B89355" : "#C9A96E",
+                color: "#fff",
+                border: "none",
+                cursor: adding ? "default" : "pointer",
+                boxShadow: adding ? "none" : "0 4px 20px rgba(201,169,110,0.3)",
+                transition: "background 200ms ease-out, box-shadow 200ms ease-out",
+                minHeight: "54px",
+              }}
+            >
+              {adding ? (
+                <>
+                  <motion.span
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 0.8, ease: "linear" }}
+                    style={{ display: "inline-block", width: "14px", height: "14px", border: "1.5px solid rgba(255,255,255,0.35)", borderTopColor: "#fff", borderRadius: "50%" }}
+                  />
+                  מוסיף...
+                </>
+              ) : (
+                <>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 01-8 0"/>
+                  </svg>
+                  הוספה לסל
+                </>
+              )}
+            </button>
 
-              {/* Delivery estimate */}
-              <div className="flex items-center justify-center gap-2 py-2">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5" strokeLinecap="round">
+            {/* 8. Secondary CTA + delivery together */}
+            <div style={{ marginTop: "10px", display: "flex", flexDirection: "column", gap: "8px" }}>
+              <Link
+                href="/custom"
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                  padding: "14px 32px",
+                  fontFamily: "'Inter',sans-serif", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase",
+                  color: "#111", border: "1px solid #E5E5E5", textDecoration: "none",
+                  transition: "border-color 200ms ease-out, color 200ms ease-out",
+                  minHeight: "48px",
+                }}
+                className="custom-btn"
+              >
+                הזמנה אישית
+              </Link>
+
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", paddingTop: "4px" }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="1.5" strokeLinecap="round">
                   <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                 </svg>
-                <span className="text-[11px] text-[#888]" style={{ fontFamily:"'Inter',sans-serif" }}>
-                  הזמיני עד 14:00 — אספקה <span className="text-[#111] font-semibold">מחר</span>
+                <span style={{ fontFamily: "'Inter',sans-serif", fontSize: "11px", color: "#999" }}>
+                  הזמיני עד 14:00 — אספקה <strong style={{ color: "#111" }}>מחר</strong>
                 </span>
               </div>
-
-              <Link href="/custom"
-                className="w-full flex items-center justify-center gap-2 border border-[#E5E5E5] hover:border-[#C9A96E] hover:text-[#C9A96E] text-[#111] transition-colors duration-200 px-8 py-4 text-[11px] tracking-[.22em] uppercase min-h-[52px]"
-                style={{ fontFamily:"'Inter',sans-serif" }}>
-                הזמנה אישית ✦
-              </Link>
             </div>
 
+            {/* 9. Wishlist + Share */}
+            <div style={{ display: "flex", gap: "8px", marginTop: "16px", paddingTop: "16px", borderTop: "1px solid #F0F0F0" }}>
+              <button
+                onClick={() => setWishlisted(w => !w)}
+                aria-label="רשימת משאלות"
+                className="action-btn"
+                style={{ display: "flex", alignItems: "center", gap: "6px", background: "none", border: "none", cursor: "pointer", padding: "4px 0" }}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill={wishlisted ? "#C9A96E" : "none"} stroke={wishlisted ? "#C9A96E" : "#888"} strokeWidth="1.5">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                <span style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", letterSpacing: "0.12em", color: "#888" }}>שמירה למועדפים</span>
+              </button>
+              <div style={{ width: "1px", background: "#EBEBEB", margin: "0 4px" }} />
+              <button
+                onClick={handleShare}
+                aria-label="שתף"
+                className="action-btn"
+                style={{ display: "flex", alignItems: "center", gap: "6px", background: "none", border: "none", cursor: "pointer", padding: "4px 0" }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="1.5" strokeLinecap="round">
+                  <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
+                <span style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", letterSpacing: "0.12em", color: "#888" }}>שיתוף</span>
+              </button>
+            </div>
 
-            {/* Accordion */}
-            <div className="mt-8 border-t border-[#E5E5E5]">
+            {/* 10. Description — the story */}
+            <div style={{ marginTop: "28px", paddingTop: "24px", borderTop: "1px solid #EFEFEF" }}>
+              <p style={{
+                fontFamily: "'Frank Ruhl Libre', serif",
+                fontSize: "14px", fontWeight: 300, color: "#555",
+                lineHeight: 1.8,
+              }}>
+                {product.descriptionHe}
+              </p>
+            </div>
+
+            {/* 11. Accordion */}
+            <div style={{ marginTop: "24px", borderTop: "1px solid #E5E5E5" }}>
               {ACCORDION_ITEMS.map((item, i) => (
-                <div key={i} className="border-b border-[#E5E5E5]">
+                <div key={i} style={{ borderBottom: "1px solid #E5E5E5" }}>
                   <button
                     onClick={() => setOpenAccordion(openAccordion === i ? null : i)}
-                    className="w-full flex items-center justify-between py-4 text-right cursor-pointer"
-                    style={{ background:"none", border:"none" }}
+                    style={{
+                      width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                      padding: "14px 0", background: "none", border: "none", cursor: "pointer", textAlign: "right",
+                    }}
                   >
-                    <span className="text-[12px] tracking-[.12em] uppercase text-[#333]"
-                      style={{ fontFamily:"'Inter',sans-serif", fontWeight:400 }}>
+                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: "#333", fontWeight: 400 }}>
                       {item.title}
                     </span>
                     <motion.span
                       animate={{ rotate: openAccordion === i ? 45 : 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="text-[#C9A96E] text-lg leading-none select-none"
+                      transition={{ duration: 0.18 }}
+                      style={{ color: "#C9A96E", fontSize: "18px", lineHeight: 1, userSelect: "none" }}
                     >
                       +
                     </motion.span>
@@ -417,11 +476,15 @@ export default function ProductPage({
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25, ease: "easeOut" }}
+                        transition={{ duration: 0.22, ease: "easeOut" }}
                         style={{ overflow: "hidden" }}
                       >
-                        <p className="pb-5 text-[13px] text-[#666] leading-relaxed whitespace-pre-line"
-                          style={{ fontFamily:"'Frank Ruhl Libre',serif", fontWeight:300, lineHeight:1.8 }}>
+                        <p style={{
+                          paddingBottom: "16px",
+                          fontFamily: "'Frank Ruhl Libre', serif",
+                          fontSize: "13px", fontWeight: 300, color: "#666", lineHeight: 1.8,
+                          whiteSpace: "pre-line",
+                        }}>
                           {item.content}
                         </p>
                       </motion.div>
@@ -433,33 +496,29 @@ export default function ProductPage({
           </motion.div>
         </div>
 
-        {/* Related */}
+        {/* ── Related products ─────────────────────────────────── */}
         {related.length > 0 && (
-          <section className="mt-20 border-t border-[#E5E5E5] pt-16">
-            <p className="text-[10px] tracking-[.28em] uppercase text-[#999] mb-2"
-              style={{ fontFamily:"'Inter',sans-serif" }}>אולי תאהב גם</p>
-            <h2 style={{ fontFamily:"'Inter',sans-serif", fontSize:"1.5rem", fontWeight:300, color:"#111" }}>
+          <section style={{ marginTop: "80px", borderTop: "1px solid #EFEFEF", paddingTop: "60px" }}>
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: "#999", marginBottom: "6px" }}>
+              אולי תאהבי גם
+            </p>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(1.4rem,2.4vw,2rem)", fontWeight: 400, fontStyle: "italic", color: "#111", marginBottom: "36px" }}>
               עוד מהקולקציה
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-5 mt-8">
-              {related.map((p, i) => (
-                <Link key={p.id} href={`/product/${p.id}`} className="group block" style={{ textDecoration: "none" }}>
-                  <div style={{
-                    background: "#fff", border: "1px solid #EFEFEF",
-                    boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
-                    aspectRatio: "1/1", display: "flex", alignItems: "center",
-                    justifyContent: "center", padding: "20px", overflow: "hidden",
-                    marginBottom: "10px",
-                  }}>
-                    <img src={p.image} alt={p.nameHe} loading="lazy"
-                      style={{ width: "100%", height: "100%", objectFit: "contain",
-                        transition: "transform 0.5s ease" }}
-                      className="group-hover:scale-[1.06] transition-transform duration-500" />
+            <div className="related-grid">
+              {related.map(p => (
+                <Link key={p.id} href={`/product/${p.id}`} style={{ textDecoration: "none" }} className="related-card">
+                  <div style={{ aspectRatio: "1/1", overflow: "hidden", background: "#FAFAFA", border: "1px solid #EFEFEF", marginBottom: "10px" }}>
+                    <img
+                      src={p.image} alt={p.nameHe} loading="lazy"
+                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 500ms ease" }}
+                      className="related-img"
+                    />
                   </div>
-                  <p className="text-[13px] text-[#111] group-hover:text-[#C9A96E] transition-colors"
-                    style={{ fontFamily:"'Inter',sans-serif", fontWeight:300 }}>{p.nameHe}</p>
-                  <p className="mt-1 text-[12px] text-[#888]"
-                    style={{ fontFamily:"'Inter',sans-serif", fontWeight:300 }}>
+                  <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1rem", fontStyle: "italic", color: "#111", fontWeight: 400, margin: "0 0 4px" }}>
+                    {p.nameHe}
+                  </p>
+                  <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "12px", color: "#888", fontWeight: 300 }}>
                     ₪{p.price.toLocaleString()}
                   </p>
                 </Link>
@@ -468,21 +527,78 @@ export default function ProductPage({
           </section>
         )}
       </main>
+
+      {/* ── Lightbox ─────────────────────────────────────────── */}
+      <AnimatePresence>
+        {lightbox && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setLightbox(false)}
+            style={{
+              position: "fixed", inset: 0, zIndex: 200,
+              background: "rgba(0,0,0,0.94)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              padding: "40px", cursor: "zoom-out",
+            }}
+          >
+            <motion.img
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.92 }}
+              transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+              src={allImages[selectedImg]}
+              alt={product.nameHe}
+              onClick={e => e.stopPropagation()}
+              style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", cursor: "default" }}
+            />
+            <button
+              onClick={() => setLightbox(false)}
+              aria-label="סגור"
+              style={{
+                position: "absolute", top: "20px", left: "20px",
+                background: "rgba(255,255,255,0.1)", border: "none", color: "#fff",
+                width: "40px", height: "40px", borderRadius: "50%",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer", transition: "background 200ms ease",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,255,255,0.2)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,0.1)")}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Footer />
 
       <style>{`
-        .icon-btn {
-          transition: background-color 120ms ease-out;
-        }
-        @media (hover: hover) and (pointer: fine) {
-          .icon-btn:hover { background-color: #EEECE8; }
-        }
-        .icon-btn:active { transform: scale(0.94); transition: transform 100ms ease-out; }
-
+        .add-btn:active  { transform: scale(0.98); }
+        .custom-btn:hover { border-color: #C9A96E !important; color: #C9A96E !important; }
+        .action-btn:hover span { color: #111 !important; }
+        .action-btn:hover svg  { stroke: #111 !important; }
         .size-btn {
-          transition: background-color 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
+          transition: background 120ms ease-out, border-color 120ms ease-out, color 120ms ease-out;
         }
         .size-btn:active { transform: scale(0.94); }
+
+        .related-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 16px;
+        }
+        @media (max-width: 900px) {
+          .related-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 480px) {
+          .related-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        }
+        .related-card:hover .related-img { transform: scale(1.05); }
       `}</style>
     </div>
   );

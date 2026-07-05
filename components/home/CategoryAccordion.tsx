@@ -34,7 +34,7 @@ const cats = [
 ];
 
 export default function CategoryAccordion() {
-  const [active, setActive] = useState<string>("rings");
+  const [active, setActive] = useState<string | null>(null);
 
   return (
     <section style={{ padding: "72px 0 0" }} dir="rtl">
@@ -62,9 +62,9 @@ export default function CategoryAccordion() {
       </div>
 
       {/* Accordion strips */}
-      <div className="cat-accordion" aria-label="קטגוריות">
+      <div className="cat-accordion" aria-label="קטגוריות" onMouseLeave={() => setActive(null)}>
         {cats.map((cat) => {
-          const isActive = active === cat.id;
+          const isActive = active !== null && active === cat.id;
           return (
             <Link
               key={cat.id}

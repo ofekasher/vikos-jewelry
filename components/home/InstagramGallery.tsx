@@ -18,33 +18,31 @@ const T = {
   sans:  "'Inter', system-ui, sans-serif",
 };
 
+/*
+  8 images shown — editorial grid layout:
+    [ A  A  B  C ]   A = 2×2 featured
+    [ A  A  D  E ]
+    [ F  G  H  H ]   H = 2×2 featured
+    [ F  G  H  H ]   F,G each span 2 rows tall
+*/
 const IMAGES = [
-  { src: "/instagram/ig1.jpeg",  alt: "טבעת יהלום על אבנים" },
-  { src: "/instagram/ig2.jpeg",  alt: "צמידים על מעמד קטיפה" },
-  { src: "/instagram/ig3.jpeg",  alt: "שרשרת בקופסת ויקוס" },
-  { src: "/instagram/ig4.jpeg",  alt: "עגילים על קופסה" },
-  { src: "/instagram/ig5.jpeg",  alt: "טבעות אמייל אדום" },
-  { src: "/instagram/ig6.jpeg",  alt: "תכשיטי ויקוס" },
-  { src: "/instagram/ig7.jpeg",  alt: "תכשיטי ויקוס" },
-  { src: "/instagram/ig8.jpeg",  alt: "תכשיטי ויקוס" },
-  { src: "/instagram/ig9.jpeg",  alt: "תכשיטי ויקוס" },
-  { src: "/instagram/ig10.jpeg", alt: "תכשיטי ויקוס" },
-  { src: "/rings/vopf_hand_01.png",  alt: "טבעת יהלום ויקוס" },
-  { src: "/instagram/ig11.jpeg", alt: "טבעת יהלום על יד" },
-  { src: "/instagram/ig12.jpeg", alt: "צמידי זהב Van Cleef" },
-  { src: "/instagram/ig13.jpeg", alt: "טבעת אמייל צהוב" },
-  { src: "/instagram/ig14.jpeg", alt: "צמידי זהב אמייל" },
-  { src: "/instagram/ig15.jpeg", alt: "תכשיטים ליד הבריכה" },
-  { src: "/instagram/ig16.jpeg", alt: "עגילי יהלום על האוזן" },
-  { src: "/instagram/ig17.jpeg", alt: "טבעות ליד הבריכה" },
-  { src: "/instagram/ig18.jpeg", alt: "טבעת לב יהלום" },
+  { src: "/instagram/ig1.jpeg",  alt: "טבעת יהלום על אבנים" },   // A — large featured
+  { src: "/instagram/ig11.jpeg", alt: "טבעת יהלום על יד" },      // B
+  { src: "/instagram/ig12.jpeg", alt: "צמידי זהב" },             // C
+  { src: "/instagram/ig13.jpeg", alt: "טבעת אמייל" },            // D
+  { src: "/instagram/ig3.jpeg",  alt: "שרשרת בקופסת ויקוס" },   // E
+  { src: "/instagram/ig15.jpeg", alt: "תכשיטים ליד הבריכה" },    // F — tall
+  { src: "/instagram/ig16.jpeg", alt: "עגילי יהלום" },           // G — tall
+  { src: "/instagram/ig8.jpeg",  alt: "תכשיטי ויקוס" },          // H — large featured
 ];
+
+const AREAS = ["a", "b", "c", "d", "e", "f", "g", "h"] as const;
 
 function Photo({ src, alt, area }: { src: string; alt: string; area: string }) {
   return (
     <div className="ig-photo" style={{ gridArea: area }}>
       <img src={src} alt={alt} loading="lazy" />
-      <div className="ig-overlay">
+      <div className="ig-hover">
         <IgIcon size={20} color="#fff" />
       </div>
     </div>
@@ -58,64 +56,33 @@ export default function InstagramGallery() {
 
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: "48px" }}>
-          <p style={{ fontFamily: T.sans, fontSize: "9px", letterSpacing: "0.36em", textTransform: "uppercase", color: T.gold, marginBottom: "14px" }}>
+          <p style={{
+            fontFamily: T.sans, fontSize: "9px", letterSpacing: "0.36em",
+            textTransform: "uppercase", color: T.gold, marginBottom: "14px",
+          }}>
             עקבו אחרינו
           </p>
-          <h2 style={{ fontFamily: T.serif, fontSize: "clamp(1.8rem, 3vw, 2.6rem)", fontWeight: 300, color: T.black, margin: "0 0 12px" }}>
+          <h2 style={{
+            fontFamily: T.serif, fontSize: "clamp(1.8rem, 3vw, 2.6rem)",
+            fontWeight: 300, color: T.black, margin: "0 0 12px",
+          }}>
             העיצובים שלנו
           </h2>
-          <a
-            href="https://instagram.com/vikosjewelry"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ig-handle"
-          >
+          <a href="https://instagram.com/vikosjewelry" target="_blank" rel="noopener noreferrer" className="ig-handle">
             <IgIcon size={13} />
             @vikosjewelry
           </a>
         </div>
 
-        {/*
-          Editorial asymmetric 4-col grid:
-          [ A  A  B  C ]   ← A is 2×2 large featured
-          [ A  A  D  E ]
-          [ F  G  H  H ]   ← H is 2×2 large featured
-          [ I  J  H  H ]
-          [ K  K  K  K ]   ← K is full-width ring feature
-          [ L  L  M  N ]   ← L is 2×1 wide
-          [ O  P  Q  R ]
-          [ S  S  S  S ]   ← S is full-width
-        */}
         <div className="ig-grid">
-          <Photo src={IMAGES[0].src} alt={IMAGES[0].alt} area="a" />
-          <Photo src={IMAGES[1].src} alt={IMAGES[1].alt} area="b" />
-          <Photo src={IMAGES[2].src} alt={IMAGES[2].alt} area="c" />
-          <Photo src={IMAGES[3].src} alt={IMAGES[3].alt} area="d" />
-          <Photo src={IMAGES[4].src} alt={IMAGES[4].alt} area="e" />
-          <Photo src={IMAGES[5].src} alt={IMAGES[5].alt} area="f" />
-          <Photo src={IMAGES[6].src} alt={IMAGES[6].alt} area="g" />
-          <Photo src={IMAGES[7].src} alt={IMAGES[7].alt} area="h" />
-          <Photo src={IMAGES[8].src} alt={IMAGES[8].alt} area="i" />
-          <Photo src={IMAGES[9].src} alt={IMAGES[9].alt} area="j" />
-          <Photo src={IMAGES[10].src} alt={IMAGES[10].alt} area="k" />
-          <Photo src={IMAGES[11].src} alt={IMAGES[11].alt} area="l" />
-          <Photo src={IMAGES[12].src} alt={IMAGES[12].alt} area="m" />
-          <Photo src={IMAGES[13].src} alt={IMAGES[13].alt} area="n" />
-          <Photo src={IMAGES[14].src} alt={IMAGES[14].alt} area="o" />
-          <Photo src={IMAGES[15].src} alt={IMAGES[15].alt} area="p" />
-          <Photo src={IMAGES[16].src} alt={IMAGES[16].alt} area="q" />
-          <Photo src={IMAGES[17].src} alt={IMAGES[17].alt} area="r" />
-          <Photo src={IMAGES[18].src} alt={IMAGES[18].alt} area="s" />
+          {IMAGES.map((img, i) => (
+            <Photo key={img.src} src={img.src} alt={img.alt} area={AREAS[i]} />
+          ))}
         </div>
 
         {/* CTA */}
         <div style={{ textAlign: "center", marginTop: "44px" }}>
-          <a
-            href="https://instagram.com/vikosjewelry"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ig-cta"
-          >
+          <a href="https://instagram.com/vikosjewelry" target="_blank" rel="noopener noreferrer" className="ig-cta">
             <IgIcon size={12} />
             עקבו ב-Instagram
           </a>
@@ -123,18 +90,21 @@ export default function InstagramGallery() {
       </div>
 
       <style>{`
+        /*
+          4-column, 4-row editorial grid.
+          A and H are 2×2 featured cells.
+          F and G are 1×2 tall cells.
+          B, C, D, E are standard 1×1 cells.
+        */
         .ig-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          grid-template-rows: repeat(4, 200px) 280px 200px 200px;
+          grid-template-rows: repeat(4, 220px);
           grid-template-areas:
             "a a b c"
             "a a d e"
             "f g h h"
-            "i j h h"
-            "k k k k"
-            "l l m n"
-            "o p q r";
+            "f g h h";
           gap: 4px;
         }
 
@@ -144,28 +114,30 @@ export default function InstagramGallery() {
           cursor: pointer;
         }
 
+        /* object-fit: cover always fills the cell — 1:1 square crop */
         .ig-photo img {
           width: 100%;
           height: 100%;
           object-fit: cover;
+          object-position: center;
           display: block;
-          transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+          transition: transform 700ms cubic-bezier(0.23, 1, 0.32, 1);
         }
 
-        .ig-overlay {
+        .ig-hover {
           position: absolute;
           inset: 0;
-          background: rgba(17, 17, 17, 0.38);
+          background: rgba(12, 12, 12, 0.36);
           display: flex;
           align-items: center;
           justify-content: center;
           opacity: 0;
-          transition: opacity 0.3s ease;
+          transition: opacity 400ms ease;
         }
 
         @media (hover: hover) and (pointer: fine) {
-          .ig-photo:hover img { transform: scale(1.06); }
-          .ig-photo:hover .ig-overlay { opacity: 1; }
+          .ig-photo:hover img      { transform: scale(1.05); }
+          .ig-photo:hover .ig-hover { opacity: 1; }
         }
 
         .ig-handle {
@@ -200,35 +172,31 @@ export default function InstagramGallery() {
           color: #fff;
         }
 
+        /* ─── Mobile: 2-col stacked ─────────────────────────── */
         @media (max-width: 768px) {
           .ig-grid {
             grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(6, 160px) 240px repeat(5, 160px);
+            grid-template-rows: repeat(4, 180px) repeat(2, 180px);
             grid-template-areas:
               "a a"
               "a a"
               "b c"
               "d e"
               "f g"
-              "h h"
-              "i j"
-              "k k"
-              "l m"
-              "n o"
-              "p q"
-              "r s";
+              "h h";
           }
         }
 
+        /* ─── Very small: uniform squares ───────────────────── */
         @media (max-width: 480px) {
           .ig-grid {
             grid-template-columns: repeat(2, 1fr);
             grid-template-rows: auto;
-            grid-template-areas: none;
+            grid-template-areas: unset;
           }
           .ig-photo {
             grid-area: unset !important;
-            aspect-ratio: 1/1;
+            aspect-ratio: 1 / 1;
           }
         }
       `}</style>

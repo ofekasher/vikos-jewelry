@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,7 +8,8 @@ import { ShoppingBag, X, Search, SlidersHorizontal, Heart } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
-import { products, categories } from "@/lib/products";
+import { categories } from "@/lib/products";
+import type { Product } from "@/lib/products";
 import { useStore } from "@/lib/store";
 
 const T = {
@@ -31,7 +32,7 @@ const SORTS = [
   { id: "bestseller", label: "נמכר ביותר" },
 ];
 
-function ProductCard({ p, index }: { p: typeof products[0]; index: number }) {
+function ProductCard({ p, index }: { p: Product; index: number }) {
   const { addToCart, toggleWishlist, isWishlisted } = useStore();
   const [hovered, setHovered] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -97,6 +98,11 @@ function ProductCard({ p, index }: { p: typeof products[0]; index: number }) {
 }
 
 export default function ShopPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  useEffect(() => {
+    fetch("/api/products").then(r => r.json()).then(setProducts).catch(() => {});
+  }, []);
+
   const [activeCategory, setActiveCategory] = useState("all");
   const [sort, setSort] = useState("default");
   const [showSort, setShowSort] = useState(false);

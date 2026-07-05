@@ -21,7 +21,7 @@ export default function BrandMarquee() {
       padding: "14px 0",
       overflow: "hidden",
     }}>
-      <Marquee speed={28} gradient={false} direction="right">
+      <Marquee speed={8} gradient={false} direction="right">
         {ITEMS.map((item) => (
           <span
             key={item}

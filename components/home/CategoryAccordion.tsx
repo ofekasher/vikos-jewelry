@@ -8,28 +8,28 @@ const cats = [
     label: "עגילים",
     sub: "אלגנטיות עדינה",
     href: "/shop?cat=earrings",
-    img: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=900&q=90",
+    img: "https://images.pexels.com/photos/20943476/pexels-photo-20943476.jpeg?auto=compress&cs=tinysrgb&w=900",
   },
   {
     id: "rings",
     label: "טבעות",
     sub: "סמל נצחי",
     href: "/shop?cat=rings",
-    img: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=900&q=90",
+    img: "/rings/vopf_hand_01.png",
   },
   {
     id: "necklaces",
     label: "שרשראות",
     sub: "קסם עדין",
     href: "/shop?cat=necklaces",
-    img: "https://images.unsplash.com/photo-1573408301185-9519f94816b4?w=900&q=90",
+    img: "/necklaces/pe7k_neck_01.png",
   },
   {
     id: "bracelets",
     label: "צמידים",
     sub: "יוקרה על הפרק",
     href: "/shop?cat=bracelets",
-    img: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=900&q=90",
+    img: "/bracelets/br_01.png",
   },
 ];
 

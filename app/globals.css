@@ -139,9 +139,9 @@ body {
   margin: 0 auto;
 }
 
-/* Reduced motion */
+/* Reduced motion — exclude marquee so it stays readable */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *:not(.rfm-marquee), *:not(.rfm-marquee)::before, *:not(.rfm-marquee)::after {
     animation-duration: .01ms !important;
     transition-duration: .01ms !important;
   }

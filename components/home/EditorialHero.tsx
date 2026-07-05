@@ -20,19 +20,19 @@ export default function EditorialHero() {
             letterSpacing: "0.3em",
             textTransform: "uppercase",
             color: "#C9A96E",
-            marginBottom: "24px",
+            marginBottom: "14px",
           }}>
             קולקציית 2025
           </p>
 
           <h2 style={{
             fontFamily: "'Cormorant Garamond', Georgia, serif",
-            fontSize: "clamp(2.6rem, 5vw, 4.2rem)",
+            fontSize: "clamp(1.4rem, 2.5vw, 2.2rem)",
             fontWeight: 400,
             fontStyle: "italic",
             color: "#111111",
             lineHeight: 1.1,
-            margin: "0 0 20px",
+            margin: "0 0 14px",
           }}>
             יופי שנולד<br />מידיים
           </h2>
@@ -44,7 +44,7 @@ export default function EditorialHero() {
             lineHeight: 1.75,
             fontWeight: 300,
             maxWidth: "300px",
-            marginBottom: "32px",
+            marginBottom: "20px",
           }}>
             כל תכשיט מעוצב ומיוצר ביד, עם חומרים שנבחרו בקפידה ותשומת לב לכל פרט.
           </p>
@@ -74,13 +74,13 @@ export default function EditorialHero() {
         .editorial-hero-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          min-height: 480px;
+          height: 320px;
         }
         .editorial-hero-text {
           display: flex;
           flex-direction: column;
           justify-content: center;
-          padding: 56px 48px;
+          padding: 20px 28px;
           background: #F9F7F4;
         }
         .editorial-hero-img-wrap {

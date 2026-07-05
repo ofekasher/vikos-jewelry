@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -13,7 +13,7 @@ import LookbookSection from "@/components/home/LookbookSection";
 import CategoryAccordion from "@/components/home/CategoryAccordion";
 import ReviewsCarousel from "@/components/home/ReviewsCarousel";
 import InstagramGallery from "@/components/home/InstagramGallery";
-import { products } from "@/lib/products";
+import type { Product } from "@/lib/products";
 import { useStore } from "@/lib/store";
 
 /* ── Design tokens ── */
@@ -52,7 +52,11 @@ function SectionHeader({ eyebrow, title, cta }: { eyebrow: string; title: string
 
 export default function HomePage() {
   const { addToCart } = useStore();
-  const newest = products.slice(0, 3);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  useEffect(() => {
+    fetch("/api/products").then(r => r.json()).then(setAllProducts).catch(() => {});
+  }, []);
+  const newest = allProducts.slice(0, 3);
   const [hovered, setHovered] = useState<string | null>(null); // for newest grid hover
 
   return (

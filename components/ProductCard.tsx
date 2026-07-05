@@ -27,11 +27,12 @@ export default function ProductCard({ product, index = 0 }: Props) {
     >
       {/* Image */}
       <Link href={`/shop/${product.id}`}>
-        <div className="relative overflow-hidden aspect-[3/4] bg-[#F0EDE8] mb-4">
+        <div className="relative overflow-hidden mb-4" style={{ aspectRatio: "1 / 1", background: "#fafafa" }}>
           <img
             src={product.image}
             alt={product.nameHe}
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            className="w-full h-full transition-transform duration-700 ease-out group-hover:scale-105"
+            style={{ objectFit: "contain" }}
             loading="lazy"
           />
           {/* Badges */}

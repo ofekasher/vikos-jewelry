@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { products } from "@/lib/products";
+import type { Product } from "@/lib/products";
 import { useStore } from "@/lib/store";
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
@@ -34,10 +34,31 @@ const ACCORDION_ITEMS = [
 
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const product = products.find((p) => p.id === id);
-  if (!product) notFound();
-
   const { addToCart } = useStore();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [notFoundState, setNotFoundState] = useState(false);
+
+  useEffect(() => {
+    fetch(`/api/admin/products/${id}`)
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(raw => {
+        // Map DbProduct → Product shape
+        const p: Product = {
+          id: raw.id, nameHe: raw.name, nameEn: raw.name,
+          descriptionHe: raw.description ?? "", descriptionEn: raw.description ?? "",
+          price: raw.price, category: raw.category,
+          image: raw.images?.[0] ?? "", images: raw.images ?? [],
+          material: raw.material ?? "",
+          isNew: raw.badge === "חדש", isBestseller: raw.badge === "נמכר ביותר",
+        };
+        setProduct(p);
+      })
+      .catch(() => setNotFoundState(true));
+  }, [id]);
+
+  if (notFoundState) notFound();
+  if (!product) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: "#aaa" }}>טוען...</div>;
+
   const allImages = product.images.length > 0 ? product.images : [product.image];
   const [adding, setAdding] = useState(false);
   const [selectedImg, setSelectedImg] = useState(0);
@@ -45,9 +66,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [openAccordion, setOpenAccordion] = useState<number | null>(0);
   const [wishlisted, setWishlisted] = useState(false);
 
-  const related = products
-    .filter((p) => p.id !== product.id && p.category === product.category)
-    .slice(0, 3);
+  const related: Product[] = [];
 
   const isRing = product.category === "rings";
 

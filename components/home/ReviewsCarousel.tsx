@@ -85,7 +85,7 @@ export default function ReviewsCarousel() {
 
         {/* Quote */}
         <div style={{ position: "relative", minHeight: "120px" }}>
-          <AnimatePresence mode="wait" custom={dir}>
+          <AnimatePresence mode="wait" custom={dir} initial={false}>
             <motion.div
               key={idx}
               custom={dir}

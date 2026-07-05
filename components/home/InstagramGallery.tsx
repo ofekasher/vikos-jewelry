@@ -30,6 +30,14 @@ const IMAGES = [
   { src: "/instagram/ig9.jpeg",  alt: "תכשיטי ויקוס" },
   { src: "/instagram/ig10.jpeg", alt: "תכשיטי ויקוס" },
   { src: "/rings/vopf_hand_01.png",  alt: "טבעת יהלום ויקוס" },
+  { src: "/instagram/ig11.jpeg", alt: "טבעת יהלום על יד" },
+  { src: "/instagram/ig12.jpeg", alt: "צמידי זהב Van Cleef" },
+  { src: "/instagram/ig13.jpeg", alt: "טבעת אמייל צהוב" },
+  { src: "/instagram/ig14.jpeg", alt: "צמידי זהב אמייל" },
+  { src: "/instagram/ig15.jpeg", alt: "תכשיטים ליד הבריכה" },
+  { src: "/instagram/ig16.jpeg", alt: "עגילי יהלום על האוזן" },
+  { src: "/instagram/ig17.jpeg", alt: "טבעות ליד הבריכה" },
+  { src: "/instagram/ig18.jpeg", alt: "טבעת לב יהלום" },
 ];
 
 function Photo({ src, alt, area }: { src: string; alt: string; area: string }) {
@@ -74,6 +82,9 @@ export default function InstagramGallery() {
           [ F  G  H  H ]   ← H is 2×2 large featured
           [ I  J  H  H ]
           [ K  K  K  K ]   ← K is full-width ring feature
+          [ L  L  M  N ]   ← L is 2×1 wide
+          [ O  P  Q  R ]
+          [ S  S  S  S ]   ← S is full-width
         */}
         <div className="ig-grid">
           <Photo src={IMAGES[0].src} alt={IMAGES[0].alt} area="a" />
@@ -87,6 +98,14 @@ export default function InstagramGallery() {
           <Photo src={IMAGES[8].src} alt={IMAGES[8].alt} area="i" />
           <Photo src={IMAGES[9].src} alt={IMAGES[9].alt} area="j" />
           <Photo src={IMAGES[10].src} alt={IMAGES[10].alt} area="k" />
+          <Photo src={IMAGES[11].src} alt={IMAGES[11].alt} area="l" />
+          <Photo src={IMAGES[12].src} alt={IMAGES[12].alt} area="m" />
+          <Photo src={IMAGES[13].src} alt={IMAGES[13].alt} area="n" />
+          <Photo src={IMAGES[14].src} alt={IMAGES[14].alt} area="o" />
+          <Photo src={IMAGES[15].src} alt={IMAGES[15].alt} area="p" />
+          <Photo src={IMAGES[16].src} alt={IMAGES[16].alt} area="q" />
+          <Photo src={IMAGES[17].src} alt={IMAGES[17].alt} area="r" />
+          <Photo src={IMAGES[18].src} alt={IMAGES[18].alt} area="s" />
         </div>
 
         {/* CTA */}
@@ -107,13 +126,15 @@ export default function InstagramGallery() {
         .ig-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          grid-template-rows: repeat(4, 200px) 280px;
+          grid-template-rows: repeat(4, 200px) 280px 200px 200px;
           grid-template-areas:
             "a a b c"
             "a a d e"
             "f g h h"
             "i j h h"
-            "k k k k";
+            "k k k k"
+            "l l m n"
+            "o p q r";
           gap: 4px;
         }
 
@@ -182,7 +203,7 @@ export default function InstagramGallery() {
         @media (max-width: 768px) {
           .ig-grid {
             grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(6, 160px) 240px;
+            grid-template-rows: repeat(6, 160px) 240px repeat(5, 160px);
             grid-template-areas:
               "a a"
               "a a"
@@ -191,7 +212,11 @@ export default function InstagramGallery() {
               "f g"
               "h h"
               "i j"
-              "k k";
+              "k k"
+              "l m"
+              "n o"
+              "p q"
+              "r s";
           }
         }
 

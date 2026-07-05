@@ -10,8 +10,7 @@ export default function LookbookSection() {
         {/* Image — 60% */}
         <motion.div
           initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, amount: 0.2 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: 0.9, ease: "easeOut" }}
           className="lookbook-img-col"
         >
@@ -25,8 +24,7 @@ export default function LookbookSection() {
         {/* Text — 40% */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.15, ease: [0.23, 1, 0.32, 1] }}
           className="lookbook-text"
         >

@@ -9,8 +9,7 @@ export default function EditorialHero() {
         {/* Text side — right in RTL */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
           className="editorial-hero-text"
         >
@@ -57,8 +56,7 @@ export default function EditorialHero() {
         {/* Image side — left in RTL */}
         <motion.div
           initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, amount: 0.2 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: 0.9, ease: "easeOut" }}
           className="editorial-hero-img-wrap"
         >

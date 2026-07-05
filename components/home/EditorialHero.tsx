@@ -15,18 +15,18 @@ export default function EditorialHero() {
         >
           <p style={{
             fontFamily: "'Inter', system-ui, sans-serif",
-            fontSize: "10px",
-            letterSpacing: "0.3em",
+            fontSize: "13px",
+            letterSpacing: "0.25em",
             textTransform: "uppercase",
             color: "#C9A96E",
             marginBottom: "14px",
           }}>
-            קולקציית 2025
+            קולקציית 2026
           </p>
 
           <h2 style={{
             fontFamily: "'Cormorant Garamond', Georgia, serif",
-            fontSize: "clamp(1.1rem, 1.8vw, 1.6rem)",
+            fontSize: "clamp(1.3rem, 2.2vw, 2rem)",
             fontWeight: 400,
             fontStyle: "italic",
             color: "#111111",
@@ -61,7 +61,7 @@ export default function EditorialHero() {
           className="editorial-hero-img-wrap"
         >
           <img
-            src="/necklaces/pe7k_neck_03.png"
+            src="/rings/vopf_hand_01.png"
             alt="תכשיטי ויקוס"
             className="editorial-hero-img"
           />

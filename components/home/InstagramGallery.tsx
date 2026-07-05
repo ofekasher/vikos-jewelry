@@ -29,6 +29,7 @@ const IMAGES = [
   { src: "/instagram/ig8.jpeg",  alt: "תכשיטי ויקוס" },
   { src: "/instagram/ig9.jpeg",  alt: "תכשיטי ויקוס" },
   { src: "/instagram/ig10.jpeg", alt: "תכשיטי ויקוס" },
+  { src: "/rings/vopf_hand_01.png",  alt: "טבעת יהלום ויקוס" },
 ];
 
 function Photo({ src, alt, area }: { src: string; alt: string; area: string }) {
@@ -72,6 +73,7 @@ export default function InstagramGallery() {
           [ A  A  D  E ]
           [ F  G  H  H ]   ← H is 2×2 large featured
           [ I  J  H  H ]
+          [ K  K  K  K ]   ← K is full-width ring feature
         */}
         <div className="ig-grid">
           <Photo src={IMAGES[0].src} alt={IMAGES[0].alt} area="a" />
@@ -84,6 +86,7 @@ export default function InstagramGallery() {
           <Photo src={IMAGES[7].src} alt={IMAGES[7].alt} area="h" />
           <Photo src={IMAGES[8].src} alt={IMAGES[8].alt} area="i" />
           <Photo src={IMAGES[9].src} alt={IMAGES[9].alt} area="j" />
+          <Photo src={IMAGES[10].src} alt={IMAGES[10].alt} area="k" />
         </div>
 
         {/* CTA */}
@@ -104,12 +107,13 @@ export default function InstagramGallery() {
         .ig-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          grid-template-rows: repeat(4, 200px);
+          grid-template-rows: repeat(4, 200px) 280px;
           grid-template-areas:
             "a a b c"
             "a a d e"
             "f g h h"
-            "i j h h";
+            "i j h h"
+            "k k k k";
           gap: 4px;
         }
 
@@ -178,7 +182,7 @@ export default function InstagramGallery() {
         @media (max-width: 768px) {
           .ig-grid {
             grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(6, 160px);
+            grid-template-rows: repeat(6, 160px) 240px;
             grid-template-areas:
               "a a"
               "a a"
@@ -186,7 +190,8 @@ export default function InstagramGallery() {
               "d e"
               "f g"
               "h h"
-              "i j";
+              "i j"
+              "k k";
           }
         }
 

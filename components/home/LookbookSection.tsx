@@ -36,7 +36,7 @@ export default function LookbookSection() {
             color: "#C9A96E",
             marginBottom: "20px",
           }}>
-            לוקבוק 2025
+            לוקבוק 2026
           </p>
 
           <h2 style={{

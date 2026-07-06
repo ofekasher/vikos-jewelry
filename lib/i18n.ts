@@ -27,6 +27,16 @@ export const translations = {
       quickAdd: "Add to cart",
       new: "New",
     },
+    // Video Hero
+    hero: {
+      eyebrow: "VIKOS FINE JEWELRY",
+      titles: [
+        ["Made to", "Shine"],
+        ["Delicate", "Elegance"],
+      ] as [string, string][],
+      body: "Every moment. Every detail. Forever yours.",
+      cta: "Discover the collection",
+    },
     // Editorial Hero
     editorial: {
       eyebrow: "Collection 2026",
@@ -213,6 +223,15 @@ export const translations = {
       storyCta: "לחנות",
       quickAdd: "הוסף לסל",
       new: "חדש",
+    },
+    hero: {
+      eyebrow: "ויקוס תכשיטים",
+      titles: [
+        ["עשוי", "לזהור"],
+        ["אלגנטיות", "עדינה"],
+      ] as [string, string][],
+      body: "כל רגע. כל פרט. לנצח שלך.",
+      cta: "גלי את הקולקציה",
     },
     editorial: {
       eyebrow: "קולקציית 2026",

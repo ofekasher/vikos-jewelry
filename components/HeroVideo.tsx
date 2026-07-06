@@ -2,15 +2,17 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useT } from "@/lib/LanguageContext";
 
 const VIDEOS = [
-  { src: "/videos/ring.mp4" },
-  { src: "/videos/necklace.mp4" },
+  { src: "/videos/ring.mp4",     poster: "/posters/ring-poster.jpg" },
+  { src: "/videos/necklace.mp4", poster: "/posters/necklace-poster.jpg" },
 ];
 
 const INTERVAL = 6000;
 
 export default function HeroVideo() {
+  const h = useT().hero;
   const [active, setActive] = useState(0);
   const [prev, setPrev]     = useState<number | null>(null);
   const refs = [useRef<HTMLVideoElement>(null), useRef<HTMLVideoElement>(null)];
@@ -21,7 +23,6 @@ export default function HeroVideo() {
     setActive(idx);
   }, [active]);
 
-  /* Auto-switch every 6s */
   useEffect(() => {
     const id = setInterval(() => {
       switchTo((active + 1) % VIDEOS.length);
@@ -29,7 +30,6 @@ export default function HeroVideo() {
     return () => clearInterval(id);
   }, [active, switchTo]);
 
-  /* Play active video, reset outgoing */
   useEffect(() => {
     refs[active].current?.play().catch(() => {});
     if (prev !== null) {
@@ -39,7 +39,7 @@ export default function HeroVideo() {
   }, [active, prev]); // eslint-disable-line
 
   return (
-    <section style={{ position: "relative", width: "100%", height: "100vh", minHeight: "560px", overflow: "hidden" }}>
+    <section style={{ position: "relative", width: "100%", height: "100dvh", minHeight: "560px", overflow: "hidden" }}>
 
       {/* ── Video layers ── */}
       {VIDEOS.map((v, i) => (
@@ -52,7 +52,7 @@ export default function HeroVideo() {
           loop
           playsInline
           preload={i === 0 ? "auto" : "none"}
-          poster={i === 0 ? "/posters/ring-poster.jpg" : "/posters/necklace-poster.jpg"}
+          poster={v.poster}
           animate={{ opacity: i === active ? 1 : 0 }}
           transition={{ duration: 1, ease: "easeInOut" }}
           style={{
@@ -67,19 +67,19 @@ export default function HeroVideo() {
       {/* ── Dark overlay ── */}
       <div style={{
         position: "absolute", inset: 0,
-        background: "linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.45) 50%, rgba(0,0,0,0.2) 100%)",
+        background: "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.15) 100%)",
         pointerEvents: "none",
       }} />
 
-      {/* ── Corner vignette to cover watermark ── */}
+      {/* ── Corner vignette ── */}
       <div style={{
         position: "absolute", inset: 0,
-        background: "radial-gradient(ellipse 30% 20% at 100% 100%, rgba(0,0,0,0.95) 0%, transparent 100%)",
+        background: "radial-gradient(ellipse 30% 20% at 100% 100%, rgba(0,0,0,0.92) 0%, transparent 100%)",
         pointerEvents: "none",
         zIndex: 1,
       }} />
 
-      {/* ── Centered text ── */}
+      {/* ── Content ── */}
       <div style={{
         position: "absolute", inset: 0,
         display: "flex", flexDirection: "column",
@@ -87,63 +87,55 @@ export default function HeroVideo() {
         textAlign: "center", padding: "0 24px",
         zIndex: 2,
       }}>
+        {/* Brand eyebrow */}
         <motion.p
           initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2 }}
           style={{ fontFamily: "'Inter',sans-serif", fontSize: "9px", letterSpacing: "0.44em", textTransform: "uppercase", color: "#C9A96E", marginBottom: "16px" }}
         >
-          ויקוס תכשיטים
+          {h.eyebrow}
         </motion.p>
 
+        {/* Animated headline */}
         <AnimatePresence mode="wait">
           <motion.h1
             key={active}
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.6 }}
-            style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(2.4rem,6vw,5rem)", fontWeight: 300, color: "#fff", lineHeight: 1.1, marginBottom: "16px" }}
+            style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(2.6rem,7vw,5.5rem)", fontWeight: 300, color: "#fff", lineHeight: 1.05, marginBottom: "16px", textTransform: "uppercase", letterSpacing: "0.06em" }}
           >
-            {active === 0 ? <>יופי<br /><em style={{ fontStyle: "italic", fontWeight: 400 }}>נצחי</em></> : <>אלגנטיות<br /><em style={{ fontStyle: "italic", fontWeight: 400 }}>עדינה</em></>}
+            {h.titles[active][0]}<br />
+            <em style={{ fontStyle: "italic", fontWeight: 400 }}>{h.titles[active][1]}</em>
           </motion.h1>
         </AnimatePresence>
 
+        {/* Subtitle */}
         <motion.p
           initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          style={{ fontFamily: "'Inter',sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.6)", lineHeight: 1.75, marginBottom: "36px", fontWeight: 300, maxWidth: "320px" }}
+          style={{ fontFamily: "'Inter',sans-serif", fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.55)", marginBottom: "44px", fontWeight: 300 }}
         >
-          תכשיטים עבודת יד לכל רגע
+          {h.body}
         </motion.p>
 
-        {/* CTA */}
+        {/* Single CTA → /shop */}
         <motion.div
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.65 }}
-          style={{ display: "flex", gap: "14px", flexWrap: "wrap", justifyContent: "center" }}
         >
           <Link href="/shop" style={{
-            display: "inline-block", padding: "14px 40px",
-            background: "#C9A96E", color: "#fff",
-            fontFamily: "'Inter',sans-serif", fontSize: "10px", letterSpacing: "0.24em", textTransform: "uppercase",
+            display: "inline-block", padding: "15px 48px",
+            background: "transparent",
+            border: "1px solid rgba(255,255,255,0.6)",
+            color: "#fff",
+            fontFamily: "'Inter',sans-serif", fontSize: "10px", letterSpacing: "0.26em", textTransform: "uppercase",
             textDecoration: "none",
-            boxShadow: "0 0 0 rgba(201,169,110,0)",
-            transition: "box-shadow 0.3s, background 0.3s",
+            transition: "border-color 0.25s, background 0.25s",
           }}
-          onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 0 24px rgba(201,169,110,0.6)"; e.currentTarget.style.background = "#d4b97a"; }}
-          onMouseLeave={e => { e.currentTarget.style.boxShadow = "0 0 0 rgba(201,169,110,0)"; e.currentTarget.style.background = "#C9A96E"; }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = "#C9A96E"; e.currentTarget.style.background = "rgba(201,169,110,0.12)"; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.6)"; e.currentTarget.style.background = "transparent"; }}
           >
-            קנה עכשיו
-          </Link>
-          <Link href="/about" style={{
-            display: "inline-block", padding: "14px 36px",
-            background: "transparent", color: "#fff",
-            border: "1px solid rgba(255,255,255,0.45)",
-            fontFamily: "'Inter',sans-serif", fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase",
-            textDecoration: "none", transition: "border-color 0.25s, background 0.25s",
-          }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = "#fff"; e.currentTarget.style.background = "rgba(255,255,255,0.08)"; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.45)"; e.currentTarget.style.background = "transparent"; }}
-          >
-            הסיפור שלנו
+            {h.cta}
           </Link>
         </motion.div>
       </div>
@@ -159,7 +151,7 @@ export default function HeroVideo() {
             <button
               key={i}
               onClick={() => switchTo(i)}
-              aria-label={`וידאו ${i + 1}`}
+              aria-label={`Video ${i + 1}`}
               style={{
                 width: i === active ? "24px" : "8px",
                 height: "8px",
@@ -171,7 +163,6 @@ export default function HeroVideo() {
             />
           ))}
         </div>
-        {/* Scroll line */}
         <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}

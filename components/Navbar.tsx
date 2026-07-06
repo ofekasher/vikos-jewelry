@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useStore } from "@/lib/store";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLang, useT } from "@/lib/LanguageContext";
@@ -13,9 +14,14 @@ export default function Navbar() {
   const count = cartCount();
   const { lang, setLang } = useLang();
   const t = useT();
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+  // Transparent mode: homepage + not yet scrolled
+  const heroMode = isHome && !scrolled;
 
   useEffect(() => {
-    const h = () => setScrolled(window.scrollY > 8);
+    const h = () => setScrolled(window.scrollY > 60);
+    h(); // run once on mount
     window.addEventListener("scroll", h, { passive: true });
     return () => window.removeEventListener("scroll", h);
   }, []);
@@ -32,23 +38,23 @@ export default function Navbar() {
     <>
       <nav style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        borderBottom: "1px solid #EBEBEB",
+        borderBottom: heroMode ? "none" : "1px solid #EBEBEB",
         padding: "0 28px",
         height: "70px",
-        position: "sticky", top: 0, zIndex: 50,
-        background: "#fff",
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
+        background: heroMode ? "transparent" : "#fff",
         boxShadow: scrolled ? "0 1px 8px rgba(0,0,0,0.05)" : "none",
-        transition: "box-shadow 0.3s",
-      }}>
+        transition: "background 0.4s ease, border-color 0.4s ease, box-shadow 0.3s",
+      }} className={heroMode ? "navbar-hero-mode" : ""}>
         {/* Right side (in RTL: nav links; in LTR: nav links) */}
         <div className="nav-desktop-links" style={{ display: "flex", gap: "28px", alignItems: "center" }}>
           {navLinks.map(l => (
             <Link key={l.href} href={l.href} style={{
               fontFamily: "'Inter',sans-serif", fontSize: "12px", fontWeight: 400,
-              letterSpacing: "0.06em", color: "#333", textDecoration: "none", transition: "color 0.2s",
+              letterSpacing: "0.06em", color: heroMode ? "rgba(255,255,255,0.85)" : "#333", textDecoration: "none", transition: "color 0.2s",
             }}
             onMouseEnter={e => (e.currentTarget.style.color = "#C9A96E")}
-            onMouseLeave={e => (e.currentTarget.style.color = "#333")}
+            onMouseLeave={e => (e.currentTarget.style.color = heroMode ? "rgba(255,255,255,0.85)" : "#333")}
             >{l.label}</Link>
           ))}
         </div>
@@ -59,7 +65,12 @@ export default function Navbar() {
             <img
               src="/logo.png"
               alt="VIKOS"
-              style={{ height: "77px", width: "auto", display: "block", mixBlendMode: "multiply" }}
+              style={{
+                height: "77px", width: "auto", display: "block",
+                mixBlendMode: heroMode ? "normal" : "multiply",
+                filter: heroMode ? "brightness(0) invert(1)" : "none",
+                transition: "filter 0.4s ease",
+              }}
             />
           </div>
         </Link>
@@ -71,19 +82,22 @@ export default function Navbar() {
           <button
             onClick={() => setLang(lang === "en" ? "he" : "en")}
             style={{
-              background: "none", border: "1px solid #E5E5E5", cursor: "pointer",
+              background: "none",
+              border: `1px solid ${heroMode ? "rgba(255,255,255,0.5)" : "#E5E5E5"}`,
+              cursor: "pointer",
               fontFamily: "'Inter',sans-serif", fontSize: "9px", letterSpacing: "0.18em",
-              color: "#888", padding: "3px 8px", transition: "border-color 180ms ease, color 180ms ease",
+              color: heroMode ? "rgba(255,255,255,0.8)" : "#888",
+              padding: "3px 8px", transition: "border-color 180ms ease, color 180ms ease",
             }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = "#C9A96E"; e.currentTarget.style.color = "#C9A96E"; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = "#E5E5E5"; e.currentTarget.style.color = "#888"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = heroMode ? "rgba(255,255,255,0.5)" : "#E5E5E5"; e.currentTarget.style.color = heroMode ? "rgba(255,255,255,0.8)" : "#888"; }}
             aria-label="Switch language"
           >
             {lang === "en" ? "עב" : "EN"}
           </button>
 
           {/* Wishlist */}
-          <Link href="/wishlist" aria-label={t.nav.wishlist} style={{ background: "none", border: "none", cursor: "pointer", color: "#444", padding: "4px", display: "flex", position: "relative", textDecoration: "none" }}>
+          <Link href="/wishlist" aria-label={t.nav.wishlist} style={{ background: "none", border: "none", cursor: "pointer", color: heroMode ? "rgba(255,255,255,0.85)" : "#444", padding: "4px", display: "flex", position: "relative", textDecoration: "none", transition: "color 0.4s ease" }}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
@@ -93,7 +107,7 @@ export default function Navbar() {
           </Link>
 
           {/* Cart */}
-          <button onClick={toggleCart} aria-label={t.nav.cart} style={{ background: "none", border: "none", cursor: "pointer", color: "#444", padding: "4px", position: "relative", display: "flex" }}>
+          <button onClick={toggleCart} aria-label={t.nav.cart} style={{ background: "none", border: "none", cursor: "pointer", color: heroMode ? "rgba(255,255,255,0.85)" : "#444", padding: "4px", position: "relative", display: "flex", transition: "color 0.4s ease" }}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
               <line x1="3" y1="6" x2="21" y2="6"/>
@@ -107,9 +121,9 @@ export default function Navbar() {
           {/* Mobile hamburger */}
           <button onClick={() => setMenuOpen(true)} className="nav-mobile-only" aria-label={t.nav.menu}
             style={{ background: "none", border: "none", cursor: "pointer", padding: "4px", flexDirection: "column", gap: "4px" }}>
-            <span style={{ display: "block", width: "20px", height: "1px", background: "#333" }} />
-            <span style={{ display: "block", width: "20px", height: "1px", background: "#333" }} />
-            <span style={{ display: "block", width: "20px", height: "1px", background: "#333" }} />
+            <span style={{ display: "block", width: "20px", height: "1px", background: heroMode ? "rgba(255,255,255,0.85)" : "#333", transition: "background 0.4s ease" }} />
+            <span style={{ display: "block", width: "20px", height: "1px", background: heroMode ? "rgba(255,255,255,0.85)" : "#333", transition: "background 0.4s ease" }} />
+            <span style={{ display: "block", width: "20px", height: "1px", background: heroMode ? "rgba(255,255,255,0.85)" : "#333", transition: "background 0.4s ease" }} />
           </button>
         </div>
       </nav>
@@ -122,6 +136,10 @@ export default function Navbar() {
         @media (min-width: 768px) {
           .nav-desktop-links { display: flex !important; }
           .nav-mobile-only   { display: none !important; }
+        }
+        /* On mobile, hide the entire navbar when in hero mode so it doesn't overlay the hero */
+        @media (max-width: 767px) {
+          .navbar-hero-mode { display: none !important; }
         }
       `}</style>
 

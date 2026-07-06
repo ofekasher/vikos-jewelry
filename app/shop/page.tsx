@@ -8,9 +8,10 @@ import { ShoppingBag, X, Search, SlidersHorizontal, Heart } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
-import { categories } from "@/lib/products";
+import { categories, getMaterialEn } from "@/lib/products";
 import type { Product } from "@/lib/products";
 import { useStore } from "@/lib/store";
+import { useLang } from "@/lib/LanguageContext";
 
 const T = {
   gold:   "#C9A96E",
@@ -23,20 +24,29 @@ const T = {
   sans:   "'Inter', system-ui, sans-serif",
 };
 
-const MATERIALS = ["הכל", "זהב 14K", "זהב 18K", "כסף 925", "זהב ורד", "יהלום"];
-const SORTS = [
-  { id: "default",    label: "מומלץ" },
-  { id: "price-asc",  label: "מחיר: נמוך לגבוה" },
-  { id: "price-desc", label: "מחיר: גבוה לנמוך" },
-  { id: "new",        label: "חדש" },
-  { id: "bestseller", label: "נמכר ביותר" },
+const MATERIAL_OPTIONS = [
+  { value: "הכל",     labelHe: "הכל",      labelEn: "All" },
+  { value: "זהב 14K", labelHe: "זהב 14K",  labelEn: "14K Gold" },
+  { value: "זהב 18K", labelHe: "זהב 18K",  labelEn: "18K Gold" },
+  { value: "כסף 925", labelHe: "כסף 925",  labelEn: "925 Silver" },
+  { value: "זהב ורד", labelHe: "זהב ורד",  labelEn: "Rose Gold" },
+  { value: "יהלום",   labelHe: "יהלום",    labelEn: "Diamond" },
+];
+const SORT_OPTIONS = [
+  { id: "default",    labelHe: "מומלץ",            labelEn: "Recommended" },
+  { id: "price-asc",  labelHe: "מחיר: נמוך לגבוה", labelEn: "Price: Low to High" },
+  { id: "price-desc", labelHe: "מחיר: גבוה לנמוך", labelEn: "Price: High to Low" },
+  { id: "new",        labelHe: "חדש",               labelEn: "New" },
+  { id: "bestseller", labelHe: "נמכר ביותר",        labelEn: "Best Seller" },
 ];
 
 function ProductCard({ p, index }: { p: Product; index: number }) {
   const { addToCart, toggleWishlist, isWishlisted } = useStore();
+  const { lang } = useLang();
   const [hovered, setHovered] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const wishlisted = isWishlisted(p.id);
+  const displayName = lang === "en" ? p.nameEn : p.nameHe;
 
   return (
     <motion.article
@@ -59,7 +69,7 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
 
           {/* next/image */}
           <Image
-            src={p.image} alt={p.nameHe}
+            src={p.image} alt={displayName}
             fill sizes="(max-width: 700px) 50vw, (max-width: 1100px) 33vw, 25vw"
             priority={index < 4}
             style={{ objectFit: "cover", transition: "opacity 0.4s", opacity: imgLoaded ? 1 : 0 }}
@@ -67,7 +77,7 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
           />
 
           {/* Wishlist — always visible on touch, hover on desktop */}
-          <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWishlist(p); toast.success(wishlisted ? `${p.nameHe} הוסר ממועדפים` : `${p.nameHe} נוסף למועדפים`); }}
+          <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWishlist(p); toast.success(wishlisted ? (lang === "en" ? `${displayName} removed from wishlist` : `${displayName} הוסר ממועדפים`) : (lang === "en" ? `${displayName} added to wishlist` : `${displayName} נוסף למועדפים`)); }}
             aria-label="מועדפים"
             style={{ position: "absolute", top: "10px", left: "10px", width: "44px", height: "44px", borderRadius: "50%", background: "rgba(255,255,255,0.88)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "opacity 0.2s" }}
             className={wishlisted ? "wish-active" : "wish-btn"}>
@@ -75,22 +85,22 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
           </button>
 
           {/* Quick-add — hover on desktop, always visible on touch */}
-          <button onClick={e => { e.preventDefault(); e.stopPropagation(); addToCart(p); toast.success(`${p.nameHe} נוסף לסל`, { duration: 2200 }); }}
+          <button onClick={e => { e.preventDefault(); e.stopPropagation(); addToCart(p); toast.success(lang === "en" ? `${displayName} added to cart` : `${displayName} נוסף לסל`, { duration: 2200 }); }}
             style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "14px", background: "rgba(255,255,255,0.92)", backdropFilter: "blur(4px)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "7px", fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase", color: T.black, transition: "transform 0.3s ease", minHeight: "44px" }}
             className={hovered ? "add-btn-visible" : "add-btn-hidden"}>
             <ShoppingBag size={12} strokeWidth={1.5} />
-            הוסף לסל
+            {lang === "en" ? "Add to bag" : "הוסף לסל"}
           </button>
 
           {(p.isNew || p.isBestseller) && (
             <span style={{ position: "absolute", top: "10px", right: "10px", background: p.isBestseller ? T.gold : T.black, color: "#fff", fontFamily: T.sans, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", padding: "3px 7px" }}>
-              {p.isBestseller ? "נמכר ביותר" : "חדש"}
+              {p.isBestseller ? (lang === "en" ? "Best Seller" : "נמכר ביותר") : (lang === "en" ? "New" : "חדש")}
             </span>
           )}
         </div>
       </Link>
       <Link href={`/product/${p.id}`} style={{ textDecoration: "none" }}>
-        <p style={{ fontFamily: T.serif, fontSize: "0.98rem", fontWeight: 400, color: T.black, marginBottom: "4px", lineHeight: 1.3 }}>{p.nameHe}</p>
+        <p style={{ fontFamily: T.serif, fontSize: "0.98rem", fontWeight: 400, color: T.black, marginBottom: "4px", lineHeight: 1.3 }}>{displayName}</p>
         <p style={{ fontFamily: T.sans, fontSize: "13px", color: T.gray, fontWeight: 300 }}>₪{p.price.toLocaleString()}</p>
       </Link>
     </motion.article>
@@ -98,6 +108,7 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
 }
 
 export default function ShopPage() {
+  const { lang } = useLang();
   const [products, setProducts] = useState<Product[]>([]);
   useEffect(() => {
     fetch("/api/products").then(r => r.json()).then(setProducts).catch(() => {});
@@ -134,8 +145,10 @@ export default function ShopPage() {
   const hasActiveFilters = material !== "הכל" || maxPrice < 25000 || onlyNew || onlyBestseller || search;
   const clearFilters = () => { setMaterial("הכל"); setMaxPrice(25000); setOnlyNew(false); setOnlyBestseller(false); setSearch(""); };
 
+  const SORTS = SORT_OPTIONS.map(s => ({ id: s.id, label: lang === "en" ? s.labelEn : s.labelHe }));
+
   return (
-    <div style={{ background: "#fff", minHeight: "100vh" }} dir="rtl">
+    <div style={{ background: "#fff", minHeight: "100vh" }}>
       <Navbar />
       <CartDrawer />
 
@@ -144,19 +157,19 @@ export default function ShopPage() {
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 32px" }}>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}
             style={{ fontFamily: T.sans, fontSize: "9px", letterSpacing: "0.38em", textTransform: "uppercase", color: T.gold, marginBottom: "12px" }}>
-            הקולקציה
+            {lang === "en" ? "The Collection" : "הקולקציה"}
           </motion.p>
           <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: "16px" }}>
             <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65, delay: 0.08 }}
               style={{ fontFamily: T.serif, fontSize: "clamp(2.4rem, 5vw, 4rem)", fontWeight: 300, color: T.black, lineHeight: 1.05, margin: 0 }}>
-              כל הפריטים
+              {lang === "en" ? "All Items" : "כל הפריטים"}
             </motion.h1>
 
             {/* Search */}
             <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
               <Search size={14} color="#AAA" style={{ position: "absolute", right: "12px", pointerEvents: "none" }} />
               <input ref={searchRef} value={search} onChange={e => setSearch(e.target.value)}
-                placeholder="חיפוש..."
+                placeholder={lang === "en" ? "Search..." : "חיפוש..."}
                 style={{ paddingRight: "36px", paddingLeft: search ? "32px" : "14px", paddingTop: "9px", paddingBottom: "9px", border: `1px solid ${T.border}`, background: "#fff", fontFamily: T.sans, fontSize: "12px", color: T.black, outline: "none", width: "200px", transition: "border-color 0.2s, width 0.3s", borderRadius: 0 }}
                 onFocus={e => { e.currentTarget.style.borderColor = T.gold; e.currentTarget.style.width = "260px"; }}
                 onBlur={e => { e.currentTarget.style.borderColor = T.border; e.currentTarget.style.width = "200px"; }}
@@ -178,20 +191,20 @@ export default function ShopPage() {
           <div style={{ display: "flex", gap: "6px", overflowX: "auto", flexShrink: 0 }} className="hide-scrollbar">
             {categories.map(cat => (
               <button key={cat.id} onClick={() => setActiveCategory(cat.id)} style={{ padding: "5px 14px", border: `1px solid ${activeCategory === cat.id ? T.black : T.border}`, background: activeCategory === cat.id ? T.black : "transparent", color: activeCategory === cat.id ? "#fff" : T.gray, fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.16em", textTransform: "uppercase", cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.22s ease" }}>
-                {cat.labelHe}
+                {lang === "en" ? cat.labelEn : cat.labelHe}
               </button>
             ))}
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
             {hasActiveFilters && (
-              <button onClick={clearFilters} style={{ fontFamily: T.sans, fontSize: "10px", color: T.gold, background: "none", border: "none", cursor: "pointer", textDecoration: "underline", whiteSpace: "nowrap" }}>נקה</button>
+              <button onClick={clearFilters} style={{ fontFamily: T.sans, fontSize: "10px", color: T.gold, background: "none", border: "none", cursor: "pointer", textDecoration: "underline", whiteSpace: "nowrap" }}>{lang === "en" ? "Clear" : "נקה"}</button>
             )}
-            <span style={{ fontFamily: T.sans, fontSize: "10px", color: T.light }}>{filtered.length} פריטים</span>
+            <span style={{ fontFamily: T.sans, fontSize: "10px", color: T.light }}>{filtered.length} {lang === "en" ? "items" : "פריטים"}</span>
 
             <button onClick={() => setShowFilters(v => !v)} style={{ display: "flex", alignItems: "center", gap: "6px", background: showFilters ? T.black : "none", border: `1px solid ${showFilters ? T.black : T.border}`, cursor: "pointer", padding: "5px 12px", fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.12em", color: showFilters ? "#fff" : T.gray, transition: "all 0.2s" }}>
               <SlidersHorizontal size={12} strokeWidth={1.5} />
-              סינון
+              {lang === "en" ? "Filter" : "סינון"}
             </button>
 
             <div style={{ position: "relative" }}>
@@ -228,11 +241,11 @@ export default function ShopPage() {
 
                 {/* Material */}
                 <div>
-                  <p style={{ fontFamily: T.sans, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", color: T.light, marginBottom: "10px" }}>חומר</p>
+                  <p style={{ fontFamily: T.sans, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", color: T.light, marginBottom: "10px" }}>{lang === "en" ? "Material" : "חומר"}</p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                    {MATERIALS.map(m => (
-                      <button key={m} onClick={() => setMaterial(m)} style={{ padding: "4px 12px", border: `1px solid ${material === m ? T.black : T.border}`, background: material === m ? T.black : "transparent", color: material === m ? "#fff" : T.gray, fontFamily: T.sans, fontSize: "10px", cursor: "pointer", transition: "all 0.18s" }}>
-                        {m}
+                    {MATERIAL_OPTIONS.map(opt => (
+                      <button key={opt.value} onClick={() => setMaterial(opt.value)} style={{ padding: "4px 12px", border: `1px solid ${material === opt.value ? T.black : T.border}`, background: material === opt.value ? T.black : "transparent", color: material === opt.value ? "#fff" : T.gray, fontFamily: T.sans, fontSize: "10px", cursor: "pointer", transition: "all 0.18s" }}>
+                        {lang === "en" ? opt.labelEn : opt.labelHe}
                       </button>
                     ))}
                   </div>
@@ -241,14 +254,14 @@ export default function ShopPage() {
                 {/* Price */}
                 <div style={{ minWidth: "220px" }}>
                   <p style={{ fontFamily: T.sans, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", color: T.light, marginBottom: "10px" }}>
-                    תקציב
+                    {lang === "en" ? "Budget" : "תקציב"}
                   </p>
                   {/* Quick range buttons */}
                   <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap" }}>
                     {[
-                      { label: "עד ₪2,000",  val: 2000 },
-                      { label: "₪2,000–₪8,000", val: 8000 },
-                      { label: "₪8,000+",    val: 25000 },
+                      { label: lang === "en" ? "Up to ₪2,000" : "עד ₪2,000",       val: 2000 },
+                      { label: lang === "en" ? "₪2,000–₪8,000" : "₪2,000–₪8,000",  val: 8000 },
+                      { label: lang === "en" ? "₪8,000+" : "₪8,000+",              val: 25000 },
                     ].map(btn => (
                       <button key={btn.val} onClick={() => setMaxPrice(btn.val)}
                         style={{ padding: "4px 10px", border: `1px solid ${maxPrice === btn.val ? T.black : T.border}`, background: maxPrice === btn.val ? T.black : "transparent", color: maxPrice === btn.val ? "#fff" : T.gray, fontFamily: T.sans, fontSize: "10px", cursor: "pointer", transition: "all 0.18s", whiteSpace: "nowrap" }}>
@@ -258,7 +271,7 @@ export default function ShopPage() {
                   </div>
                   {/* Precise slider */}
                   <p style={{ fontFamily: T.sans, fontSize: "9px", color: T.light, marginBottom: "6px" }}>
-                    עד ₪{maxPrice.toLocaleString()}
+                    {lang === "en" ? "Up to" : "עד"} ₪{maxPrice.toLocaleString()}
                   </p>
                   <input type="range" min={500} max={25000} step={500} value={maxPrice}
                     onChange={e => setMaxPrice(Number(e.target.value))}
@@ -267,11 +280,11 @@ export default function ShopPage() {
 
                 {/* Toggles */}
                 <div>
-                  <p style={{ fontFamily: T.sans, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", color: T.light, marginBottom: "10px" }}>סטטוס</p>
+                  <p style={{ fontFamily: T.sans, fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", color: T.light, marginBottom: "10px" }}>{lang === "en" ? "Status" : "סטטוס"}</p>
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                     {[
-                      { label: "חדש בלבד", val: onlyNew, set: setOnlyNew },
-                      { label: "נמכר ביותר", val: onlyBestseller, set: setOnlyBestseller },
+                      { label: lang === "en" ? "New only" : "חדש בלבד",         val: onlyNew,        set: setOnlyNew },
+                      { label: lang === "en" ? "Best Seller" : "נמכר ביותר",    val: onlyBestseller, set: setOnlyBestseller },
                     ].map(({ label, val, set }) => (
                       <label key={label} style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
                         <input type="checkbox" checked={val} onChange={e => set(e.target.checked)} style={{ accentColor: T.gold, width: "14px", height: "14px" }} />
@@ -299,12 +312,12 @@ export default function ShopPage() {
         {filtered.length === 0 && (
           <div style={{ textAlign: "center", padding: "96px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
             <X size={32} strokeWidth={1} color={T.light} />
-            <p style={{ fontFamily: T.serif, fontSize: "1.2rem", color: T.light, fontWeight: 300 }}>לא נמצאו פריטים</p>
+            <p style={{ fontFamily: T.serif, fontSize: "1.2rem", color: T.light, fontWeight: 300 }}>{lang === "en" ? "No items found" : "לא נמצאו פריטים"}</p>
             <button onClick={() => { setActiveCategory("all"); clearFilters(); }}
               style={{ marginTop: "8px", padding: "10px 24px", border: `1px solid ${T.border}`, background: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: T.gray, transition: "all 0.2s" }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = T.black; (e.currentTarget as HTMLElement).style.color = "#fff"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "none"; (e.currentTarget as HTMLElement).style.color = T.gray; }}>
-              הצג הכל
+              {lang === "en" ? "Show all" : "הצג הכל"}
             </button>
           </div>
         )}

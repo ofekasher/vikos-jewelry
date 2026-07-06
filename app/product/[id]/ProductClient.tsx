@@ -4,13 +4,13 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { products as allProducts } from "@/lib/products";
+import { products as allProducts, getMaterialEn } from "@/lib/products";
 import type { Product } from "@/lib/products";
 import { useStore } from "@/lib/store";
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
-import { useT } from "@/lib/LanguageContext";
+import { useT, useLang } from "@/lib/LanguageContext";
 
 const RING_SIZES = ["46", "48", "50", "52", "54", "56", "58"];
 
@@ -23,6 +23,7 @@ export default function ProductPage({
 }) {
   const { addToCart } = useStore();
   const p_t = useT().product;
+  const { lang } = useLang();
 
   const ACCORDION_ITEMS = [
     { title: p_t.productDetails,    content: p_t.productDetailsContent },
@@ -68,7 +69,7 @@ export default function ProductPage({
   if (notFoundState) notFound();
   if (!product) return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: "#aaa" }}>
-      טוען...
+      {lang === "en" ? "Loading..." : "טוען..."}
     </div>
   );
 
@@ -87,7 +88,7 @@ export default function ProductPage({
     }
     setAdding(true);
     addToCart(product);
-    toast.success(p_t.addedToCart(product.nameHe), {
+    toast.success(p_t.addedToCart(displayName), {
       description: `₪${product.price.toLocaleString()}`,
       duration: 3000,
     });
@@ -98,7 +99,7 @@ export default function ProductPage({
   const handleShare = async () => {
     try {
       if (navigator.share) {
-        await navigator.share({ title: product.nameHe, url: window.location.href });
+        await navigator.share({ title: displayName, url: window.location.href });
       } else {
         await navigator.clipboard.writeText(window.location.href);
         toast.success(p_t.linkCopied, { duration: 2000 });
@@ -106,7 +107,10 @@ export default function ProductPage({
     } catch {}
   };
 
-  const materialDisplay = product.material.split("|")[0].trim();
+  const displayName = lang === "en" ? product.nameEn : displayName;
+  const displayDescription = lang === "en" ? product.descriptionEn : displayDescription;
+  const rawMaterial = product.material.split("|")[0].trim();
+  const materialDisplay = lang === "en" ? getMaterialEn(rawMaterial) : rawMaterial;
 
   return (
     <div className="bg-white">
@@ -123,7 +127,7 @@ export default function ProductPage({
             <li aria-hidden>·</li>
             <li><Link href="/shop" className="hover:text-[#111] transition-colors">{p_t.breadcrumbShop}</Link></li>
             <li aria-hidden>·</li>
-            <li className="text-[#C9A96E]" aria-current="page">{product.nameHe}</li>
+            <li className="text-[#C9A96E]" aria-current="page">{displayName}</li>
           </ol>
         </nav>
 
@@ -151,7 +155,7 @@ export default function ProductPage({
                 <motion.img
                   key={allImages[selectedImg]}
                   src={allImages[selectedImg]}
-                  alt={product.nameHe}
+                  alt={displayName}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -233,7 +237,7 @@ export default function ProductPage({
               lineHeight: 1.1,
               marginBottom: "12px",
             }}>
-              {product.nameHe}
+              {displayName}
             </h1>
 
             {/* 3. Material — prominent, near name */}
@@ -433,7 +437,7 @@ export default function ProductPage({
                 fontSize: "14px", fontWeight: 300, color: "#555",
                 lineHeight: 1.8,
               }}>
-                {product.descriptionHe}
+                {displayDescription}
               </p>
             </div>
 
@@ -499,13 +503,13 @@ export default function ProductPage({
                 <Link key={p.id} href={`/product/${p.id}`} style={{ textDecoration: "none" }} className="related-card">
                   <div style={{ aspectRatio: "1/1", overflow: "hidden", background: "#FAFAFA", border: "1px solid #EFEFEF", marginBottom: "10px" }}>
                     <img
-                      src={p.image} alt={p.nameHe} loading="lazy"
+                      src={p.image} alt={lang === "en" ? p.nameEn : p.nameHe} loading="lazy"
                       style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 500ms ease" }}
                       className="related-img"
                     />
                   </div>
                   <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1rem", fontStyle: "italic", color: "#111", fontWeight: 400, margin: "0 0 4px" }}>
-                    {p.nameHe}
+                    {lang === "en" ? p.nameEn : p.nameHe}
                   </p>
                   <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "12px", color: "#888", fontWeight: 300 }}>
                     ₪{p.price.toLocaleString()}
@@ -539,7 +543,7 @@ export default function ProductPage({
               exit={{ opacity: 0, scale: 0.92 }}
               transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
               src={allImages[selectedImg]}
-              alt={product.nameHe}
+              alt={displayName}
               onClick={e => e.stopPropagation()}
               style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", cursor: "default" }}
             />

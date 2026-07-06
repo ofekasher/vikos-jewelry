@@ -15,7 +15,7 @@ import ReviewsCarousel from "@/components/home/ReviewsCarousel";
 import InstagramGallery from "@/components/home/InstagramGallery";
 import type { Product } from "@/lib/products";
 import { useStore } from "@/lib/store";
-import { useT } from "@/lib/LanguageContext";
+import { useT, useLang } from "@/lib/LanguageContext";
 
 /* ── Design tokens ── */
 const T = {
@@ -54,6 +54,7 @@ function SectionHeader({ eyebrow, title, cta }: { eyebrow: string; title: string
 export default function HomePage() {
   const { addToCart } = useStore();
   const t = useT();
+  const { lang } = useLang();
   const h = t.home;
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   useEffect(() => {
@@ -103,7 +104,7 @@ export default function HomePage() {
               <Link href={`/product/${p.id}`} style={{ textDecoration: "none", display: "block" }}>
                 {/* Image */}
                 <div style={{ position: "relative", overflow: "hidden", background: T.warm, marginBottom: "14px" }}>
-                  <img src={p.image} alt={p.nameHe} loading={i === 0 ? "eager" : "lazy"}
+                  <img src={p.image} alt={lang === "en" ? p.nameEn : p.nameHe} loading={i === 0 ? "eager" : "lazy"}
                     style={{
                       width: "100%", aspectRatio: "1/1", objectFit: "cover", display: "block",
                       transition: "transform 0.6s ease",
@@ -141,7 +142,7 @@ export default function HomePage() {
                   {p.material.split("|")[0].trim()}
                 </p>
                 <p style={{ fontFamily: T.serif, fontSize: "1.05rem", fontWeight: 400, color: T.black, marginBottom: "5px", lineHeight: 1.3 }}>
-                  {p.nameHe}
+                  {lang === "en" ? p.nameEn : p.nameHe}
                 </p>
                 <p style={{ fontFamily: T.sans, fontSize: "13px", color: T.gold, fontWeight: 500, letterSpacing: "0.03em" }}>
                   ₪{p.price.toLocaleString()}

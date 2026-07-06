@@ -222,9 +222,25 @@ export const products: Product[] = [
 ];
 
 export const categories = [
-  { id: "all",       labelHe: "הכל" },
-  { id: "rings",     labelHe: "טבעות" },
-  { id: "necklaces", labelHe: "שרשראות" },
-  { id: "bracelets", labelHe: "צמידים" },
-  { id: "earrings",  labelHe: "עגילים" },
+  { id: "all",       labelHe: "הכל",      labelEn: "All" },
+  { id: "rings",     labelHe: "טבעות",    labelEn: "Rings" },
+  { id: "necklaces", labelHe: "שרשראות",  labelEn: "Necklaces" },
+  { id: "bracelets", labelHe: "צמידים",   labelEn: "Bracelets" },
+  { id: "earrings",  labelHe: "עגילים",   labelEn: "Earrings" },
 ];
+
+const MATERIAL_EN_MAP: Record<string, string> = {
+  "זהב 14K": "14K Gold",
+  "זהב 18K": "18K Gold",
+  "כסף 925": "925 Silver",
+  "זהב לבן 14K": "14K White Gold",
+  "זהב ורד 14K": "14K Rose Gold",
+  "זהב לבן 18K": "18K White Gold",
+  "זהב ורד 18K": "18K Rose Gold",
+  "זהב שחור 14K": "14K Black Gold",
+  "קרמיקה/זהב ורד": "Ceramic/Rose Gold",
+};
+
+export function getMaterialEn(matHe: string): string {
+  return MATERIAL_EN_MAP[matHe] ?? matHe;
+}

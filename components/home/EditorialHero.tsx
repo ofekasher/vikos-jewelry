@@ -66,7 +66,7 @@ export default function EditorialHero() {
           className="editorial-hero-img-wrap"
         >
           <img
-            src="/rings/vopf_hand_01.png"
+            src="/hero-new.jpg"
             alt="VIKOS Jewelry"
             className="editorial-hero-img"
           />

@@ -107,8 +107,8 @@ export default function ProductPage({
     } catch {}
   };
 
-  const displayName = lang === "en" ? product.nameEn : displayName;
-  const displayDescription = lang === "en" ? product.descriptionEn : displayDescription;
+  const displayName = lang === "en" ? product.nameEn : product.name;
+  const displayDescription = lang === "en" ? product.descriptionEn : product.description;
   const rawMaterial = product.material.split("|")[0].trim();
   const materialDisplay = lang === "en" ? getMaterialEn(rawMaterial) : rawMaterial;
 

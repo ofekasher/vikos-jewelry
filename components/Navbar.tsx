@@ -67,7 +67,6 @@ export default function Navbar() {
               alt="VIKOS"
               style={{
                 height: "77px", width: "auto", display: "block",
-                mixBlendMode: heroMode ? "normal" : "multiply",
                 filter: heroMode ? "brightness(0) invert(1)" : "none",
                 transition: "filter 0.4s ease",
               }}

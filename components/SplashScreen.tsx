@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const TOTAL = 4800; // ms visible before fade
+const TOTAL = 3600; // ms before fade-out begins
 
 /* ── Gold particle canvas ── */
 function GoldDust() {
@@ -17,14 +17,14 @@ function GoldDust() {
     resize();
     window.addEventListener("resize", resize);
 
-    const COUNT = 90;
+    const COUNT = 70;
     const particles = Array.from({ length: COUNT }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      r: Math.random() * 1.4 + 0.3,
-      vx: (Math.random() - 0.5) * 0.35,
-      vy: -(Math.random() * 0.5 + 0.1),
-      alpha: Math.random() * 0.6 + 0.15,
+      r: Math.random() * 1.2 + 0.2,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: -(Math.random() * 0.45 + 0.08),
+      alpha: Math.random() * 0.5 + 0.1,
       life: Math.random(),
     }));
 
@@ -61,6 +61,8 @@ function GoldDust() {
   );
 }
 
+const LETTERS = ["V", "I", "K", "O", "S"];
+
 export default function SplashScreen() {
   const [visible, setVisible] = useState(false);
 
@@ -78,7 +80,7 @@ export default function SplashScreen() {
         <motion.div
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 1.1, ease: "easeInOut" }}
+          transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }}
           style={{
             position: "fixed", inset: 0, zIndex: 9999,
             background: "#060504",
@@ -89,95 +91,113 @@ export default function SplashScreen() {
           {/* Particles */}
           <GoldDust />
 
-          {/* Radial glow behind logo */}
+          {/* Radial glow */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.6 }}
+            initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 2, delay: 0.5, ease: "easeOut" }}
+            transition={{ duration: 2.2, delay: 0.3, ease: "easeOut" }}
             style={{
               position: "absolute",
-              width: "520px", height: "520px",
+              width: "600px", height: "600px",
               borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(201,169,110,0.13) 0%, transparent 70%)",
+              background: "radial-gradient(circle, rgba(201,169,110,0.10) 0%, transparent 70%)",
               pointerEvents: "none",
             }}
           />
 
-          {/* Center stack */}
+          {/* Center content */}
           <div style={{
             position: "relative", zIndex: 2,
             display: "flex", flexDirection: "column",
-            alignItems: "center", gap: "28px",
+            alignItems: "center", gap: "26px",
           }}>
 
-            {/* Horizontal lines that draw in */}
-            <div style={{ display: "flex", alignItems: "center", gap: "18px", width: "340px", justifyContent: "center" }}>
+            {/* Top decorative lines */}
+            <div style={{ display: "flex", alignItems: "center", gap: "18px", width: "320px", justifyContent: "center" }}>
               <motion.div
-                initial={{ scaleX: 0, originX: 1 }}
+                initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
-                transition={{ duration: 1.1, delay: 0.7, ease: "easeOut" }}
+                transition={{ duration: 1.0, delay: 0.6, ease: [0.23, 1, 0.32, 1] }}
                 style={{ flex: 1, height: "1px", background: "linear-gradient(to left, #C9A96E, transparent)", transformOrigin: "right" }}
               />
               <motion.div
-                initial={{ opacity: 0, scale: 0.5 }}
+                initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 1.0 }}
+                transition={{ duration: 0.5, delay: 1.0 }}
                 style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#C9A96E", flexShrink: 0 }}
               />
               <motion.div
-                initial={{ scaleX: 0, originX: 0 }}
+                initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
-                transition={{ duration: 1.1, delay: 0.7, ease: "easeOut" }}
+                transition={{ duration: 1.0, delay: 0.6, ease: [0.23, 1, 0.32, 1] }}
                 style={{ flex: 1, height: "1px", background: "linear-gradient(to right, #C9A96E, transparent)", transformOrigin: "left" }}
               />
             </div>
 
-            {/* Logo with shine sweep */}
-            <div style={{ position: "relative", overflow: "hidden" }}>
-              <motion.img
-                src="/logo.png"
-                alt="VIKOS Jewelry"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1.1, delay: 0.9, ease: "easeOut" }}
-                style={{
-                  height: "clamp(70px, 10vw, 120px)",
-                  objectFit: "contain",
-                  display: "block",
-                  filter: "invert(1)",
-                }}
-              />
-              {/* Shine sweep over logo */}
+            {/* VIKOS — letter by letter */}
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.06em",
+              overflow: "hidden",
+            }}>
+              {LETTERS.map((letter, i) => (
+                <motion.span
+                  key={letter + i}
+                  initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  transition={{
+                    duration: 0.8,
+                    delay: 0.85 + i * 0.08,
+                    ease: [0.23, 1, 0.32, 1],
+                  }}
+                  style={{
+                    fontFamily: "'Cormorant Garamond', Georgia, serif",
+                    fontSize: "clamp(52px, 9vw, 88px)",
+                    fontWeight: 400,
+                    letterSpacing: "0.22em",
+                    color: "#FAFAF8",
+                    lineHeight: 1,
+                    display: "block",
+                  }}
+                >
+                  {letter}
+                </motion.span>
+              ))}
+
+              {/* Shine sweep across VIKOS text */}
               <motion.div
-                initial={{ x: "-120%" }}
-                animate={{ x: "200%" }}
-                transition={{ duration: 1.0, delay: 1.6, ease: "easeInOut" }}
+                initial={{ x: "-140%" }}
+                animate={{ x: "220%" }}
+                transition={{ duration: 1.1, delay: 1.8, ease: "easeInOut" }}
                 style={{
-                  position: "absolute", inset: 0,
-                  background: "linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.45) 50%, transparent 70%)",
+                  position: "absolute",
+                  top: 0, bottom: 0,
+                  width: "60%",
+                  background: "linear-gradient(105deg, transparent 25%, rgba(255,255,255,0.18) 50%, transparent 75%)",
                   pointerEvents: "none",
                 }}
               />
             </div>
 
-            {/* Bottom lines */}
-            <div style={{ display: "flex", alignItems: "center", gap: "18px", width: "340px", justifyContent: "center" }}>
+            {/* Bottom decorative lines */}
+            <div style={{ display: "flex", alignItems: "center", gap: "18px", width: "320px", justifyContent: "center" }}>
               <motion.div
-                initial={{ scaleX: 0, originX: 1 }}
+                initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
-                transition={{ duration: 1.1, delay: 0.7, ease: "easeOut" }}
+                transition={{ duration: 1.0, delay: 0.6, ease: [0.23, 1, 0.32, 1] }}
                 style={{ flex: 1, height: "1px", background: "linear-gradient(to left, #C9A96E, transparent)", transformOrigin: "right" }}
               />
               <motion.div
-                initial={{ opacity: 0, scale: 0.5 }}
+                initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 1.0 }}
+                transition={{ duration: 0.5, delay: 1.0 }}
                 style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#C9A96E", flexShrink: 0 }}
               />
               <motion.div
-                initial={{ scaleX: 0, originX: 0 }}
+                initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
-                transition={{ duration: 1.1, delay: 0.7, ease: "easeOut" }}
+                transition={{ duration: 1.0, delay: 0.6, ease: [0.23, 1, 0.32, 1] }}
                 style={{ flex: 1, height: "1px", background: "linear-gradient(to right, #C9A96E, transparent)", transformOrigin: "left" }}
               />
             </div>
@@ -185,8 +205,8 @@ export default function SplashScreen() {
             {/* Tagline */}
             <motion.p
               initial={{ opacity: 0, letterSpacing: "0.6em" }}
-              animate={{ opacity: 0.65, letterSpacing: "0.38em" }}
-              transition={{ duration: 1.4, delay: 1.8, ease: "easeOut" }}
+              animate={{ opacity: 0.6, letterSpacing: "0.36em" }}
+              transition={{ duration: 1.4, delay: 1.7, ease: "easeOut" }}
               style={{
                 fontFamily: "'Inter', sans-serif",
                 fontSize: "9px",
@@ -202,12 +222,12 @@ export default function SplashScreen() {
           {/* Bottom progress line */}
           <div style={{
             position: "absolute", bottom: 0, left: 0, right: 0,
-            height: "2px", background: "rgba(201,169,110,0.1)",
+            height: "1px", background: "rgba(201,169,110,0.08)",
           }}>
             <motion.div
               initial={{ width: "0%" }}
               animate={{ width: "100%" }}
-              transition={{ duration: (TOTAL - 600) / 1000, delay: 0.3, ease: "linear" }}
+              transition={{ duration: (TOTAL - 800) / 1000, delay: 0.2, ease: "linear" }}
               style={{ height: "100%", background: "linear-gradient(to right, transparent, #C9A96E, transparent)" }}
             />
           </div>

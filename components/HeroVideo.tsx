@@ -14,7 +14,7 @@ export default function HeroVideo() {
         position: "absolute", inset: 0,
         backgroundImage: "url('/hero-new.jpg')",
         backgroundSize: "cover",
-        backgroundPosition: "center top",
+        backgroundPosition: "top center",
       }} />
 
       {/* ── Dark overlay ── */}

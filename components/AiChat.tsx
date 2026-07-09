@@ -48,9 +48,10 @@ export default function AiChat() {
         onClick={() => setOpen(o => !o)}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
+        className="ai-fab"
         style={{
-          position: "fixed", bottom: "96px", left: "28px", zIndex: 9000,
-          width: "56px", height: "56px", borderRadius: "50%",
+          position: "fixed", bottom: "92px", right: "28px", zIndex: 9000,
+          width: "52px", height: "52px", borderRadius: "50%",
           background: "#111", border: "1.5px solid #C9A96E",
           display: "flex", alignItems: "center", justifyContent: "center",
           cursor: "pointer", boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
@@ -82,8 +83,9 @@ export default function AiChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
+            className="ai-chat-window"
             style={{
-              position: "fixed", bottom: "164px", left: "28px", zIndex: 9000,
+              position: "fixed", bottom: "156px", right: "28px", zIndex: 9000,
               width: "340px", maxHeight: "480px",
               background: "#0D0C0A", border: "1px solid rgba(201,169,110,0.25)",
               borderRadius: "4px", display: "flex", flexDirection: "column",
@@ -174,6 +176,10 @@ export default function AiChat() {
         @keyframes bounce {
           0%, 60%, 100% { transform: translateY(0); }
           30% { transform: translateY(-6px); }
+        }
+        @media (max-width: 767px) {
+          .ai-fab { width: 44px !important; height: 44px !important; bottom: 76px !important; right: 20px !important; }
+          .ai-chat-window { right: 12px !important; left: 12px !important; width: auto !important; bottom: 132px !important; }
         }
       `}</style>
     </>

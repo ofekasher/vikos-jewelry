@@ -28,13 +28,14 @@ export default function WhatsAppButton() {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          className="wa-btn"
           style={{
             position: "fixed",
             bottom: "28px",
-            left: "28px",
+            right: "28px",
             zIndex: 9000,
-            width: "56px",
-            height: "56px",
+            width: "52px",
+            height: "52px",
             borderRadius: "50%",
             background: "#25D366",
             display: "flex",
@@ -66,6 +67,10 @@ export default function WhatsAppButton() {
             @keyframes wa-pulse {
               0% { transform: scale(1); opacity: 0.6; }
               100% { transform: scale(1.8); opacity: 0; }
+            }
+            @media (max-width: 767px) {
+              .wa-btn { width: 44px !important; height: 44px !important; bottom: 20px !important; right: 20px !important; }
+              .wa-btn svg { width: 24px !important; height: 24px !important; }
             }
           `}</style>
         </motion.a>

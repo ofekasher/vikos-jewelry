@@ -3,10 +3,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Minus, Plus, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
+import { useLang } from "@/lib/LanguageContext";
 
 export default function CartDrawer() {
   const { cart, isCartOpen, toggleCart, removeFromCart, updateQuantity, cartTotal } = useStore();
+  const { lang } = useLang();
   const total = cartTotal();
+  const en = lang === "en";
+  const strings = {
+    title:    en ? "Your Bag"        : "עגלת הקניות",
+    empty:    en ? "Your bag is empty" : "העגלה ריקה",
+    total:    en ? "Total"           : "סה״כ",
+    checkout: en ? "Checkout"        : "לתשלום",
+    remove:   en ? "Remove item"     : "הסר מוצר",
+    close:    en ? "Close bag"       : "סגור סל",
+  };
 
   return (
     <AnimatePresence>
@@ -27,9 +38,9 @@ export default function CartDrawer() {
             {/* Header */}
             <div className="flex items-center justify-between px-8 py-6 border-b border-[#E5E5E5]">
               <h2 style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:"1.4rem", fontWeight:400, color:"#111" }}>
-                עגלת הקניות
+                {strings.title}
               </h2>
-              <button onClick={toggleCart} aria-label="סגור סל"
+              <button onClick={toggleCart} aria-label={strings.close}
                 className="p-2 text-[#AAA] hover:text-[#111] transition-colors cursor-pointer">
                 <X size={18} />
               </button>
@@ -42,7 +53,7 @@ export default function CartDrawer() {
                   <ShoppingBag size={36} strokeWidth={1} className="text-[#DDD]" />
                   <p className="text-[13px] text-[#AAA]"
                     style={{ fontFamily:"'Inter',sans-serif", fontWeight:300 }}>
-                    העגלה ריקה
+                    {strings.empty}
                   </p>
                 </div>
               ) : (
@@ -55,18 +66,18 @@ export default function CartDrawer() {
                         className="flex gap-4">
                         <div className="w-18 h-18 rounded overflow-hidden flex-shrink-0 bg-[#EEECE8]"
                           style={{ width: 72, height: 72 }}>
-                          <img src={item.product.image} alt={item.product.nameHe}
+                          <img src={item.product.image} alt={en ? item.product.nameEn : item.product.nameHe}
                             className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between gap-2">
                             <p className="text-[13px] text-[#111] leading-snug truncate"
                               style={{ fontFamily:"'Inter',sans-serif", fontWeight:300 }}>
-                              {item.product.nameHe}
+                              {en ? item.product.nameEn : item.product.nameHe}
                             </p>
                             <button onClick={() => removeFromCart(item.product.id)}
                               className="text-[#CCC] hover:text-[#111] transition-colors cursor-pointer flex-shrink-0"
-                              aria-label="הסר מוצר">
+                              aria-label={strings.remove}>
                               <X size={13} />
                             </button>
                           </div>
@@ -107,7 +118,7 @@ export default function CartDrawer() {
               <div className="px-8 py-6 border-t border-[#E5E5E5]">
                 <div className="flex justify-between items-center mb-5">
                   <span className="text-[12px] text-[#888]" style={{ fontFamily:"'Inter',sans-serif" }}>
-                    סה״כ
+                    {strings.total}
                   </span>
                   <span style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:"1.3rem", fontWeight:400, color:"#111" }}>
                     ₪{total.toLocaleString()}
@@ -116,7 +127,7 @@ export default function CartDrawer() {
                 <Link href="/checkout" onClick={toggleCart}
                   className="w-full py-3.5 bg-[#111] text-white text-[11px] tracking-[.22em] uppercase hover:bg-[#C9A96E] transition-colors duration-300 cursor-pointer min-h-[48px] flex items-center justify-center"
                   style={{ fontFamily:"'Inter',sans-serif", textDecoration:"none" }}>
-                  לתשלום
+                  {strings.checkout}
                 </Link>
               </div>
             )}

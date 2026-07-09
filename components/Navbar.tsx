@@ -71,7 +71,7 @@ export default function Navbar() {
           position: "absolute", left: "50%", transform: "translateX(-50%)",
           display: "flex", alignItems: "center",
         }}>
-          <span style={{
+          <span className="nav-logo-text" style={{
             fontFamily: "'Cormorant Garamond', Georgia, serif",
             fontSize: "28px",
             fontWeight: 600,
@@ -177,6 +177,7 @@ export default function Navbar() {
         }
         @media (max-width: 767px) {
           .navbar-hero-mode { display: none !important; }
+          .nav-logo-text { font-size: 32px !important; letter-spacing: 0.26em !important; }
         }
       `}</style>
 

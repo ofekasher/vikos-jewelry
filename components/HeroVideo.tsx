@@ -7,21 +7,57 @@ export default function HeroVideo() {
   const h = useT().hero;
 
   return (
-    <section className="hero-split" style={{
+    <section style={{
       position: "relative", width: "100%",
       height: "100dvh", minHeight: "560px",
       display: "flex", overflow: "hidden",
-      background: "#0E0D0B",
+      background: "#f5f0eb",  /* cream fallback if image fails */
     }}>
 
-      {/* ── LEFT — text panel ── */}
-      <div className="hero-split-left" style={{
+      {/* ── Image panel — desktop: right 50%, mobile: absolute full-bg ── */}
+      <div className="hero-img-panel" style={{
+        flex: "0 0 50%", width: "50%",
+        position: "relative", overflow: "hidden",
+        order: 2,
+      }}>
+        <img
+          src="/hero-new.jpg"
+          alt="VIKOS Jewelry model"
+          loading="eager"
+          style={{
+            width: "100%", height: "100%",
+            objectFit: "cover",
+            objectPosition: "60% 15%",
+            display: "block",
+          }}
+        />
+        {/* Blend left edge into text panel on desktop */}
+        <div className="hero-img-gradient" style={{
+          position: "absolute", inset: 0,
+          background: "linear-gradient(to right, #0E0D0B 0%, transparent 20%)",
+          pointerEvents: "none",
+        }} />
+      </div>
+
+      {/* ── Dark overlay for mobile (sits over image on mobile only) ── */}
+      <div className="hero-mobile-overlay" style={{
+        display: "none",
+        position: "absolute", inset: 0, zIndex: 1,
+        background: "rgba(0,0,0,0.48)",
+        pointerEvents: "none",
+      }} />
+
+      {/* ── Text panel — desktop: left 50%, mobile: full-width centered ── */}
+      <div className="hero-text-panel" style={{
         flex: "0 0 50%", width: "50%",
         display: "flex", flexDirection: "column",
         alignItems: "flex-start", justifyContent: "center",
         padding: "0 clamp(40px, 6vw, 96px)",
         position: "relative", zIndex: 2,
+        order: 1,
+        background: "#0E0D0B",
       }}>
+
         {/* Eyebrow */}
         <motion.p
           initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
@@ -29,7 +65,7 @@ export default function HeroVideo() {
           style={{
             fontFamily: "'Inter',sans-serif", fontSize: "9px",
             letterSpacing: "0.44em", textTransform: "uppercase",
-            color: "#C9A96E", marginBottom: "20px", margin: "0 0 20px",
+            color: "#C9A96E", margin: "0 0 20px",
           }}
         >
           {h.eyebrow}
@@ -103,43 +139,37 @@ export default function HeroVideo() {
           animate={{ y: [0, 8, 0] }}
           transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
           style={{
-            position: "absolute", bottom: "32px", left: "clamp(40px, 6vw, 96px)",
+            position: "absolute", bottom: "32px",
+            left: "clamp(40px, 6vw, 96px)",
             width: "1px", height: "32px",
             background: "linear-gradient(to bottom, rgba(255,255,255,0.35), transparent)",
           }}
         />
       </div>
 
-      {/* ── RIGHT — portrait image ── */}
-      <div className="hero-split-right" style={{ flex: "0 0 50%", width: "50%", position: "relative", overflow: "hidden" }}>
-        <motion.img
-          src="/hero-new.jpg"
-          alt="VIKOS Jewelry"
-          initial={{ scale: 1.06 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 1.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-          style={{
-            width: "100%", height: "100%",
-            objectFit: "cover",
-            objectPosition: "60% 15%",
-            display: "block",
-          }}
-        />
-        {/* Subtle left-edge gradient to blend into dark panel */}
-        <div style={{
-          position: "absolute", inset: 0,
-          background: "linear-gradient(to right, #0E0D0B 0%, transparent 18%)",
-          pointerEvents: "none",
-        }} />
-      </div>
-
-      {/* ── Mobile: stack as full-bg (≤767px) ── */}
       <style>{`
         @media (max-width: 767px) {
-          .hero-split-left  { flex: unset !important; width: 100% !important; padding: 0 28px !important; align-items: center !important; text-align: center !important; }
-          .hero-split-right { display: none !important; }
-          section.hero-split { background-image: url('/hero-new.jpg'); background-size: cover; background-position: 60% 15%; }
-          section.hero-split::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.55); }
+          /* Image becomes absolute full-screen background */
+          .hero-img-panel {
+            position: absolute !important;
+            inset: 0 !important;
+            width: 100% !important;
+            flex: unset !important;
+            order: 0 !important;
+            z-index: 0;
+          }
+          /* Hide the desktop left-edge blend, show mobile overlay instead */
+          .hero-img-gradient { display: none !important; }
+          .hero-mobile-overlay { display: block !important; }
+          /* Text panel becomes full-width transparent, sits above image */
+          .hero-text-panel {
+            flex: unset !important;
+            width: 100% !important;
+            background: transparent !important;
+            align-items: center !important;
+            text-align: center !important;
+            padding: 0 28px !important;
+          }
         }
       `}</style>
     </section>

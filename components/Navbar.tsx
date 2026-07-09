@@ -46,6 +46,14 @@ export default function Navbar() {
         transition: "background 0.4s ease",
       }} className={`${heroMode ? "navbar-hero-mode" : ""} nav-root`}>
 
+        {/* MOBILE HAMBURGER — direct nav child, pinned to left on mobile */}
+        <button onClick={() => setMenuOpen(true)} className="nav-hamburger" aria-label={t.nav.menu}
+          style={{ background: "none", border: "none", cursor: "pointer", padding: "4px", display: "none", flexDirection: "column", gap: "5px" }}>
+          <span style={{ display: "block", width: "22px", height: "1.5px", background: iconColor, transition: "background 0.4s ease" }} />
+          <span style={{ display: "block", width: "22px", height: "1.5px", background: iconColor, transition: "background 0.4s ease" }} />
+          <span style={{ display: "block", width: "14px", height: "1.5px", background: iconColor, transition: "background 0.4s ease" }} />
+        </button>
+
         {/* LEFT — desktop nav links */}
         <div className="nav-desktop-links" style={{ display: "flex", gap: "32px", alignItems: "center", flex: 1 }}>
           {navLinks.map(l => (
@@ -157,51 +165,52 @@ export default function Navbar() {
               <span style={{ position: "absolute", top: "-2px", right: "-2px", width: "16px", height: "16px", borderRadius: "50%", background: "#C9A96E", color: "#fff", fontSize: "8px", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600 }}>{count}</span>
             )}
           </button>
-
-          {/* Mobile hamburger */}
-          <button onClick={() => setMenuOpen(true)} className="nav-mobile-only" aria-label={t.nav.menu}
-            style={{ background: "none", border: "none", cursor: "pointer", padding: "4px", flexDirection: "column", gap: "5px" }}>
-            <span style={{ display: "block", width: "22px", height: "1.5px", background: iconColor, transition: "background 0.4s ease" }} />
-            <span style={{ display: "block", width: "22px", height: "1.5px", background: iconColor, transition: "background 0.4s ease" }} />
-            <span style={{ display: "block", width: "14px", height: "1.5px", background: iconColor, transition: "background 0.4s ease" }} />
-          </button>
         </div>
       </nav>
 
       <style>{`
         /* ── Desktop ── */
         @media (min-width: 768px) {
+          .nav-hamburger    { display: none !important; }
           .nav-desktop-links { display: flex !important; }
-          .nav-mobile-only   { display: none !important; }
           .nav-hide-mobile   { display: flex !important; }
         }
 
         /* ── Mobile ── */
         @media (max-width: 767px) {
           /* Navbar height + padding */
-          .nav-root { height: 60px !important; padding: 0 20px !important; }
+          .nav-root {
+            height: 60px !important;
+            padding: 0 20px !important;
+            position: fixed !important;
+          }
 
-          /* Hide desktop links + extra icons */
+          /* Hide desktop nav links + extra desktop icons */
           .nav-desktop-links { display: none !important; }
           .nav-hide-mobile   { display: none !important; }
 
-          /* Show hamburger */
-          .nav-mobile-only { display: flex !important; }
+          /* Hamburger: pinned absolutely to the LEFT */
+          .nav-hamburger {
+            display: flex !important;
+            flex-direction: column !important;
+            position: absolute !important;
+            left: 20px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            z-index: 2 !important;
+          }
 
-          /* Hamburger moves to LEFT — swap flex order */
-          .nav-mobile-only { order: -1; }
-
-          /* Logo — smaller, centered */
+          /* Logo — smaller on mobile */
           .nav-logo-text {
             font-size: 22px !important;
             letter-spacing: 0.24em !important;
           }
 
-          /* Hero-mode: show navbar on mobile (don't hide) */
+          /* Hero-mode override — keep flex display */
           .navbar-hero-mode { display: flex !important; }
 
-          /* Right group — only cart + hamburger visible, tighten gap */
-          .nav-root > div:last-child { gap: 12px !important; }
+          /* Right icons group — cart only, no gap needed */
+          .nav-root > div:last-child { gap: 0 !important; }
         }
       `}</style>
 

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
-const TOTAL = 3600;
+const TOTAL = 3400;
 
 export default function SplashScreen() {
   const [visible, setVisible] = useState(false);
@@ -23,94 +23,66 @@ export default function SplashScreen() {
         <motion.div
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: d(0.7), ease: "easeInOut" }}
+          transition={{ duration: d(0.55), ease: "easeInOut" }}
           style={{
             position: "fixed", inset: 0, zIndex: 9999,
             overflow: "hidden",
             display: "flex", alignItems: "center", justifyContent: "center",
+            /* Warm dark gradient — GPU-friendly, no image blur */
+            background: "radial-gradient(ellipse at 50% 40%, #2a1a08 0%, #130d05 45%, #0a0602 100%)",
           }}
         >
-          {/* ── Background: blurred jewelry image → bokeh effect ── */}
-          <img
-            src="/hero-new.jpg"
-            alt=""
-            aria-hidden="true"
-            style={{
-              position: "absolute", inset: 0,
-              width: "100%", height: "100%",
-              objectFit: "cover",
-              objectPosition: "60% 25%",
-              filter: "blur(6px) saturate(1.3) brightness(0.85)",
-              transform: "scale(1.08)", /* hide blur edges */
-            }}
-          />
-
-          {/* Warm dark overlay */}
+          {/* Subtle gold glow behind arch */}
           <div style={{
-            position: "absolute", inset: 0,
-            background: "rgba(10, 6, 2, 0.55)",
+            position: "absolute",
+            width: "clamp(260px, 36vw, 420px)",
+            height: "clamp(260px, 36vw, 420px)",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(201,149,50,0.12) 0%, transparent 70%)",
+            pointerEvents: "none",
           }} />
 
-          {/* Gold center radial glow — simulates bokeh warmth */}
-          <div style={{
-            position: "absolute", inset: 0,
-            background: "radial-gradient(ellipse at 50% 50%, rgba(200, 145, 50, 0.22) 0%, transparent 58%)",
-          }} />
-
-          {/* ── Arch + content — centered ── */}
+          {/* ── Arch + content ── */}
           <div style={{ position: "relative", zIndex: 2, display: "flex", alignItems: "center", justifyContent: "center" }}>
 
-            {/*
-              Roman arch SVG (like the Canva template):
-              - Open at bottom (no floor bar)
-              - Semicircular top, two straight vertical sides
-              - viewBox 0 0 220 400
-              - Arch inner width = 200px → radius = 100px
-              - Straight section = ~195px
-              - Path: bottom-left → up → semicircle over top → down to bottom-right
-            */}
+            {/* Roman arch — semicircle top, open bottom */}
             <svg
               viewBox="0 0 220 400"
               style={{
                 position: "absolute",
-                width: "clamp(190px, 26vw, 300px)",
-                height: "clamp(345px, 47vw, 545px)",
+                width: "clamp(190px, 25vw, 290px)",
+                height: "clamp(346px, 45vw, 527px)",
               }}
-              overflow="visible"
             >
               <motion.path
                 d="M 10 395 L 10 195 A 100 100 0 0 1 210 195 L 210 395"
                 fill="none"
-                stroke="rgba(255,255,255,0.80)"
-                strokeWidth="1.2"
+                stroke="rgba(255,255,255,0.78)"
+                strokeWidth="1.1"
                 strokeLinecap="round"
-                initial={{ pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ duration: d(1.6), delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: d(1.5), delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
               />
             </svg>
 
-            {/* Content inside arch */}
+            {/* Content */}
             <div style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "clamp(28px, 4vw, 52px) clamp(20px, 3.5vw, 44px)",
-              gap: 0,
+              display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center",
+              padding: "clamp(26px, 4vw, 50px) clamp(18px, 3vw, 40px)",
             }}>
 
-              {/* Decorative "V" monogram — like the SD in the template */}
-              <div style={{ overflow: "hidden", marginBottom: "clamp(8px, 1.4vw, 14px)" }}>
+              {/* V monogram */}
+              <div style={{ overflow: "hidden", marginBottom: "clamp(6px, 1vw, 10px)" }}>
                 <motion.span
-                  initial={{ transform: "translateY(110%)" }}
+                  initial={{ transform: "translateY(100%)" }}
                   animate={{ transform: "translateY(0%)" }}
-                  transition={{ duration: d(0.85), delay: 0.8, ease: [0.23, 1, 0.32, 1] }}
+                  transition={{ duration: d(0.8), delay: 0.75, ease: [0.23, 1, 0.32, 1] }}
                   style={{
                     fontFamily: "'Cormorant Garamond', Georgia, serif",
-                    fontSize: "clamp(52px, 9vw, 100px)",
+                    fontSize: "clamp(56px, 9.5vw, 104px)",
                     fontWeight: 300,
-                    letterSpacing: "-0.02em",
                     color: "#FAFAF8",
                     lineHeight: 0.85,
                     display: "block",
@@ -120,22 +92,22 @@ export default function SplashScreen() {
                 </motion.span>
               </div>
 
-              {/* VIKOS brand name — smaller, spaced */}
+              {/* VIKOS */}
               <div style={{ overflow: "hidden" }}>
                 <motion.span
-                  initial={{ transform: "translateY(110%)", opacity: 0 }}
+                  initial={{ transform: "translateY(100%)", opacity: 0 }}
                   animate={{ transform: "translateY(0%)", opacity: 1 }}
-                  transition={{ duration: d(0.75), delay: 1.1, ease: [0.23, 1, 0.32, 1] }}
+                  transition={{ duration: d(0.7), delay: 1.05, ease: [0.23, 1, 0.32, 1] }}
                   style={{
                     fontFamily: "'Cormorant Garamond', Georgia, serif",
-                    fontSize: "clamp(11px, 1.8vw, 18px)",
+                    fontSize: "clamp(11px, 1.7vw, 17px)",
                     fontWeight: 500,
-                    letterSpacing: "0.45em",
+                    letterSpacing: "0.46em",
                     textTransform: "uppercase",
                     color: "#FAFAF8",
                     lineHeight: 1,
                     display: "block",
-                    paddingRight: "0.45em",
+                    paddingRight: "0.46em",
                   }}
                 >
                   VIKOS
@@ -145,12 +117,11 @@ export default function SplashScreen() {
               {/* Tagline */}
               <motion.p
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 0.65 }}
-                transition={{ duration: d(0.8), delay: 1.45, ease: "easeOut" }}
+                animate={{ opacity: 0.55 }}
+                transition={{ duration: d(0.7), delay: 1.4, ease: "easeOut" }}
                 style={{
                   fontFamily: "'Inter', sans-serif",
-                  fontSize: "clamp(6px, 0.9vw, 8px)",
-                  fontWeight: 400,
+                  fontSize: "clamp(6px, 0.85vw, 8px)",
                   letterSpacing: "0.38em",
                   textTransform: "uppercase",
                   color: "#fff",
@@ -161,24 +132,19 @@ export default function SplashScreen() {
                 PREMIUM QUALITY
               </motion.p>
 
-              {/* Leaf ornament — matching the Canva template style */}
+              {/* Leaf ornament */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: d(0.8), delay: 1.65, ease: "easeOut" }}
-                style={{ marginTop: "clamp(18px, 3vw, 30px)" }}
+                transition={{ duration: d(0.6), delay: 1.6, ease: "easeOut" }}
+                style={{ marginTop: "clamp(16px, 2.6vw, 28px)" }}
               >
-                <svg width="clamp(60px, 8vw, 90px)" height="18" viewBox="0 0 90 18" fill="none">
-                  {/* Left branch */}
-                  <path d="M43 9 C36 5, 26 4, 10 9" stroke="rgba(255,255,255,0.7)" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
-                  <path d="M38 9 C34 6, 28 5, 20 7" stroke="rgba(255,255,255,0.45)" strokeWidth="0.7" fill="none" strokeLinecap="round"/>
-                  <path d="M33 9 C30 7, 26 6.5, 22 7.5" stroke="rgba(255,255,255,0.3)" strokeWidth="0.6" fill="none" strokeLinecap="round"/>
-                  {/* Right branch */}
-                  <path d="M47 9 C54 5, 64 4, 80 9" stroke="rgba(255,255,255,0.7)" strokeWidth="0.9" fill="none" strokeLinecap="round"/>
-                  <path d="M52 9 C56 6, 62 5, 70 7" stroke="rgba(255,255,255,0.45)" strokeWidth="0.7" fill="none" strokeLinecap="round"/>
-                  <path d="M57 9 C60 7, 64 6.5, 68 7.5" stroke="rgba(255,255,255,0.3)" strokeWidth="0.6" fill="none" strokeLinecap="round"/>
-                  {/* Center diamond */}
-                  <rect x="43.5" y="7.5" width="3" height="3" fill="rgba(255,255,255,0.8)" transform="rotate(45 45 9)"/>
+                <svg width="clamp(58px, 7.5vw, 86px)" height="16" viewBox="0 0 86 16" fill="none">
+                  <path d="M41 8 C34 4, 24 3, 8 8"  stroke="rgba(255,255,255,0.65)" strokeWidth="0.85" fill="none" strokeLinecap="round"/>
+                  <path d="M36 8 C32 6, 26 5, 18 6.5" stroke="rgba(255,255,255,0.38)" strokeWidth="0.7"  fill="none" strokeLinecap="round"/>
+                  <path d="M45 8 C52 4, 62 3, 78 8"  stroke="rgba(255,255,255,0.65)" strokeWidth="0.85" fill="none" strokeLinecap="round"/>
+                  <path d="M50 8 C54 6, 60 5, 68 6.5" stroke="rgba(255,255,255,0.38)" strokeWidth="0.7"  fill="none" strokeLinecap="round"/>
+                  <rect x="41.5" y="6.5" width="3" height="3" fill="rgba(255,255,255,0.82)" transform="rotate(45 43 8)"/>
                 </svg>
               </motion.div>
 

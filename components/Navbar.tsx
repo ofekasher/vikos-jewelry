@@ -44,7 +44,7 @@ export default function Navbar() {
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
         background: heroMode ? "transparent" : "#FAFAF8",
         transition: "background 0.4s ease",
-      }} className={heroMode ? "navbar-hero-mode" : ""}>
+      }} className={`${heroMode ? "navbar-hero-mode" : ""} nav-root`}>
 
         {/* LEFT — desktop nav links */}
         <div className="nav-desktop-links" style={{ display: "flex", gap: "32px", alignItems: "center", flex: 1 }}>
@@ -88,8 +88,9 @@ export default function Navbar() {
         {/* RIGHT — icons */}
         <div style={{ display: "flex", alignItems: "center", gap: "20px", flex: 1, justifyContent: "flex-end" }}>
 
-          {/* Language toggle */}
+          {/* Language toggle — hidden on mobile */}
           <button
+            className="nav-hide-mobile"
             onClick={() => setLang(lang === "en" ? "he" : "en")}
             style={{
               background: "none", border: "none", cursor: "pointer",
@@ -106,8 +107,9 @@ export default function Navbar() {
             {lang === "en" ? "עב" : "EN"}
           </button>
 
-          {/* Search icon */}
+          {/* Search icon — hidden on mobile */}
           <button
+            className="nav-hide-mobile"
             aria-label="Search"
             style={{ background: "none", border: "none", cursor: "pointer", color: iconColor, padding: "4px", display: "flex", transition: "color 0.4s ease" }}
             onMouseEnter={e => (e.currentTarget.style.color = "#C9A96E")}
@@ -119,8 +121,8 @@ export default function Navbar() {
             </svg>
           </button>
 
-          {/* Account / wishlist icon */}
-          <Link href="/wishlist" aria-label={t.nav.wishlist} style={{
+          {/* Account / wishlist icon — hidden on mobile */}
+          <Link href="/wishlist" aria-label={t.nav.wishlist} className="nav-hide-mobile" style={{
             background: "none", border: "none", cursor: "pointer",
             color: iconColor, padding: "4px", display: "flex",
             position: "relative", textDecoration: "none", transition: "color 0.4s ease",
@@ -167,17 +169,39 @@ export default function Navbar() {
       </nav>
 
       <style>{`
-        @media (max-width: 767px) {
-          .nav-desktop-links { display: none !important; }
-          .nav-mobile-only   { display: flex !important; }
-        }
+        /* ── Desktop ── */
         @media (min-width: 768px) {
           .nav-desktop-links { display: flex !important; }
           .nav-mobile-only   { display: none !important; }
+          .nav-hide-mobile   { display: flex !important; }
         }
+
+        /* ── Mobile ── */
         @media (max-width: 767px) {
-          .navbar-hero-mode { display: none !important; }
-          .nav-logo-text { font-size: 32px !important; letter-spacing: 0.26em !important; }
+          /* Navbar height + padding */
+          .nav-root { height: 60px !important; padding: 0 20px !important; }
+
+          /* Hide desktop links + extra icons */
+          .nav-desktop-links { display: none !important; }
+          .nav-hide-mobile   { display: none !important; }
+
+          /* Show hamburger */
+          .nav-mobile-only { display: flex !important; }
+
+          /* Hamburger moves to LEFT — swap flex order */
+          .nav-mobile-only { order: -1; }
+
+          /* Logo — smaller, centered */
+          .nav-logo-text {
+            font-size: 22px !important;
+            letter-spacing: 0.24em !important;
+          }
+
+          /* Hero-mode: show navbar on mobile (don't hide) */
+          .navbar-hero-mode { display: flex !important; }
+
+          /* Right group — only cart + hamburger visible, tighten gap */
+          .nav-root > div:last-child { gap: 12px !important; }
         }
       `}</style>
 

@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -114,7 +115,8 @@ export default function ShopPage() {
     fetch("/api/products").then(r => r.json()).then(setProducts).catch(() => {});
   }, []);
 
-  const [activeCategory, setActiveCategory] = useState("all");
+  const searchParams = useSearchParams();
+  const [activeCategory, setActiveCategory] = useState(() => searchParams.get("category") ?? "all");
   const [sort, setSort] = useState("default");
   const [showSort, setShowSort] = useState(false);
   const [material, setMaterial] = useState("הכל");

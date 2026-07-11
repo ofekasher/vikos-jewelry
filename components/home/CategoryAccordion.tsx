@@ -5,7 +5,7 @@ import { useT } from "@/lib/LanguageContext";
 const CARDS = [
   { id: "rings",     img: "/cat-rings.jpg",                href: "/shop?category=rings" },
   { id: "earrings",  img: "/cat-earrings.jpg",             href: "/shop?category=earrings" },
-  { id: "necklaces", img: "/cat-necklaces.jpg",            href: "/shop?category=necklaces" },
+  { id: "necklaces", img: "/necklaces/pe7k_neck_01.png",   href: "/shop?category=necklaces" },
   { id: "bracelets", img: "/cat-bracelets.jpg",            href: "/shop?category=bracelets" },
 ];
 
@@ -40,11 +40,8 @@ export default function CategoryAccordion() {
         .cat-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          grid-template-rows: 1fr 1fr;
+          grid-template-rows: 300px 300px;
           width: 100%;
-          height: 80vh;
-          min-height: 480px;
-          max-height: 800px;
         }
 
         .cat-block {
@@ -54,6 +51,7 @@ export default function CategoryAccordion() {
           align-items: center;
           justify-content: center;
           cursor: pointer;
+          text-decoration: none;
         }
 
         .cat-block-img {
@@ -76,7 +74,10 @@ export default function CategoryAccordion() {
         }
 
         .cat-block-label {
-          position: relative;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
           z-index: 2;
           font-family: 'Inter', system-ui, sans-serif;
           font-size: clamp(12px, 1.4vw, 16px);
@@ -84,10 +85,10 @@ export default function CategoryAccordion() {
           letter-spacing: 0.32em;
           text-transform: uppercase;
           color: #ffffff;
-          padding-right: 0.32em; /* compensate letter-spacing */
+          white-space: nowrap;
+          padding-right: 0.32em;
         }
 
-        /* Desktop hover */
         @media (hover: hover) and (pointer: fine) {
           .cat-block:hover .cat-block-img {
             filter: brightness(0.82);
@@ -95,7 +96,6 @@ export default function CategoryAccordion() {
           }
         }
 
-        /* Thin border between cells */
         .cat-block:nth-child(1),
         .cat-block:nth-child(2) {
           border-bottom: 1px solid rgba(255,255,255,0.12);
@@ -105,15 +105,13 @@ export default function CategoryAccordion() {
           border-right: 1px solid rgba(255,255,255,0.12);
         }
 
-        /* Mobile: 2×2, square blocks */
         @media (max-width: 768px) {
           .cat-grid {
-            height: auto;
-            max-height: none;
-            min-height: unset;
+            grid-template-rows: auto auto;
           }
           .cat-block {
             aspect-ratio: 1 / 1;
+            height: auto;
           }
         }
       `}</style>

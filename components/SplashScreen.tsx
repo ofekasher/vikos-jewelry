@@ -10,6 +10,8 @@ export default function SplashScreen() {
     if (sessionStorage.getItem("vikos_splash")) return;
     sessionStorage.setItem("vikos_splash", "1");
     setVisible(true);
+    const t = setTimeout(dismiss, 4000);
+    return () => clearTimeout(t);
   }, []);
 
   function dismiss() {

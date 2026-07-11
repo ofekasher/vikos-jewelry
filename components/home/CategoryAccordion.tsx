@@ -20,18 +20,15 @@ export default function CategoryAccordion() {
   };
 
   return (
-    <section style={{ width: "100%" }}>
+    <section style={{ background: "#FAFAF8", padding: "0 16px 16px" }}>
       <div className="cat-grid">
         {CARDS.map(({ id, img, href }) => (
           <Link key={id} href={href} className="cat-block" style={{ textDecoration: "none" }}>
-            {/* Background image */}
             <img src={img} alt={labels[id]} loading="lazy" className="cat-block-img" />
-
-            {/* Dark overlay */}
-            <div className="cat-block-overlay" />
-
-            {/* Label */}
-            <span className="cat-block-label">{labels[id]}</span>
+            <div className="cat-block-footer">
+              <span className="cat-block-label">{labels[id]}</span>
+              <span className="cat-block-arrow">→</span>
+            </div>
           </Link>
         ))}
       </div>
@@ -40,79 +37,82 @@ export default function CategoryAccordion() {
         .cat-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          grid-template-rows: 300px 300px;
+          gap: 8px;
           width: 100%;
+          max-width: 900px;
+          margin: 0 auto;
         }
 
         .cat-block {
           position: relative;
           overflow: hidden;
           display: flex;
-          align-items: center;
-          justify-content: center;
+          flex-direction: column;
+          background: #ffffff;
           cursor: pointer;
-          text-decoration: none;
-        }
-
-        .cat-block-img {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: center;
-          transition: transform 600ms cubic-bezier(0.23, 1, 0.32, 1),
-                      filter 400ms ease;
-          filter: brightness(0.62);
-        }
-
-        .cat-block-overlay {
-          position: absolute;
-          inset: 0;
-          background: rgba(0, 0, 0, 0.22);
-          pointer-events: none;
-        }
-
-        .cat-block-label {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          z-index: 2;
-          font-family: 'Inter', system-ui, sans-serif;
-          font-size: clamp(12px, 1.4vw, 16px);
-          font-weight: 500;
-          letter-spacing: 0.32em;
-          text-transform: uppercase;
-          color: #ffffff;
-          white-space: nowrap;
-          padding-right: 0.32em;
+          border: 1px solid rgba(0,0,0,0.06);
+          transition: box-shadow 300ms ease;
         }
 
         @media (hover: hover) and (pointer: fine) {
+          .cat-block:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+          }
           .cat-block:hover .cat-block-img {
-            filter: brightness(0.82);
-            transform: scale(1.04);
+            transform: scale(1.03);
           }
         }
 
-        .cat-block:nth-child(1),
-        .cat-block:nth-child(2) {
-          border-bottom: 1px solid rgba(255,255,255,0.12);
+        .cat-block-img {
+          width: 100%;
+          height: 260px;
+          object-fit: contain;
+          object-position: center center;
+          padding: 24px;
+          box-sizing: border-box;
+          transition: transform 500ms cubic-bezier(0.23, 1, 0.32, 1);
+          background: #fafaf8;
         }
-        .cat-block:nth-child(1),
-        .cat-block:nth-child(3) {
-          border-right: 1px solid rgba(255,255,255,0.12);
+
+        .cat-block-footer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 12px 20px;
+          border-top: 1px solid rgba(0,0,0,0.06);
+          background: #ffffff;
+        }
+
+        .cat-block-label {
+          font-family: 'Inter', system-ui, sans-serif;
+          font-size: 10px;
+          font-weight: 500;
+          letter-spacing: 0.28em;
+          text-transform: uppercase;
+          color: #111111;
+          padding-right: 0.28em;
+        }
+
+        .cat-block-arrow {
+          font-size: 12px;
+          color: #C9A96E;
+          transition: transform 200ms ease;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+          .cat-block:hover .cat-block-arrow {
+            transform: translateX(3px);
+          }
         }
 
         @media (max-width: 768px) {
-          .cat-grid {
-            grid-template-rows: auto auto;
-          }
-          .cat-block {
-            aspect-ratio: 1 / 1;
-            height: auto;
-          }
+          .cat-grid { gap: 6px; }
+          .cat-block-img { height: 180px; padding: 16px; }
+          .cat-block-footer { padding: 10px 14px; }
+        }
+
+        @media (max-width: 480px) {
+          .cat-block-img { height: 140px; }
         }
       `}</style>
     </section>

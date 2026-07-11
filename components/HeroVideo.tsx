@@ -9,7 +9,7 @@ export default function HeroVideo() {
       background: "#f5f0eb",
     }}>
       <img
-        src="/hero-santorini.jpg"
+        src="/hero-editorial.jpg"
         alt="VIKOS Jewelry"
         loading="eager"
         style={{

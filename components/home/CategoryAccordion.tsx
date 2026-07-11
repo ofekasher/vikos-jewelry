@@ -3,10 +3,10 @@ import Link from "next/link";
 import { useT } from "@/lib/LanguageContext";
 
 const CARDS = [
-  { id: "earrings",  img: "/instagram/ig16.jpeg",          href: "/shop?category=earrings" },
-  { id: "rings",     img: "/rings/RA_hand_01.png",         href: "/shop?category=rings" },
+  { id: "rings",     img: "/cat-rings.jpg",                href: "/shop?category=rings" },
+  { id: "earrings",  img: "/cat-earrings.jpg",             href: "/shop?category=earrings" },
   { id: "necklaces", img: "/necklaces/pe7k_neck_01.png",   href: "/shop?category=necklaces" },
-  { id: "bracelets", img: "/bracelets/br_01.png",          href: "/shop?category=bracelets" },
+  { id: "bracelets", img: "/cat-bracelets.jpg",            href: "/shop?category=bracelets" },
 ];
 
 export default function CategoryAccordion() {

@@ -45,7 +45,6 @@ export default function CategoryAccordion() {
 
         .cat-block {
           position: relative;
-          overflow: hidden;
           display: flex;
           flex-direction: column;
           background: #ffffff;
@@ -58,20 +57,23 @@ export default function CategoryAccordion() {
           .cat-block:hover {
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
           }
-          .cat-block:hover .cat-block-img {
-            transform: scale(1.03);
-          }
         }
 
         .cat-block-img {
-          width: 100%;
+          width: calc(100% - 32px);
           height: 260px;
           object-fit: contain;
           object-position: center center;
-          padding: 24px;
-          box-sizing: border-box;
+          margin: 16px;
+          display: block;
+          background: #f5f0eb;
           transition: transform 500ms cubic-bezier(0.23, 1, 0.32, 1);
-          background: #fafaf8;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+          .cat-block:hover .cat-block-img {
+            transform: scale(1.02);
+          }
         }
 
         .cat-block-footer {

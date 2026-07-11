@@ -8,7 +8,7 @@ export default function LookbookSection() {
   const l = t.lookbook;
 
   return (
-    <section style={{ overflow: "hidden", background: "#111111" }}>
+    <section style={{ overflow: "hidden", background: "#FAFAF8" }}>
       <div className="lookbook-grid">
 
         {/* Image — 60% */}
@@ -48,7 +48,7 @@ export default function LookbookSection() {
             fontSize: "clamp(2.2rem, 3.5vw, 3.4rem)",
             fontWeight: 400,
             fontStyle: "italic",
-            color: "#ffffff",
+            color: "#111111",
             lineHeight: 1.1,
             margin: "0 0 20px",
             whiteSpace: "pre-line",
@@ -61,7 +61,7 @@ export default function LookbookSection() {
           <p style={{
             fontFamily: "'Frank Ruhl Libre', serif",
             fontSize: "13px",
-            color: "rgba(255,255,255,0.55)",
+            color: "#6B6B6B",
             lineHeight: 1.85,
             fontWeight: 300,
             marginBottom: "40px",
@@ -90,7 +90,7 @@ export default function LookbookSection() {
           flex-direction: column;
           justify-content: flex-end;
           padding: 72px 56px;
-          background: #111111;
+          background: #FAFAF8;
         }
         .lookbook-cta {
           display: inline-flex;
@@ -100,9 +100,9 @@ export default function LookbookSection() {
           font-size: 10px;
           letter-spacing: 0.22em;
           text-transform: uppercase;
-          color: #C9A96E;
+          color: #111111;
           text-decoration: none;
-          border-bottom: 1px solid rgba(201,169,110,0.4);
+          border-bottom: 1px solid rgba(17,17,17,0.35);
           padding-bottom: 2px;
           align-self: flex-start;
           transition: border-color 180ms ease-out;

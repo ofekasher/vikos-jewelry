@@ -12,14 +12,14 @@ function IgIcon({ size = 16, color = "currentColor" }: { size?: number; color?: 
 }
 
 const IMAGES = [
-  { src: "/instagram/ig1.jpeg",  alt: "VIKOS Jewelry" },
-  { src: "/instagram/ig11.jpeg", alt: "VIKOS Jewelry" },
-  { src: "/instagram/ig12.jpeg", alt: "VIKOS Jewelry" },
-  { src: "/instagram/ig13.jpeg", alt: "VIKOS Jewelry" },
-  { src: "/instagram/ig3.jpeg",  alt: "VIKOS Jewelry" },
-  { src: "/instagram/ig15.jpeg", alt: "VIKOS Jewelry" },
-  { src: "/instagram/ig16.jpeg", alt: "VIKOS Jewelry" },
-  { src: "/instagram/ig8.jpeg",  alt: "VIKOS Jewelry" },
+  { src: "/instagram/ig2.jpeg",  alt: "VIKOS Jewelry" },
+  { src: "/instagram/ig5.jpeg",  alt: "VIKOS Jewelry" },
+  { src: "/instagram/ig7.jpeg",  alt: "VIKOS Jewelry" },
+  { src: "/instagram/ig9.jpeg",  alt: "VIKOS Jewelry" },
+  { src: "/instagram/ig4.jpeg",  alt: "VIKOS Jewelry" },
+  { src: "/instagram/ig10.jpeg", alt: "VIKOS Jewelry" },
+  { src: "/instagram/ig14.jpeg", alt: "VIKOS Jewelry" },
+  { src: "/instagram/ig17.jpeg", alt: "VIKOS Jewelry" },
 ];
 
 const AREAS = ["a", "b", "c", "d", "e", "f", "g", "h"] as const;

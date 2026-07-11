@@ -11,6 +11,7 @@ export default function Navbar() {
   const wCount = wishlistCount();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [shopOpen, setShopOpen] = useState(false);
   const count = cartCount();
   const { lang, setLang } = useLang();
   const t = useT();
@@ -56,16 +57,75 @@ export default function Navbar() {
 
         {/* LEFT — desktop nav links */}
         <div className="nav-desktop-links" style={{ display: "flex", gap: "32px", alignItems: "center", flex: 1 }}>
-          {navLinks.map(l => (
+          {navLinks.map(l => l.href === "/shop" ? (
+            /* SHOP with dropdown */
+            <div key="/shop" style={{ position: "relative" }}
+              onMouseEnter={() => setShopOpen(true)}
+              onMouseLeave={() => setShopOpen(false)}
+            >
+              <Link href="/shop" style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: "11px", fontWeight: 500,
+                letterSpacing: "0.15em", textTransform: "uppercase",
+                color: shopOpen ? "#C9A96E" : heroMode ? "rgba(255,255,255,0.85)" : "#1a1a1a",
+                textDecoration: "none", transition: "color 0.2s ease",
+                display: "flex", alignItems: "center", gap: "4px",
+              }}>
+                {l.label}
+                <svg width="8" height="8" viewBox="0 0 8 8" fill="none" style={{ transition: "transform 0.2s ease", transform: shopOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
+                  <path d="M1 2.5L4 5.5L7 2.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+                </svg>
+              </Link>
+
+              <AnimatePresence>
+                {shopOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+                    style={{
+                      position: "absolute", top: "calc(100% + 14px)", left: "50%",
+                      transform: "translateX(-50%)",
+                      background: "#FAFAF8",
+                      border: "1px solid rgba(0,0,0,0.07)",
+                      boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                      minWidth: "160px",
+                      padding: "8px 0",
+                    }}
+                  >
+                    {[
+                      { label: t.categories.rings.label,     href: "/shop?category=rings" },
+                      { label: t.categories.necklaces.label, href: "/shop?category=necklaces" },
+                      { label: t.categories.earrings.label,  href: "/shop?category=earrings" },
+                      { label: t.categories.bracelets?.label ?? "Bracelets", href: "/shop?category=bracelets" },
+                    ].map(item => (
+                      <Link key={item.href} href={item.href}
+                        style={{
+                          display: "block", padding: "10px 20px",
+                          fontFamily: "'Inter', sans-serif",
+                          fontSize: "10px", fontWeight: 500,
+                          letterSpacing: "0.18em", textTransform: "uppercase",
+                          color: "#1a1a1a", textDecoration: "none",
+                          transition: "color 0.15s ease",
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.color = "#C9A96E")}
+                        onMouseLeave={e => (e.currentTarget.style.color = "#1a1a1a")}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
             <Link key={l.href} href={l.href} style={{
               fontFamily: "'Inter', sans-serif",
-              fontSize: "11px",
-              fontWeight: 500,
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
+              fontSize: "11px", fontWeight: 500,
+              letterSpacing: "0.15em", textTransform: "uppercase",
               color: heroMode ? "rgba(255,255,255,0.85)" : "#1a1a1a",
-              textDecoration: "none",
-              transition: "color 0.2s ease",
+              textDecoration: "none", transition: "color 0.2s ease",
             }}
             onMouseEnter={e => (e.currentTarget.style.color = "#C9A96E")}
             onMouseLeave={e => (e.currentTarget.style.color = heroMode ? "rgba(255,255,255,0.85)" : "#1a1a1a")}

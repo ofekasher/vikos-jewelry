@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -108,7 +108,7 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
   );
 }
 
-export default function ShopPage() {
+function ShopContent() {
   const { lang } = useLang();
   const [products, setProducts] = useState<Product[]>([]);
   useEffect(() => {
@@ -352,5 +352,13 @@ export default function ShopPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function ShopPage() {
+  return (
+    <Suspense fallback={null}>
+      <ShopContent />
+    </Suspense>
   );
 }

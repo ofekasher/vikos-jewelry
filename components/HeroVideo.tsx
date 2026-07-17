@@ -1,11 +1,12 @@
 "use client";
 import { motion, useReducedMotion } from "motion/react";
-import { useT } from "@/lib/LanguageContext";
+import { useLang } from "@/lib/LanguageContext";
 import Link from "next/link";
 
 export default function HeroVideo() {
   const reduce = useReducedMotion();
-  const t = useT();
+  const { lang } = useLang();
+  const he = lang !== "en";
 
   const ease = [0.23, 1, 0.32, 1] as const;
 
@@ -57,7 +58,7 @@ export default function HeroVideo() {
             marginBottom: "20px",
           }}
         >
-          {t.home.heroEyebrow ?? "תכשיטים יוקרתיים"}
+          {he ? "תכשיטים יוקרתיים" : "Luxury Jewelry"}
         </motion.p>
 
         {/* Main headline */}
@@ -76,10 +77,10 @@ export default function HeroVideo() {
             maxWidth: "740px",
           }}
         >
-          {t.home.heroTitle ?? "עיצוב שמדבר"}
+          {he ? "עיצוב שמדבר" : "Design That Speaks"}
           <br />
           <em style={{ fontStyle: "normal", fontWeight: 600, letterSpacing: "0.06em", fontSize: "0.75em" }}>
-            {t.home.heroSubtitle ?? "VIKOS"}
+            VIKOS
           </em>
         </motion.h1>
 
@@ -103,7 +104,7 @@ export default function HeroVideo() {
             maxWidth: "380px", marginBottom: "36px",
           }}
         >
-          {t.home.heroBody ?? "תכשיטים בעבודת יד · עיצוב סקנדינבי · ישראל"}
+          {he ? "תכשיטים בעבודת יד · עיצוב סקנדינבי · ישראל" : "Handcrafted Jewelry · Scandinavian Design · Israel"}
         </motion.p>
 
         {/* CTA */}
@@ -124,7 +125,7 @@ export default function HeroVideo() {
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.88)"; }}
           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#fff"; }}
           >
-            {t.home.heroCta ?? "לקולקציה"}
+            {he ? "לקולקציה" : "Shop Now"}
           </Link>
           <Link href="/custom" style={{
             padding: "14px 36px",
@@ -138,7 +139,7 @@ export default function HeroVideo() {
           onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.9)"; }}
           onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.55)"; }}
           >
-            {t.home.heroCtaCustom ?? "הזמנה מותאמת"}
+            {he ? "הזמנה מותאמת" : "Custom Order"}
           </Link>
         </motion.div>
       </div>
@@ -160,7 +161,7 @@ export default function HeroVideo() {
             fontSize: "9px", letterSpacing: "0.28em",
             textTransform: "uppercase", color: "rgba(255,255,255,0.45)",
           }}>
-            {t.home.heroScroll ?? "גלול"}
+            {he ? "גלול" : "Scroll"}
           </span>
           <motion.div
             animate={{ y: [0, 6, 0] }}

@@ -51,7 +51,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" dir="ltr" className={`${cormorant.variable} ${inter.variable} ${frankRuhl.variable}`}>
+    <html lang="he" dir="rtl" className={`${cormorant.variable} ${inter.variable} ${frankRuhl.variable}`}>
       <head>
         <meta name="referrer" content="no-referrer" />
       </head>

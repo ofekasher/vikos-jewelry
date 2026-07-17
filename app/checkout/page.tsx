@@ -107,7 +107,7 @@ export default function CheckoutPage() {
 
   if (cartItems.length === 0 && step !== "success") {
     return (
-      <div style={{ background: "#fff", minHeight: "100vh" }} dir="rtl">
+      <div style={{ background: "#fff", minHeight: "100vh" }}>
         <Navbar /><CartDrawer />
         <div style={{ textAlign: "center", padding: "120px 32px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
           <p style={{ fontFamily: T.serif, fontSize: "1.4rem", fontWeight: 300, color: "#AAA" }}>הסל ריק</p>
@@ -121,7 +121,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div style={{ background: "#fff", minHeight: "100vh" }} dir="rtl">
+    <div style={{ background: "#fff", minHeight: "100vh" }}>
       <Navbar />
       <CartDrawer />
 

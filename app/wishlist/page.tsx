@@ -21,7 +21,7 @@ export default function WishlistPage() {
   const { wishlist, toggleWishlist, addToCart } = useStore();
 
   return (
-    <div style={{ background: "#fff", minHeight: "100vh" }} dir="rtl">
+    <div style={{ background: "#fff", minHeight: "100vh" }}>
       <Navbar />
       <CartDrawer />
 

@@ -19,7 +19,7 @@ const fadeIn = { initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0
 
 export default function AboutPage() {
   return (
-    <div style={{ background: "#fff", minHeight: "100vh" }} dir="rtl">
+    <div style={{ background: "#fff", minHeight: "100vh" }}>
       <Navbar />
       <CartDrawer />
 

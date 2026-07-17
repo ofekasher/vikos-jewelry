@@ -129,7 +129,7 @@ export default function CustomPage() {
   };
 
   return (
-    <main style={{ minHeight: "100vh", background: T.warm }} dir="rtl">
+    <main style={{ minHeight: "100vh", background: T.warm }}>
       <Navbar />
       <CartDrawer />
 

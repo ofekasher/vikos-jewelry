@@ -101,7 +101,7 @@ export default function ProductViewer360({ images, alt }: Props) {
         borderRadius: "2px", padding: "4px 10px",
         display: "flex", alignItems: "center", gap: "5px",
       }}>
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="1.5">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8B7355" strokeWidth="1.5">
           <path d="M21.5 12a9.5 9.5 0 1 1-19 0 9.5 9.5 0 0 1 19 0z"/>
           <path d="M12 8v4l2.5 2.5"/>
           <path d="M16 3.5 C 18 5 20 8 20 12" strokeLinecap="round"/>
@@ -123,7 +123,7 @@ export default function ProductViewer360({ images, alt }: Props) {
             border: "none", cursor: "pointer",
           }}
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="1.5" strokeLinecap="round">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8B7355" strokeWidth="1.5" strokeLinecap="round">
             <path d="M5 3l14 9-14 9V3z"/>
           </svg>
           <span style={{ fontFamily:"'Inter',sans-serif", fontSize:"9px", color:"rgba(255,255,255,0.8)", letterSpacing:"0.12em" }}>
@@ -139,7 +139,7 @@ export default function ProductViewer360({ images, alt }: Props) {
             <div style={{
               position: "absolute", top: 0, left: 0,
               width: `${percent}%`, height: "100%",
-              background: "#C9A96E", borderRadius: "1px",
+              background: "#8B7355", borderRadius: "1px",
               transition: isDragging ? "none" : "width 0.12s ease",
             }} />
             {/* Frame dots */}
@@ -154,7 +154,7 @@ export default function ProductViewer360({ images, alt }: Props) {
                   width: i === currentFrame ? "8px" : "5px",
                   height: i === currentFrame ? "8px" : "5px",
                   borderRadius: "50%",
-                  background: i === currentFrame ? "#C9A96E" : "#D0D0D0",
+                  background: i === currentFrame ? "#8B7355" : "#D0D0D0",
                   border: "none", cursor: "pointer", padding: 0,
                   transition: "all 0.2s",
                 }}

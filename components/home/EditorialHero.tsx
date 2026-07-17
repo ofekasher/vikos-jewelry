@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useT } from "@/lib/LanguageContext";
 
 export default function EditorialHero() {
@@ -13,7 +13,8 @@ export default function EditorialHero() {
         {/* Text side */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
           className="editorial-hero-text"
         >
@@ -22,7 +23,7 @@ export default function EditorialHero() {
             fontSize: "13px",
             letterSpacing: "0.25em",
             textTransform: "uppercase",
-            color: "#C9A96E",
+            color: "#8B7355",
             marginBottom: "14px",
           }}>
             {e.eyebrow}
@@ -61,7 +62,8 @@ export default function EditorialHero() {
         {/* Image side */}
         <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.9, ease: "easeOut" }}
           className="editorial-hero-img-wrap"
         >
@@ -84,7 +86,7 @@ export default function EditorialHero() {
           flex-direction: column;
           justify-content: center;
           padding: 20px 28px;
-          background: #F9F7F4;
+          background: #F0F0EE;
         }
         .editorial-hero-img-wrap {
           overflow: hidden;
@@ -114,8 +116,8 @@ export default function EditorialHero() {
         }
         @media (hover: hover) and (pointer: fine) {
           .editorial-hero-cta:hover {
-            color: #C9A96E;
-            border-bottom-color: #C9A96E;
+            color: #8B7355;
+            border-bottom-color: #8B7355;
           }
         }
         @media (max-width: 768px) {

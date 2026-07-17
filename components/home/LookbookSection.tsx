@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useT } from "@/lib/LanguageContext";
 
 export default function LookbookSection() {
@@ -8,7 +8,7 @@ export default function LookbookSection() {
   const l = t.lookbook;
 
   return (
-    <section style={{ overflow: "hidden", background: "#FAFAF8" }}>
+    <section style={{ overflow: "hidden", background: "#F0F0EE" }}>
       <div className="lookbook-grid">
 
         {/* Image — 60% */}
@@ -37,7 +37,7 @@ export default function LookbookSection() {
             fontSize: "9px",
             letterSpacing: "0.32em",
             textTransform: "uppercase",
-            color: "#C9A96E",
+            color: "#8B7355",
             marginBottom: "20px",
           }}>
             {l.eyebrow}
@@ -56,7 +56,7 @@ export default function LookbookSection() {
             {l.title}
           </h2>
 
-          <div style={{ width: "32px", height: "1px", background: "#C9A96E", marginBottom: "20px" }} />
+          <div style={{ width: "32px", height: "1px", background: "#8B7355", marginBottom: "20px" }} />
 
           <p style={{
             fontFamily: "'Frank Ruhl Libre', serif",
@@ -90,7 +90,7 @@ export default function LookbookSection() {
           flex-direction: column;
           justify-content: flex-end;
           padding: 72px 56px;
-          background: #FAFAF8;
+          background: #F0F0EE;
         }
         .lookbook-cta {
           display: inline-flex;
@@ -108,7 +108,7 @@ export default function LookbookSection() {
           transition: border-color 180ms ease-out;
         }
         @media (hover: hover) and (pointer: fine) {
-          .lookbook-cta:hover { border-bottom-color: #C9A96E; }
+          .lookbook-cta:hover { border-bottom-color: #8B7355; }
         }
         @media (max-width: 768px) {
           .lookbook-grid { grid-template-columns: 1fr; }

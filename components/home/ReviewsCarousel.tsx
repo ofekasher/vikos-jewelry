@@ -1,13 +1,13 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { useT } from "@/lib/LanguageContext";
 
 const T = {
-  gold:  "#C9A96E",
+  gold:  "#8B7355",
   black: "#111111",
   gray:  "#6B6B6B",
-  warm:  "#F9F7F4",
+  warm:  "#F0F0EE",
   serif: "'Cormorant Garamond', Georgia, serif",
   sans:  "'Inter', system-ui, sans-serif",
 };
@@ -115,7 +115,7 @@ export default function ReviewsCarousel() {
                 width: i === idx ? "22px" : "6px",
                 height: "6px",
                 borderRadius: "3px",
-                background: i === idx ? T.gold : "rgba(201,169,110,0.3)",
+                background: i === idx ? T.gold : "rgba(139,115,85,0.3)",
                 border: "none",
                 cursor: "pointer",
                 padding: 0,
@@ -134,7 +134,7 @@ export default function ReviewsCarousel() {
               className="review-nav-btn"
               style={{
                 width: "40px", height: "40px", borderRadius: "50%",
-                border: "1px solid rgba(201,169,110,0.3)",
+                border: "1px solid rgba(139,115,85,0.3)",
                 background: "none", cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}
@@ -153,8 +153,8 @@ export default function ReviewsCarousel() {
         }
         @media (hover: hover) and (pointer: fine) {
           .review-nav-btn:hover {
-            border-color: #C9A96E;
-            background: rgba(201,169,110,0.06);
+            border-color: #8B7355;
+            background: rgba(139,115,85,0.06);
           }
         }
         .review-nav-btn:active { transform: scale(0.94); }

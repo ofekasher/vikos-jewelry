@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { Heart, ShoppingBag, X } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -9,7 +9,7 @@ import Footer from "@/components/Footer";
 import { useStore } from "@/lib/store";
 
 const T = {
-  gold: "#C9A96E",
+  gold: "#8B7355",
   black: "#111111",
   gray: "#6B6B6B",
   border: "#E8E8E8",

@@ -1,14 +1,14 @@
 "use client";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
 
 const T = {
-  gold:  "#C9A96E",
+  gold:  "#8B7355",
   black: "#111111",
   gray:  "#5A5A5A",
-  warm:  "#F9F7F4",
+  warm:  "#F0F0EE",
   cream: "#FAFAF8",
   serif: "'Cormorant Garamond', Georgia, serif",
   sans:  "'Inter', system-ui, sans-serif",

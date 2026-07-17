@@ -20,7 +20,7 @@ export default function CategoryAccordion() {
   };
 
   return (
-    <section style={{ background: "#FAFAF8", padding: "0 16px 16px" }}>
+    <section style={{ background: "#F0F0EE", padding: "0 16px 16px" }}>
       <div className="cat-grid">
         {CARDS.map(({ id, img, href }) => (
           <Link key={id} href={href} className="cat-block" style={{ textDecoration: "none" }}>
@@ -97,7 +97,7 @@ export default function CategoryAccordion() {
 
         .cat-block-arrow {
           font-size: 12px;
-          color: #C9A96E;
+          color: #8B7355;
           transition: transform 200ms ease;
         }
 

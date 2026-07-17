@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { toast } from "sonner";
 import { CheckCircle, ChevronDown } from "lucide-react";
@@ -12,11 +12,11 @@ import Footer from "@/components/Footer";
 import { useStore } from "@/lib/store";
 
 const T = {
-  gold: "#C9A96E",
+  gold: "#8B7355",
   black: "#111111",
   gray: "#6B6B6B",
   border: "#E8E8E8",
-  warm: "#F9F7F4",
+  warm: "#F0F0EE",
   serif: "'Cormorant Garamond', Georgia, serif",
   sans: "'Inter', system-ui, sans-serif",
 };

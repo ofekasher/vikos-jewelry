@@ -37,11 +37,11 @@ export default function InstagramGallery() {
   const ig = useT().instagram;
 
   return (
-    <section style={{ background: "#FAFAF8", padding: "96px 32px" }}>
+    <section style={{ background: "#F0F0EE", padding: "96px 32px" }}>
       <div style={{ maxWidth: "1160px", margin: "0 auto" }}>
 
         <div style={{ textAlign: "center", marginBottom: "48px" }}>
-          <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "9px", letterSpacing: "0.36em", textTransform: "uppercase", color: "#C9A96E", marginBottom: "14px" }}>
+          <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "9px", letterSpacing: "0.36em", textTransform: "uppercase", color: "#8B7355", marginBottom: "14px" }}>
             {ig.eyebrow}
           </p>
           <h2 style={{ fontFamily: "'Cormorant Garamond',Georgia,serif", fontSize: "clamp(1.8rem,3vw,2.6rem)", fontWeight: 300, color: "#111111", margin: "0 0 12px" }}>
@@ -71,10 +71,10 @@ export default function InstagramGallery() {
         .ig-photo img { width:100%; height:100%; object-fit:cover; object-position:center; display:block; transition:transform 700ms cubic-bezier(0.23,1,0.32,1); }
         .ig-hover { position:absolute; inset:0; background:rgba(12,12,12,0.36); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 400ms ease; }
         @media (hover:hover) and (pointer:fine) { .ig-photo:hover img { transform:scale(1.05); } .ig-photo:hover .ig-hover { opacity:1; } }
-        .ig-handle { font-family:'Inter',sans-serif; font-size:11px; letter-spacing:.1em; color:#C9A96E; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:opacity .2s; }
+        .ig-handle { font-family:'Inter',sans-serif; font-size:11px; letter-spacing:.1em; color:#8B7355; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:opacity .2s; }
         .ig-handle:hover { opacity:.7; }
-        .ig-cta { display:inline-flex; align-items:center; gap:8px; padding:12px 32px; border:1px solid #C9A96E; color:#C9A96E; font-family:'Inter',sans-serif; font-size:10px; letter-spacing:.22em; text-transform:uppercase; text-decoration:none; transition:background .25s,color .25s; }
-        .ig-cta:hover { background:#C9A96E; color:#fff; }
+        .ig-cta { display:inline-flex; align-items:center; gap:8px; padding:12px 32px; border:1px solid #8B7355; color:#8B7355; font-family:'Inter',sans-serif; font-size:10px; letter-spacing:.22em; text-transform:uppercase; text-decoration:none; transition:background .25s,color .25s; }
+        .ig-cta:hover { background:#8B7355; color:#fff; }
         @media (max-width:768px) { .ig-grid { grid-template-columns:repeat(2,1fr); grid-template-rows:repeat(6,180px); grid-template-areas:"a a""a a""b c""d e""f g""h h"; } }
         @media (max-width:480px) { .ig-grid { grid-template-columns:repeat(2,1fr); grid-template-rows:auto; grid-template-areas:unset; } .ig-photo { grid-area:unset !important; aspect-ratio:1/1; } }
       `}</style>

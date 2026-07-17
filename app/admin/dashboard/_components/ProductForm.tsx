@@ -114,11 +114,11 @@ export default function ProductForm({ initialData, productId }: { initialData?: 
           onDrop={onDrop}
           onClick={() => fileRef.current?.click()}
           style={{
-            border: `2px dashed ${dragOver ? "#C9A96E" : "#E0E0E0"}`,
+            border: `2px dashed ${dragOver ? "#8B7355" : "#E0E0E0"}`,
             padding: "32px", textAlign: "center", cursor: "pointer",
-            background: dragOver ? "#FDF8F0" : "#FAFAF8",
+            background: dragOver ? "#F5F5F5" : "#FAFAF8",
             transition: "all 0.15s", marginBottom: "12px",
-            color: uploading ? "#C9A96E" : "#aaa", fontSize: "13px",
+            color: uploading ? "#8B7355" : "#aaa", fontSize: "13px",
           }}
         >
           {uploading ? "מעלה תמונות..." : "גרור ושחרר תמונות, או לחץ לבחירה"}

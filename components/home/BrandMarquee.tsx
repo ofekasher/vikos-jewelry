@@ -29,7 +29,7 @@ export default function BrandMarquee() {
               marginRight: "80px",
             }}
           >
-            <span style={{ color: "#C9A96E", fontSize: "8px", flexShrink: 0 }}>✦</span>
+            <span style={{ color: "#8B7355", fontSize: "8px", flexShrink: 0 }}>✦</span>
             {item}
           </span>
         ))}

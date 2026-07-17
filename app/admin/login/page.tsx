@@ -46,7 +46,7 @@ function LoginForm() {
             autoFocus
             required
             style={{ width: "100%", padding: "11px 14px", border: "1px solid #E0E0E0", fontSize: "14px", outline: "none", boxSizing: "border-box", fontFamily: "inherit" }}
-            onFocus={e => (e.currentTarget.style.borderColor = "#C9A96E")}
+            onFocus={e => (e.currentTarget.style.borderColor = "#8B7355")}
             onBlur={e => (e.currentTarget.style.borderColor = "#E0E0E0")}
           />
 

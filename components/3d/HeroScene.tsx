@@ -14,7 +14,7 @@ function Ring({ position, rotation, scale = 1 }: { position: [number,number,numb
   return (
     <mesh ref={ref} position={position} rotation={rotation} scale={scale}>
       <torusGeometry args={[1, 0.08, 32, 100]} />
-      <meshStandardMaterial color="#C9A96E" metalness={1} roughness={0.08} />
+      <meshStandardMaterial color="#8B7355" metalness={1} roughness={0.08} />
     </mesh>
   );
 }
@@ -71,7 +71,7 @@ function Particles() {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial size={0.028} color="#C9A96E" transparent opacity={0.6} sizeAttenuation />
+      <pointsMaterial size={0.028} color="#8B7355" transparent opacity={0.6} sizeAttenuation />
     </points>
   );
 }
@@ -82,13 +82,13 @@ function Scene() {
     <>
       <ambientLight intensity={0.3} />
       <directionalLight position={[5, 5, 5]} intensity={1.2} color="#fff8e7" />
-      <directionalLight position={[-5, -3, -5]} intensity={0.4} color="#C9A96E" />
+      <directionalLight position={[-5, -3, -5]} intensity={0.4} color="#8B7355" />
       <pointLight position={[0, 0, 3]} intensity={0.8} color="#E8D5B0" />
 
       <Environment preset="studio" />
 
       <Particles />
-      <Sparkles count={60} scale={10} size={1.2} speed={0.3} color="#C9A96E" opacity={0.5} />
+      <Sparkles count={60} scale={10} size={1.2} speed={0.3} color="#8B7355" opacity={0.5} />
 
       {/* Rings */}
       <Float speed={1.2} rotationIntensity={0.4} floatIntensity={0.6}>

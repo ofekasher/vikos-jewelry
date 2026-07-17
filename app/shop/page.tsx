@@ -334,7 +334,7 @@ function ShopContent() {
 
         {filtered.length === 0 && (
           <div style={{ textAlign: "center", padding: "96px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
-            <X size={32} strokeWidth={1} color={T.light} />
+            <IconX size={32} color={T.light} />
             <p style={{ fontFamily: T.serif, fontSize: "1.2rem", color: T.light, fontWeight: 300 }}>{lang === "en" ? "No items found" : "לא נמצאו פריטים"}</p>
             <button onClick={() => { setActiveCategory("all"); clearFilters(); }}
               style={{ marginTop: "8px", padding: "10px 24px", border: `1px solid ${T.border}`, background: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: T.gray, transition: "all 0.2s" }}

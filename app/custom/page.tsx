@@ -110,10 +110,22 @@ export default function CustomPage() {
 
   const set = (k: keyof typeof form) => (v: string) => setForm(f => ({ ...f, [k]: v }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => { setLoading(false); setSubmitted(true); }, 1200);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error("server error");
+      setSubmitted(true);
+    } catch {
+      alert("שגיאה בשליחה. אנא נסו שוב או פנו אלינו ישירות.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

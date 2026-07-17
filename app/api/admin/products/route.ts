@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase";
 import { cookies } from "next/headers";
+import { verifySessionToken } from "@/lib/session";
 
-function isAuthed(cookieStore: Awaited<ReturnType<typeof cookies>>) {
-  return cookieStore.get("admin_session")?.value === process.env.ADMIN_PASSWORD;
+async function isAuthed(cookieStore: Awaited<ReturnType<typeof cookies>>) {
+  const token = cookieStore.get("admin_session")?.value;
+  if (!token) return false;
+  return verifySessionToken(token);
 }
 
 export async function GET() {
@@ -18,7 +21,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const jar = await cookies();
-  if (!isAuthed(jar)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await isAuthed(jar))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
   const db = createServerClient();

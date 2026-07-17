@@ -75,7 +75,33 @@ export default function CheckoutPage() {
     if (validate()) setStep("payment");
   };
 
-  const handleSuccess = () => {
+  const handleSuccess = async (paypalOrderId: string) => {
+    const orderId = crypto.randomUUID();
+    const shipping = total >= 500 ? 0 : 30;
+    try {
+      await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId,
+          customer: form,
+          items: cartItems.map(i => ({
+            name: i.product.nameEn ?? i.product.nameHe,
+            nameHe: i.product.nameHe,
+            price: i.product.price,
+            quantity: i.quantity,
+            image: i.product.image,
+          })),
+          subtotal: total,
+          shipping,
+          total: total + shipping,
+          paypalOrderId,
+        }),
+      });
+    } catch {
+      // Don't block the success screen if email fails
+      console.error("Order save failed");
+    }
     setStep("success");
   };
 
@@ -256,9 +282,9 @@ export default function CheckoutPage() {
                               }],
                             });
                           }}
-                          onApprove={async (_data, actions) => {
+                          onApprove={async (data, actions) => {
                             await actions.order?.capture();
-                            handleSuccess();
+                            handleSuccess(data.orderID);
                           }}
                           onError={() => toast.error("שגיאה בתשלום, נסה שוב")}
                         />

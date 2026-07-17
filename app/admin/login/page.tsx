@@ -28,7 +28,7 @@ function LoginForm() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#FAFAF8", fontFamily: "'Inter', system-ui, sans-serif" }} dir="rtl">
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#FAFAF8", fontFamily: "'Inter', system-ui, sans-serif" }}>
       <div style={{ width: "100%", maxWidth: "380px", padding: "48px 40px", background: "#fff", boxShadow: "0 1px 24px rgba(0,0,0,0.07)" }}>
         <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "2rem", fontWeight: 300, color: "#111", marginBottom: "8px" }}>
           VIKOS Studio
@@ -46,7 +46,7 @@ function LoginForm() {
             autoFocus
             required
             style={{ width: "100%", padding: "11px 14px", border: "1px solid #E0E0E0", fontSize: "14px", outline: "none", boxSizing: "border-box", fontFamily: "inherit" }}
-            onFocus={e => (e.currentTarget.style.borderColor = "#C9A96E")}
+            onFocus={e => (e.currentTarget.style.borderColor = "#8B7355")}
             onBlur={e => (e.currentTarget.style.borderColor = "#E0E0E0")}
           />
 

@@ -3,9 +3,23 @@ import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
-import { ShoppingBag, X, Search, SlidersHorizontal, Heart } from "lucide-react";
+function IconSearch({ size = 14, color = "currentColor" }: { size?: number; color?: string }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
+}
+function IconX({ size = 12, color = "currentColor" }: { size?: number; color?: string }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
+}
+function IconSliders({ size = 12, color = "currentColor" }: { size?: number; color?: string }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="21" y1="4" x2="14" y2="4"/><line x1="10" y1="4" x2="3" y2="4"/><line x1="21" y1="12" x2="12" y2="12"/><line x1="8" y1="12" x2="3" y2="12"/><line x1="21" y1="20" x2="16" y2="20"/><line x1="12" y1="20" x2="3" y2="20"/><line x1="14" y1="2" x2="14" y2="6"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="16" y1="18" x2="16" y2="22"/></svg>;
+}
+function IconHeart({ size = 14, fill = "none", color = "currentColor" }: { size?: number; fill?: string; color?: string }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>;
+}
+function IconBag({ size = 12, strokeWidth = 1.5 }: { size?: number; strokeWidth?: number }) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>;
+}
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
@@ -15,12 +29,12 @@ import { useStore } from "@/lib/store";
 import { useLang } from "@/lib/LanguageContext";
 
 const T = {
-  gold:   "#C9A96E",
+  gold:   "#8B7355",
   black:  "#111111",
   gray:   "#6B6B6B",
   light:  "#AAAAAA",
   border: "#E8E8E8",
-  warm:   "#F9F7F4",
+  warm:   "#F0F0EE",
   serif:  "'Cormorant Garamond', Georgia, serif",
   sans:   "'Inter', system-ui, sans-serif",
 };
@@ -52,8 +66,9 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
   return (
     <motion.article
       initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.28, delay: Math.min(index * 0.04, 0.4), ease: [0.23, 1, 0.32, 1] }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.28, delay: Math.min(index * 0.04, 0.24), ease: [0.23, 1, 0.32, 1] }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{ cursor: "pointer" }}
@@ -82,14 +97,14 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
             aria-label="מועדפים"
             style={{ position: "absolute", top: "10px", left: "10px", width: "44px", height: "44px", borderRadius: "50%", background: "rgba(255,255,255,0.88)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "opacity 0.2s" }}
             className={wishlisted ? "wish-active" : "wish-btn"}>
-            <Heart size={14} fill={wishlisted ? T.gold : "none"} color={wishlisted ? T.gold : "#666"} />
+            <IconHeart size={14} fill={wishlisted ? T.gold : "none"} color={wishlisted ? T.gold : "#666"} />
           </button>
 
           {/* Quick-add — hover on desktop, always visible on touch */}
           <button onClick={e => { e.preventDefault(); e.stopPropagation(); addToCart(p); toast.success(lang === "en" ? `${displayName} added to cart` : `${displayName} נוסף לסל`, { duration: 2200 }); }}
             style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "14px", background: "rgba(255,255,255,0.92)", backdropFilter: "blur(4px)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "7px", fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase", color: T.black, transition: "transform 0.3s ease", minHeight: "44px" }}
             className={hovered ? "add-btn-visible" : "add-btn-hidden"}>
-            <ShoppingBag size={12} strokeWidth={1.5} />
+            <IconBag size={12} strokeWidth={1.5} />
             {lang === "en" ? "Add to bag" : "הוסף לסל"}
           </button>
 
@@ -175,7 +190,7 @@ function ShopContent() {
 
             {/* Search */}
             <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-              <Search size={14} color="#AAA" style={{ position: "absolute", right: "12px", pointerEvents: "none" }} />
+              <span style={{ position: "absolute", right: "12px", pointerEvents: "none", display: "flex" }}><IconSearch size={14} color="#AAA" /></span>
               <input ref={searchRef} value={search} onChange={e => setSearch(e.target.value)}
                 placeholder={lang === "en" ? "Search..." : "חיפוש..."}
                 style={{ paddingRight: "36px", paddingLeft: search ? "32px" : "14px", paddingTop: "9px", paddingBottom: "9px", border: `1px solid ${T.border}`, background: "#fff", fontFamily: T.sans, fontSize: "12px", color: T.black, outline: "none", width: "200px", transition: "border-color 0.2s, width 0.3s", borderRadius: 0 }}
@@ -184,7 +199,7 @@ function ShopContent() {
               />
               {search && (
                 <button onClick={() => setSearch("")} style={{ position: "absolute", left: "10px", background: "none", border: "none", cursor: "pointer", color: "#AAA", display: "flex" }}>
-                  <X size={12} />
+                  <IconX size={12} />
                 </button>
               )}
             </div>
@@ -211,7 +226,7 @@ function ShopContent() {
             <span style={{ fontFamily: T.sans, fontSize: "10px", color: T.light }}>{filtered.length} {lang === "en" ? "items" : "פריטים"}</span>
 
             <button onClick={() => setShowFilters(v => !v)} style={{ display: "flex", alignItems: "center", gap: "6px", background: showFilters ? T.black : "none", border: `1px solid ${showFilters ? T.black : T.border}`, cursor: "pointer", padding: "5px 12px", fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.12em", color: showFilters ? "#fff" : T.gray, transition: "all 0.2s" }}>
-              <SlidersHorizontal size={12} strokeWidth={1.5} />
+              <IconSliders size={12} />
               {lang === "en" ? "Filter" : "סינון"}
             </button>
 
@@ -319,7 +334,7 @@ function ShopContent() {
 
         {filtered.length === 0 && (
           <div style={{ textAlign: "center", padding: "96px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
-            <X size={32} strokeWidth={1} color={T.light} />
+            <IconX size={32} color={T.light} />
             <p style={{ fontFamily: T.serif, fontSize: "1.2rem", color: T.light, fontWeight: 300 }}>{lang === "en" ? "No items found" : "לא נמצאו פריטים"}</p>
             <button onClick={() => { setActiveCategory("all"); clearFilters(); }}
               style={{ marginTop: "8px", padding: "10px 24px", border: `1px solid ${T.border}`, background: "none", cursor: "pointer", fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: T.gray, transition: "all 0.2s" }}

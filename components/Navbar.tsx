@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useStore } from "@/lib/store";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
+import { useRouter } from "next/navigation";
 import { useLang, useT } from "@/lib/LanguageContext";
 
 export default function Navbar() {
@@ -16,6 +17,7 @@ export default function Navbar() {
   const { lang, setLang } = useLang();
   const t = useT();
   const pathname = usePathname();
+  const router = useRouter();
   const isHome = pathname === "/";
   const heroMode = isHome && !scrolled;
 
@@ -43,7 +45,7 @@ export default function Navbar() {
         padding: "0 40px",
         height: "76px",
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 50,
-        background: heroMode ? "transparent" : "#FAFAF8",
+        background: heroMode ? "transparent" : "#FAFAFA",
         transition: "background 0.4s ease",
       }} className={`${heroMode ? "navbar-hero-mode" : ""} nav-root`}>
 
@@ -67,9 +69,11 @@ export default function Navbar() {
                 fontFamily: "'Inter', sans-serif",
                 fontSize: "11px", fontWeight: 500,
                 letterSpacing: "0.15em", textTransform: "uppercase",
-                color: shopOpen ? "#C9A96E" : heroMode ? "rgba(255,255,255,0.85)" : "#1a1a1a",
+                color: shopOpen || pathname.startsWith("/shop") ? "#8B7355" : heroMode ? "rgba(255,255,255,0.85)" : "#1a1a1a",
                 textDecoration: "none", transition: "color 0.2s ease",
                 display: "flex", alignItems: "center", gap: "4px",
+                borderBottom: pathname.startsWith("/shop") ? "1px solid #8B7355" : "1px solid transparent",
+                paddingBottom: "2px",
               }}>
                 {l.label}
                 <svg width="8" height="8" viewBox="0 0 8 8" fill="none" style={{ transition: "transform 0.2s ease", transform: shopOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
@@ -87,7 +91,7 @@ export default function Navbar() {
                     style={{
                       position: "absolute", top: "calc(100% + 14px)", left: "50%",
                       transform: "translateX(-50%)",
-                      background: "#FAFAF8",
+                      background: "#FAFAFA",
                       border: "1px solid rgba(0,0,0,0.07)",
                       boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
                       minWidth: "160px",
@@ -109,7 +113,7 @@ export default function Navbar() {
                           color: "#1a1a1a", textDecoration: "none",
                           transition: "color 0.15s ease",
                         }}
-                        onMouseEnter={e => (e.currentTarget.style.color = "#C9A96E")}
+                        onMouseEnter={e => (e.currentTarget.style.color = "#8B7355")}
                         onMouseLeave={e => (e.currentTarget.style.color = "#1a1a1a")}
                       >
                         {item.label}
@@ -124,11 +128,13 @@ export default function Navbar() {
               fontFamily: "'Inter', sans-serif",
               fontSize: "11px", fontWeight: 500,
               letterSpacing: "0.15em", textTransform: "uppercase",
-              color: heroMode ? "rgba(255,255,255,0.85)" : "#1a1a1a",
+              color: pathname === l.href ? "#8B7355" : heroMode ? "rgba(255,255,255,0.85)" : "#1a1a1a",
               textDecoration: "none", transition: "color 0.2s ease",
+              borderBottom: pathname === l.href ? "1px solid #8B7355" : "1px solid transparent",
+              paddingBottom: "2px",
             }}
-            onMouseEnter={e => (e.currentTarget.style.color = "#C9A96E")}
-            onMouseLeave={e => (e.currentTarget.style.color = heroMode ? "rgba(255,255,255,0.85)" : "#1a1a1a")}
+            onMouseEnter={e => (e.currentTarget.style.color = "#8B7355")}
+            onMouseLeave={e => (e.currentTarget.style.color = pathname === l.href ? "#8B7355" : heroMode ? "rgba(255,255,255,0.85)" : "#1a1a1a")}
             >{l.label}</Link>
           ))}
         </div>
@@ -168,7 +174,7 @@ export default function Navbar() {
               padding: "2px 0",
               transition: "color 0.2s ease",
             }}
-            onMouseEnter={e => (e.currentTarget.style.color = "#C9A96E")}
+            onMouseEnter={e => (e.currentTarget.style.color = "#8B7355")}
             onMouseLeave={e => (e.currentTarget.style.color = heroMode ? "rgba(255,255,255,0.75)" : "#888")}
             aria-label="Switch language"
           >
@@ -179,8 +185,9 @@ export default function Navbar() {
           <button
             className="nav-hide-mobile"
             aria-label="Search"
-            style={{ background: "none", border: "none", cursor: "pointer", color: iconColor, padding: "4px", display: "flex", transition: "color 0.4s ease" }}
-            onMouseEnter={e => (e.currentTarget.style.color = "#C9A96E")}
+            onClick={() => router.push("/shop")}
+            style={{ background: "none", border: "none", cursor: "pointer", color: iconColor, padding: "13px", display: "flex", transition: "color 0.4s ease" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "#8B7355")}
             onMouseLeave={e => (e.currentTarget.style.color = iconColor)}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
@@ -192,10 +199,10 @@ export default function Navbar() {
           {/* Account / wishlist icon — hidden on mobile */}
           <Link href="/wishlist" aria-label={t.nav.wishlist} className="nav-hide-mobile" style={{
             background: "none", border: "none", cursor: "pointer",
-            color: iconColor, padding: "4px", display: "flex",
+            color: iconColor, padding: "13px", display: "flex",
             position: "relative", textDecoration: "none", transition: "color 0.4s ease",
           }}
-          onMouseEnter={e => (e.currentTarget.style.color = "#C9A96E")}
+          onMouseEnter={e => (e.currentTarget.style.color = "#8B7355")}
           onMouseLeave={e => (e.currentTarget.style.color = iconColor)}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
@@ -203,17 +210,17 @@ export default function Navbar() {
               <circle cx="12" cy="7" r="4"/>
             </svg>
             {wCount > 0 && (
-              <span style={{ position: "absolute", top: 0, right: 0, width: "14px", height: "14px", borderRadius: "50%", background: "#C9A96E", color: "#fff", fontSize: "7px", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif" }}>{wCount}</span>
+              <span style={{ position: "absolute", top: 0, right: 0, width: "14px", height: "14px", borderRadius: "50%", background: "#8B7355", color: "#fff", fontSize: "7px", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif" }}>{wCount}</span>
             )}
           </Link>
 
           {/* Cart icon */}
           <button onClick={toggleCart} aria-label={t.nav.cart} style={{
             background: "none", border: "none", cursor: "pointer",
-            color: iconColor, padding: "4px", position: "relative",
+            color: iconColor, padding: "13px", position: "relative",
             display: "flex", transition: "color 0.4s ease",
           }}
-          onMouseEnter={e => (e.currentTarget.style.color = "#C9A96E")}
+          onMouseEnter={e => (e.currentTarget.style.color = "#8B7355")}
           onMouseLeave={e => (e.currentTarget.style.color = iconColor)}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
@@ -222,7 +229,7 @@ export default function Navbar() {
               <path d="M16 10a4 4 0 01-8 0"/>
             </svg>
             {count > 0 && (
-              <span style={{ position: "absolute", top: "-2px", right: "-2px", width: "16px", height: "16px", borderRadius: "50%", background: "#C9A96E", color: "#fff", fontSize: "8px", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600 }}>{count}</span>
+              <span style={{ position: "absolute", top: "-2px", right: "-2px", width: "16px", height: "16px", borderRadius: "50%", background: "#8B7355", color: "#fff", fontSize: "8px", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontWeight: 600 }}>{count}</span>
             )}
           </button>
         </div>
@@ -285,8 +292,8 @@ export default function Navbar() {
             />
             <motion.div
               initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }}
-              transition={{ duration: 0.32, ease: [0.25, 0.46, 0.45, 0.94] }}
-              style={{ position: "fixed", top: 0, left: 0, zIndex: 51, height: "100%", width: "280px", background: "#FAFAF8", display: "flex", flexDirection: "column" }}
+              transition={{ duration: 0.32, ease: [0.32, 0.72, 0, 1] }}
+              style={{ position: "fixed", top: 0, left: 0, zIndex: 51, height: "100%", width: "280px", background: "#FAFAFA", display: "flex", flexDirection: "column" }}
             >
               {/* Drawer header */}
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px", borderBottom: "1px solid #EBEBEB" }}>

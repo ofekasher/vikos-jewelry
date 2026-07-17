@@ -1,5 +1,5 @@
 "use client";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { X, Minus, Plus, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
@@ -31,7 +31,7 @@ export default function CartDrawer() {
           />
           <motion.aside
             initial={{ x: -420 }} animate={{ x: 0 }} exit={{ x: -420 }}
-            transition={{ duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] }}
+            transition={{ duration: 0.38, ease: [0.32, 0.72, 0, 1] }}
             className="fixed top-0 right-0 z-50 h-full w-full max-w-[400px] bg-white shadow-2xl flex flex-col"
             aria-label="סל קניות"
           >
@@ -100,7 +100,7 @@ export default function CartDrawer() {
                                 <Plus size={11} />
                               </button>
                             </div>
-                            <span className="text-[13px] text-[#C9A96E]"
+                            <span className="text-[13px] text-[#8B7355]"
                               style={{ fontFamily:"'Inter',sans-serif", fontWeight:300 }}>
                               ₪{(item.product.price * item.quantity).toLocaleString()}
                             </span>
@@ -125,7 +125,7 @@ export default function CartDrawer() {
                   </span>
                 </div>
                 <Link href="/checkout" onClick={toggleCart}
-                  className="w-full py-3.5 bg-[#111] text-white text-[11px] tracking-[.22em] uppercase hover:bg-[#C9A96E] transition-colors duration-300 cursor-pointer min-h-[48px] flex items-center justify-center"
+                  className="w-full py-3.5 bg-[#111] text-white text-[11px] tracking-[.22em] uppercase hover:bg-[#8B7355] transition-colors duration-300 cursor-pointer min-h-[48px] flex items-center justify-center"
                   style={{ fontFamily:"'Inter',sans-serif", textDecoration:"none" }}>
                   {strings.checkout}
                 </Link>

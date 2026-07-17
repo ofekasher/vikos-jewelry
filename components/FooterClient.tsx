@@ -1,9 +1,24 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
 import { useT } from "@/lib/LanguageContext";
 
 export default function FooterClient() {
   const f = useT().footer;
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "ok" | "err">("idle");
+
+  async function handleNewsletter() {
+    if (!email || !email.includes("@")) { setStatus("err"); return; }
+    setStatus("loading");
+    try {
+      await fetch("/api/newsletter", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
+      setStatus("ok");
+      setEmail("");
+    } catch {
+      setStatus("err");
+    }
+  }
 
   return (
     <footer style={{ background: "#0A0A0A", color: "#fff" }}>
@@ -28,17 +43,30 @@ export default function FooterClient() {
           <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "9px", letterSpacing: "0.28em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: "12px" }}>
             {f.newsletterLabel}
           </p>
-          <div style={{ display: "flex", borderBottom: "1px solid rgba(255,255,255,0.2)", paddingBottom: "10px", gap: "8px" }}>
-            <input
-              type="email"
-              placeholder={f.newsletterPlaceholder}
-              aria-label={f.newsletterPlaceholder}
-              style={{ flex: 1, background: "none", border: "none", outline: "none", fontFamily: "'Inter',sans-serif", fontSize: "12px", color: "#fff" }}
-            />
-            <button style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'Inter',sans-serif", fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", color: "#C9A96E", whiteSpace: "nowrap", padding: 0 }}>
-              {f.newsletterCta} →
-            </button>
-          </div>
+          {status === "ok" ? (
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "11px", color: "rgba(255,255,255,0.5)", lineHeight: 1.6 }}>
+              ✓ נרשמת בהצלחה!
+            </p>
+          ) : (
+            <div style={{ display: "flex", borderBottom: `1px solid ${status === "err" ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.2)"}`, paddingBottom: "10px", gap: "8px" }}>
+              <input
+                type="email"
+                value={email}
+                onChange={e => { setEmail(e.target.value); setStatus("idle"); }}
+                onKeyDown={e => e.key === "Enter" && handleNewsletter()}
+                placeholder={f.newsletterPlaceholder}
+                aria-label={f.newsletterPlaceholder}
+                style={{ flex: 1, background: "none", border: "none", outline: "none", fontFamily: "'Inter',sans-serif", fontSize: "12px", color: "#fff" }}
+              />
+              <button
+                onClick={handleNewsletter}
+                disabled={status === "loading"}
+                style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'Inter',sans-serif", fontSize: "9px", letterSpacing: "0.22em", textTransform: "uppercase", color: "#8B7355", whiteSpace: "nowrap", padding: 0, opacity: status === "loading" ? 0.5 : 1 }}
+              >
+                {status === "loading" ? "..." : `${f.newsletterCta} →`}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Nav columns */}
@@ -75,8 +103,8 @@ export default function FooterClient() {
         </p>
         <div style={{ display: "flex", gap: "24px" }}>
           {[
-            { label: f.privacy,   href: "#" },
-            { label: f.terms,     href: "#" },
+            { label: f.privacy,   href: "/privacy" },
+            { label: f.terms,     href: "/terms" },
             { label: "Instagram", href: "https://instagram.com/vikosjewelry" },
           ].map((l) => (
             <Link key={l.label} href={l.href} style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", color: "rgba(255,255,255,0.3)", textDecoration: "none", transition: "color 0.2s" }}

@@ -9,13 +9,13 @@ type LanguageContextType = {
 };
 
 const LanguageContext = createContext<LanguageContextType>({
-  lang: "en",
+  lang: "he",
   setLang: () => {},
-  t: translations.en,
+  t: translations.he,
 });
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("en");
+  const [lang, setLangState] = useState<Lang>("he");
 
   // Restore from localStorage on mount
   useEffect(() => {

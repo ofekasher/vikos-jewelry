@@ -1,6 +1,6 @@
 "use client";
 import { useRef, MouseEvent } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 
 interface Card3DProps {
   children: React.ReactNode;

@@ -12,7 +12,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#FAFAF8", fontFamily: "'Inter', system-ui, sans-serif" }} dir="rtl">
+    <div style={{ minHeight: "100vh", background: "#FAFAF8", fontFamily: "'Inter', system-ui, sans-serif" }}>
       {!isLogin && (
         <nav style={{ background: "#fff", borderBottom: "1px solid #E8E8E4", padding: "0 32px", display: "flex", alignItems: "center", justifyContent: "space-between", height: "56px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>

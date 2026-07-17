@@ -1,7 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
+import Image from "next/image";
 import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
@@ -19,12 +20,12 @@ import { useT, useLang } from "@/lib/LanguageContext";
 
 /* ── Design tokens ── */
 const T = {
-  gold:    "#C9A96E",
+  gold:    "#8B7355",
   black:   "#111111",
   gray:    "#6B6B6B",
   light:   "#AAAAAA",
   border:  "#E8E8E8",
-  warm:    "#F9F7F4",
+  warm:    "#F0F0EE",
   serif:   "'Cormorant Garamond', Georgia, serif",
   sans:    "'Inter', system-ui, sans-serif",
 };
@@ -61,7 +62,6 @@ export default function HomePage() {
     fetch("/api/products").then(r => r.json()).then(setAllProducts).catch(() => {});
   }, []);
   const newest = allProducts.slice(0, 3);
-  const [hovered, setHovered] = useState<string | null>(null);
 
   return (
     <div style={{ background: "#fff", minHeight: "100vh" }}>
@@ -96,32 +96,30 @@ export default function HomePage() {
         <div className="newest-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "24px" }}>
           {newest.map((p, i) => (
             <motion.div key={p.id}
-              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.28, delay: i * 0.07, ease: [0.23, 1, 0.32, 1] }}
-              onMouseEnter={() => setHovered(p.id)}
-              onMouseLeave={() => setHovered(null)}
+              className="newest-product-card"
             >
               <Link href={`/product/${p.id}`} style={{ textDecoration: "none", display: "block" }}>
                 {/* Image */}
-                <div style={{ position: "relative", overflow: "hidden", background: T.warm, marginBottom: "14px" }}>
-                  <img src={p.image} alt={lang === "en" ? p.nameEn : p.nameHe} loading={i === 0 ? "eager" : "lazy"}
-                    style={{
-                      width: "100%", aspectRatio: "1/1", objectFit: "cover", display: "block",
-                      transition: "transform 0.6s ease",
-                      transform: hovered === p.id ? "scale(1.06)" : "scale(1)",
-                    }}
+                <div style={{ position: "relative", overflow: "hidden", background: T.warm, marginBottom: "14px", aspectRatio: "1/1" }}>
+                  <Image src={p.image} alt={lang === "en" ? p.nameEn : p.nameHe}
+                    fill sizes="(max-width: 768px) 50vw, 33vw"
+                    loading={i === 0 ? "eager" : "lazy"}
+                    style={{ objectFit: "cover" }}
+                    className="newest-product-img"
                   />
                   {/* Quick add */}
                   <button
                     onClick={e => { e.preventDefault(); e.stopPropagation(); addToCart(p); toast.success(t.product.addedToCart(p.nameHe), { duration: 2000 }); }}
+                    className="newest-quick-add"
                     style={{
                       position: "absolute", bottom: 0, left: 0, right: 0,
                       background: "rgba(17,17,17,0.88)",
                       border: "none", cursor: "pointer", padding: "13px",
                       fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase",
                       color: "#fff",
-                      transform: hovered === p.id ? "translateY(0)" : "translateY(100%)",
-                      transition: "transform 0.28s ease",
                     }}
                   >
                     {h.quickAdd}
@@ -168,7 +166,7 @@ export default function HomePage() {
       {/* ══════════════════════════════════════
           BRAND STORY
       ══════════════════════════════════════ */}
-      <section style={{ background: T.warm, padding: "80px 32px" }}>
+      <section style={{ background: "#F0F0EE", padding: "80px 32px" }}>
         <div style={{ maxWidth: "1160px", margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "72px", alignItems: "center" }}
           className="brand-story-grid">
           {/* Video */}
@@ -179,6 +177,7 @@ export default function HomePage() {
               muted
               loop
               playsInline
+              poster="/hero-editorial.jpg"
               style={{ width: "100%", aspectRatio: "4/5", objectFit: "cover", display: "block" }}
             />
           </div>
@@ -250,7 +249,7 @@ export default function HomePage() {
           transition: color 180ms ease-out, border-color 180ms ease-out;
         }
         @media (hover: hover) and (pointer: fine) {
-          .section-cta-link:hover { color: #C9A96E; border-bottom-color: #C9A96E; }
+          .section-cta-link:hover { color: #8B7355; border-bottom-color: #8B7355; }
         }
 
         /* Category card image hover */
@@ -261,10 +260,14 @@ export default function HomePage() {
           .category-card-link:hover .category-card-img { transform: scale(1.05); }
         }
 
-        /* Newest grid image hover */
+        /* Newest grid — CSS hover (no JS re-render) */
+        .newest-product-img { transition: transform 0.6s ease; }
         @media (hover: hover) and (pointer: fine) {
-          .newest-product-img:hover { transform: scale(1.06); }
+          .newest-product-card:hover .newest-product-img { transform: scale(1.06); }
+          .newest-quick-add { transform: translateY(100%); transition: transform 0.28s ease; }
+          .newest-product-card:hover .newest-quick-add { transform: translateY(0); }
         }
+        .newest-quick-add { transform: translateY(0); transition: transform 0.28s ease; }
 
         /* Brand story CTA */
         .brand-cta-btn {
@@ -272,7 +275,7 @@ export default function HomePage() {
           align-self: flex-start;
           margin-top: 4px;
           padding: 13px 32px;
-          background: #C9A96E;
+          background: #8B7355;
           color: #fff;
           font-family: 'Inter', system-ui, sans-serif;
           font-size: 10px;

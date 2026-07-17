@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
 import { products as allProducts, getMaterialEn } from "@/lib/products";
 import type { Product } from "@/lib/products";
@@ -39,6 +39,7 @@ export default function ProductPage({
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [openAccordion, setOpenAccordion] = useState<number | null>(0);
   const [wishlisted, setWishlisted]     = useState(false);
+  const [sizeError, setSizeError]       = useState(false);
   const [lightbox, setLightbox]         = useState(false);
 
   useEffect(() => {
@@ -83,9 +84,10 @@ export default function ProductPage({
 
   const handleAddToCart = async () => {
     if (isRing && !selectedSize) {
-      toast.error(p_t.selectSizeError, { duration: 2500 });
+      setSizeError(true);
       return;
     }
+    setSizeError(false);
     setAdding(true);
     addToCart(product);
     toast.success(p_t.addedToCart(displayName), {
@@ -127,7 +129,7 @@ export default function ProductPage({
             <li aria-hidden>·</li>
             <li><Link href="/shop" className="hover:text-[#111] transition-colors">{p_t.breadcrumbShop}</Link></li>
             <li aria-hidden>·</li>
-            <li className="text-[#C9A96E]" aria-current="page">{displayName}</li>
+            <li className="text-[#8B7355]" aria-current="page">{displayName}</li>
           </ol>
         </nav>
 
@@ -184,7 +186,7 @@ export default function ProductPage({
                     <span style={{ background: "#111", color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", padding: "3px 8px" }}>{p_t.new}</span>
                   )}
                   {product.isBestseller && (
-                    <span style={{ background: "#C9A96E", color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", padding: "3px 8px" }}>{p_t.bestseller}</span>
+                    <span style={{ background: "#8B7355", color: "#fff", fontFamily: "'Inter',sans-serif", fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", padding: "3px 8px" }}>{p_t.bestseller}</span>
                   )}
                 </div>
               )}
@@ -199,7 +201,7 @@ export default function ProductPage({
                     onClick={() => setSelectedImg(i)}
                     style={{
                       width: "60px", height: "60px", padding: 0, border: "none", cursor: "pointer",
-                      outline: selectedImg === i ? "2px solid #C9A96E" : "2px solid transparent",
+                      outline: selectedImg === i ? "2px solid #8B7355" : "2px solid transparent",
                       outlineOffset: "1px",
                       background: "#FAFAFA", overflow: "hidden", flexShrink: 0,
                       transition: "outline-color 120ms ease-out",
@@ -259,7 +261,7 @@ export default function ProductPage({
               <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "1.6rem", fontWeight: 400, color: "#111", letterSpacing: "-0.01em", margin: "0 0 4px" }}>
                 ₪{product.price.toLocaleString()}
               </p>
-              <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "11px", color: "#C9A96E", margin: 0 }}>
+              <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "11px", color: "#8B7355", margin: 0 }}>
                 {p_t.installments(Math.round(product.price / 3))}
               </p>
             </div>
@@ -287,7 +289,7 @@ export default function ProductPage({
                   padding: "4px 8px",
                   borderLeft: i < 2 ? "1px solid #EFEFEF" : "none",
                 }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8B7355" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d={t.icon} />
                   </svg>
                   <span style={{ fontFamily: "'Inter',sans-serif", fontSize: "9px", letterSpacing: "0.12em", color: "#666", textAlign: "center" }}>{t.label}</span>
@@ -304,7 +306,7 @@ export default function ProductPage({
                   </span>
                   <button
                     onClick={() => toast(p_t.sizeGuideText, { duration: 5000 })}
-                    style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", color: "#C9A96E", textDecoration: "underline", textUnderlineOffset: "2px", background: "none", border: "none", cursor: "pointer" }}
+                    style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", color: "#8B7355", textDecoration: "underline", textUnderlineOffset: "2px", background: "none", border: "none", cursor: "pointer" }}
                   >
                     {p_t.sizeGuide}
                   </button>
@@ -318,8 +320,8 @@ export default function ProductPage({
                       style={{
                         width: "40px", height: "40px",
                         fontFamily: "'Inter',sans-serif", fontSize: "12px", fontWeight: 300,
-                        border: selectedSize === size ? "1px solid #C9A96E" : "1px solid #E5E5E5",
-                        background: selectedSize === size ? "#C9A96E" : "transparent",
+                        border: selectedSize === size ? "1px solid #8B7355" : "1px solid #E5E5E5",
+                        background: selectedSize === size ? "#8B7355" : "transparent",
                         color: selectedSize === size ? "#fff" : "#555",
                         cursor: "pointer",
                       }}
@@ -328,8 +330,14 @@ export default function ProductPage({
                     </button>
                   ))}
                 </div>
-                {!selectedSize && (
+                {!selectedSize && !sizeError && (
                   <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", color: "#AAA", marginTop: "6px" }}>{p_t.sizeHint}</p>
+                )}
+                {sizeError && (
+                  <p role="alert" style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", color: "#C0392B", marginTop: "6px", display: "flex", alignItems: "center", gap: "5px" }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    {p_t.selectSizeError}
+                  </p>
                 )}
               </div>
             )}
@@ -345,7 +353,7 @@ export default function ProductPage({
                 padding: "16px 32px",
                 fontFamily: "'Inter',sans-serif",
                 fontSize: "11px", letterSpacing: "0.22em", textTransform: "uppercase", fontWeight: 500,
-                background: adding ? "#B89355" : "#C9A96E",
+                background: adding ? "#B89355" : "#8B7355",
                 color: "#fff",
                 border: "none",
                 cursor: adding ? "default" : "pointer",
@@ -410,7 +418,7 @@ export default function ProductPage({
                 className="action-btn"
                 style={{ display: "flex", alignItems: "center", gap: "6px", background: "none", border: "none", cursor: "pointer", padding: "4px 0" }}
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill={wishlisted ? "#C9A96E" : "none"} stroke={wishlisted ? "#C9A96E" : "#888"} strokeWidth="1.5">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill={wishlisted ? "#8B7355" : "none"} stroke={wishlisted ? "#8B7355" : "#888"} strokeWidth="1.5">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                 </svg>
                 <span style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", letterSpacing: "0.12em", color: "#888" }}>{p_t.saveWishlist}</span>
@@ -458,7 +466,7 @@ export default function ProductPage({
                     <motion.span
                       animate={{ rotate: openAccordion === i ? 45 : 0 }}
                       transition={{ duration: 0.18 }}
-                      style={{ color: "#C9A96E", fontSize: "18px", lineHeight: 1, userSelect: "none" }}
+                      style={{ color: "#8B7355", fontSize: "18px", lineHeight: 1, userSelect: "none" }}
                     >
                       +
                     </motion.span>
@@ -572,7 +580,7 @@ export default function ProductPage({
 
       <style>{`
         .add-btn:active  { transform: scale(0.98); }
-        .custom-btn:hover { border-color: #C9A96E !important; color: #C9A96E !important; }
+        .custom-btn:hover { border-color: #8B7355 !important; color: #8B7355 !important; }
         .action-btn:hover span { color: #111 !important; }
         .action-btn:hover svg  { stroke: #111 !important; }
         .size-btn {

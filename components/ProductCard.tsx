@@ -1,7 +1,6 @@
 "use client";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
 import { useStore } from "@/lib/store";
 import type { Product } from "@/lib/products";
 
@@ -38,12 +37,12 @@ export default function ProductCard({ product, index = 0 }: Props) {
           {/* Badges */}
           <div className="absolute top-4 start-4 flex flex-col gap-2">
             {product.isNew && (
-              <span className="bg-[#C9A96E] text-white text-[10px] tracking-widest uppercase px-2.5 py-1">
+              <span className="bg-[#8B7355] text-white text-[10px] tracking-widest uppercase px-2.5 py-1">
                 {"חדש"}
               </span>
             )}
             {product.isBestseller && (
-              <span className="bg-[#1A1714] text-[#C9A96E] text-[10px] tracking-widest uppercase px-2.5 py-1">
+              <span className="bg-[#1A1714] text-[#8B7355] text-[10px] tracking-widest uppercase px-2.5 py-1">
                 {"נמכר ביותר"}
               </span>
             )}
@@ -59,9 +58,9 @@ export default function ProductCard({ product, index = 0 }: Props) {
                 e.preventDefault();
                 addToCart(product);
               }}
-              className="w-full py-3 bg-[#FAFAF8] text-[#1A1714] text-xs tracking-[0.15em] uppercase flex items-center justify-center gap-2 hover:bg-[#C9A96E] hover:text-white transition-colors duration-300"
+              className="w-full py-3 bg-[#FAFAFA] text-[#1A1714] text-xs tracking-[0.15em] uppercase flex items-center justify-center gap-2 hover:bg-[#8B7355] hover:text-white transition-colors duration-300"
             >
-              <ShoppingBag size={14} />
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
               {"הוסף לסל"}
             </button>
           </motion.div>
@@ -71,13 +70,13 @@ export default function ProductCard({ product, index = 0 }: Props) {
       {/* Info */}
       <div>
         <Link href={`/shop/${product.id}`}>
-          <h3 className="font-serif text-lg text-[#1A1714] hover:text-[#C9A96E] transition-colors duration-300 mb-1"
+          <h3 className="font-serif text-lg text-[#1A1714] hover:text-[#8B7355] transition-colors duration-300 mb-1"
             style={{ fontFamily: "'Cormorant Garamond', serif" }}>
             {product.nameHe}
           </h3>
         </Link>
         <p className="text-xs text-[#8C8578] tracking-wide mb-2">{product.material}</p>
-        <p className="text-base text-[#C9A96E] font-medium">₪{product.price.toLocaleString()}</p>
+        <p className="text-base text-[#8B7355] font-medium">₪{product.price.toLocaleString()}</p>
       </div>
     </motion.div>
   );

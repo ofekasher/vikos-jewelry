@@ -1,13 +1,13 @@
 "use client";
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Check, Gem, Pen, Package, Phone, Mail, MapPin } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
 
 const T = {
-  gold:   "#C9A96E",
+  gold:   "#8B7355",
   black:  "#111111",
   dark:   "#0D0C0A",
   cream:  "#F5F4F0",
@@ -129,7 +129,7 @@ export default function CustomPage() {
   };
 
   return (
-    <main style={{ minHeight: "100vh", background: T.warm }} dir="rtl">
+    <main style={{ minHeight: "100vh", background: T.warm }}>
       <Navbar />
       <CartDrawer />
 
@@ -138,7 +138,7 @@ export default function CustomPage() {
         {/* Subtle background pattern */}
         <div style={{
           position: "absolute", inset: 0, opacity: 0.03,
-          backgroundImage: "radial-gradient(circle, #C9A96E 1px, transparent 1px)",
+          backgroundImage: "radial-gradient(circle, #8B7355 1px, transparent 1px)",
           backgroundSize: "40px 40px",
         }} />
         <motion.p

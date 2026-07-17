@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { useT } from "@/lib/LanguageContext";
@@ -55,7 +55,7 @@ export default function GalleryPage() {
             fontSize: "10px",
             letterSpacing: "0.42em",
             textTransform: "uppercase",
-            color: "#C9A96E",
+            color: "#8B7355",
             marginBottom: "18px",
           }}
         >
@@ -85,7 +85,7 @@ export default function GalleryPage() {
           style={{
             width: "48px",
             height: "1px",
-            background: "#C9A96E",
+            background: "#8B7355",
             margin: "28px auto 0",
             transformOrigin: "left center",
           }}

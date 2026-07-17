@@ -45,7 +45,7 @@ export default function FooterClient() {
           </p>
           {status === "ok" ? (
             <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "11px", color: "rgba(255,255,255,0.5)", lineHeight: 1.6 }}>
-              ✓ {f.newsletterSuccess ?? "נרשמת בהצלחה!"}
+              ✓ נרשמת בהצלחה!
             </p>
           ) : (
             <div style={{ display: "flex", borderBottom: `1px solid ${status === "err" ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.2)"}`, paddingBottom: "10px", gap: "8px" }}>

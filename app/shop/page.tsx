@@ -284,7 +284,7 @@ function ShopContent() {
                     {[
                       { label: lang === "en" ? "Up to ₪2,000" : "עד ₪2,000",       val: 2000 },
                       { label: lang === "en" ? "₪2,000–₪8,000" : "₪2,000–₪8,000",  val: 8000 },
-                      { label: lang === "en" ? "₪8,000+" : "₪8,000+",              val: 25000 },
+                      { label: lang === "en" ? "₪8,000–₪25,000" : "₪8,000–₪25,000", val: 25000 },
                     ].map(btn => (
                       <button key={btn.val} onClick={() => setMaxPrice(btn.val)}
                         style={{ padding: "4px 10px", border: `1px solid ${maxPrice === btn.val ? T.black : T.border}`, background: maxPrice === btn.val ? T.black : "transparent", color: maxPrice === btn.val ? "#fff" : T.gray, fontFamily: T.sans, fontSize: "10px", cursor: "pointer", transition: "all 0.18s", whiteSpace: "nowrap" }}>

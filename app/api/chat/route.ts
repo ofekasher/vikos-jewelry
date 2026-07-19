@@ -3,6 +3,16 @@ import { NextRequest, NextResponse } from "next/server";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
+const rateMap = new Map<string, { count: number; reset: number }>();
+function checkRate(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateMap.get(ip);
+  if (!entry || now > entry.reset) { rateMap.set(ip, { count: 1, reset: now + 60_000 }); return true; }
+  if (entry.count >= 10) return false;
+  entry.count++;
+  return true;
+}
+
 const SYSTEM = `אתה עוזר אישי של VIKOS Jewelry — מותג תכשיטים יוקרתי ישראלי.
 תפקידך לעזור ללקוחות בעברית בצורה חמה, מקצועית ותמציתית.
 
@@ -21,6 +31,10 @@ const SYSTEM = `אתה עוזר אישי של VIKOS Jewelry — מותג תכש�
 - אל תמציא מידע שאין לך`;
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+  if (!checkRate(ip)) {
+    return NextResponse.json({ text: "יותר מדי בקשות. נסה שוב בעוד דקה." }, { status: 429 });
+  }
   try {
     const { messages } = await req.json();
 

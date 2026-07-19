@@ -53,11 +53,6 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       availability: "https://schema.org/InStock",
       url: `${BASE}/product/${p.id}`,
     },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "5",
-      reviewCount: "48",
-    },
   } : null;
 
   return (

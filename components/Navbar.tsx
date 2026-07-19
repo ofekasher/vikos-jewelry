@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useStore } from "@/lib/store";
@@ -13,6 +13,9 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const count = cartCount();
   const { lang, setLang } = useLang();
   const t = useT();
@@ -184,7 +187,7 @@ export default function Navbar() {
           <button
             className="nav-hide-mobile"
             aria-label="Search"
-            onClick={() => router.push("/shop")}
+            onClick={() => { setSearchOpen(true); setTimeout(() => searchInputRef.current?.focus(), 50); }}
             style={{ background: "none", border: "none", cursor: "pointer", color: iconColor, padding: "13px", display: "flex", transition: "color 0.4s ease" }}
             onMouseEnter={e => (e.currentTarget.style.color = "#8B7355")}
             onMouseLeave={e => (e.currentTarget.style.color = iconColor)}
@@ -195,7 +198,7 @@ export default function Navbar() {
             </svg>
           </button>
 
-          {/* Account / wishlist icon — hidden on mobile */}
+          {/* Wishlist icon — hidden on mobile */}
           <Link href="/wishlist" aria-label={t.nav.wishlist} className="nav-hide-mobile" style={{
             background: "none", border: "none", cursor: "pointer",
             color: iconColor, padding: "13px", display: "flex",
@@ -205,8 +208,7 @@ export default function Navbar() {
           onMouseLeave={e => (e.currentTarget.style.color = iconColor)}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
             {wCount > 0 && (
               <span style={{ position: "absolute", top: 0, right: 0, width: "14px", height: "14px", borderRadius: "50%", background: "#8B7355", color: "#fff", fontSize: "7px", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif" }}>{wCount}</span>
@@ -279,6 +281,59 @@ export default function Navbar() {
           .nav-root > div:last-child { gap: 0 !important; }
         }
       `}</style>
+
+      {/* Search overlay */}
+      <AnimatePresence>
+        {searchOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(250,250,248,0.96)", backdropFilter: "blur(8px)" }}
+              onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+              style={{ position: "fixed", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 61, width: "min(560px, 90vw)" }}
+            >
+              <form onSubmit={(e) => { e.preventDefault(); if (searchQuery.trim()) { router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`); setSearchOpen(false); setSearchQuery(""); } }}>
+                <div style={{ position: "relative" }}>
+                  <span style={{ position: "absolute", left: "18px", top: "50%", transform: "translateY(-50%)", color: "#AAA", pointerEvents: "none" }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                  </span>
+                  <input
+                    ref={searchInputRef}
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    placeholder={lang === "en" ? "Search jewelry…" : "חפש תכשיטים…"}
+                    style={{
+                      width: "100%", boxSizing: "border-box",
+                      padding: "18px 48px 18px 48px",
+                      border: "none", borderBottom: "1px solid #DDD",
+                      background: "transparent",
+                      fontFamily: "'Inter', sans-serif", fontSize: "18px", fontWeight: 300,
+                      color: "#111", outline: "none",
+                      caretColor: "#8B7355",
+                    }}
+                  />
+                  <button type="button" onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+                    style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#AAA", padding: "8px" }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </button>
+                </div>
+                <p style={{ margin: "12px 0 0", fontFamily: "'Inter', sans-serif", fontSize: "11px", color: "#BBB", letterSpacing: "0.1em" }}>
+                  {lang === "en" ? "PRESS ENTER TO SEARCH" : "לחץ ENTER לחיפוש"}
+                </p>
+              </form>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Mobile drawer — slides from left */}
       <AnimatePresence>

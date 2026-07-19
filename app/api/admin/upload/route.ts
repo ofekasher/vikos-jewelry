@@ -4,7 +4,9 @@ import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
   const jar = await cookies();
-  if (jar.get("admin_session")?.value !== process.env.ADMIN_PASSWORD) {
+  const { verifySessionToken } = await import("@/lib/session");
+  const token = jar.get("admin_session")?.value ?? "";
+  if (!token || !(await verifySessionToken(token))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

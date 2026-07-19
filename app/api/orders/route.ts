@@ -22,8 +22,41 @@ interface OrderPayload {
   paypalOrderId: string;
 }
 
+async function verifyPayPalOrder(paypalOrderId: string): Promise<boolean> {
+  const clientId = process.env.PAYPAL_CLIENT_ID;
+  const secret   = process.env.PAYPAL_SECRET;
+  if (!clientId || !secret) return true; // skip verification if not configured
+
+  const base = process.env.PAYPAL_MODE === "live"
+    ? "https://api-m.paypal.com"
+    : "https://api-m.sandbox.paypal.com";
+
+  const tokenRes = await fetch(`${base}/v1/oauth2/token`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Basic ${Buffer.from(`${clientId}:${secret}`).toString("base64")}`,
+    },
+    body: "grant_type=client_credentials",
+  });
+  if (!tokenRes.ok) return false;
+  const { access_token } = await tokenRes.json() as { access_token: string };
+
+  const orderRes = await fetch(`${base}/v2/checkout/orders/${paypalOrderId}`, {
+    headers: { Authorization: `Bearer ${access_token}` },
+  });
+  if (!orderRes.ok) return false;
+  const paypalOrder = await orderRes.json() as { status: string };
+  return paypalOrder.status === "COMPLETED";
+}
+
 export async function POST(req: Request) {
   const order: OrderPayload = await req.json();
+
+  const paypalValid = await verifyPayPalOrder(order.paypalOrderId);
+  if (!paypalValid) {
+    return NextResponse.json({ error: "PayPal order verification failed" }, { status: 402 });
+  }
 
   // Save to Supabase if configured
   if (process.env.NEXT_PUBLIC_SUPABASE_URL) {

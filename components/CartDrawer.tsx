@@ -30,8 +30,10 @@ export default function CartDrawer() {
             onClick={toggleCart}
           />
           <motion.aside
-            initial={{ x: -420 }} animate={{ x: 0 }} exit={{ x: -420 }}
-            transition={{ duration: 0.38, ease: [0.32, 0.72, 0, 1] }}
+            initial={{ x: "100%" }}
+            animate={{ x: "0%" }}
+            exit={{ x: "100%", transition: { duration: 0.25, ease: [0.4, 0, 1, 1] } }}
+            transition={{ duration: 0.3, ease: [0, 0, 0.2, 1] }}
             className="fixed top-0 right-0 z-50 h-full w-full max-w-[400px] bg-white shadow-2xl flex flex-col"
             aria-label="סל קניות"
           >

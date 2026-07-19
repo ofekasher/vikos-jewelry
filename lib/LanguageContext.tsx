@@ -25,9 +25,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Keep <html> dir + lang in sync
+  // Keep <html> lang in sync (dir stays ltr always)
   useEffect(() => {
-    document.documentElement.dir  = translations[lang].dir;
     document.documentElement.lang = lang;
   }, [lang]);
 

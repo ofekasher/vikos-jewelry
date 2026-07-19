@@ -128,7 +128,7 @@ export default function AiChat() {
                 <div style={{ alignSelf: "flex-start" }}>
                   <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "2px 12px 12px 12px", padding: "12px 16px", display: "flex", gap: "5px", alignItems: "center" }}>
                     {[0, 1, 2].map(i => (
-                      <span key={i} style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#8B7355", animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite` }} />
+                      <span key={i} style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#8B7355", animation: `dot-pulse 1.2s cubic-bezier(0.23,1,0.32,1) ${i * 0.2}s infinite` }} />
                     ))}
                   </div>
                 </div>

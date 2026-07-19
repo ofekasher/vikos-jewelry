@@ -33,7 +33,7 @@ export async function POST(req: Request) {
             <tr><td style="padding: 8px 0; color: #888;">טלפון</td><td style="padding: 8px 0;">${phone || "לא צוין"}</td></tr>
             <tr><td style="padding: 8px 0; color: #888;">תקציב</td><td style="padding: 8px 0;">${budget ? `₪${budget}` : "לא צוין"}</td></tr>
           </table>
-          <div style="margin-top: 20px; padding: 16px; background: #f9f7f4; border-right: 3px solid #C9A96E;">
+          <div style="margin-top: 20px; padding: 16px; background: #f9f7f4; border: 1px solid #C9A96E;">
             <p style="margin: 0; line-height: 1.7; white-space: pre-wrap;">${message}</p>
           </div>
           <p style="margin-top: 24px; font-size: 12px; color: #aaa;">נשלח מטופס ההזמנה המותאמת באתר VIKOS</p>

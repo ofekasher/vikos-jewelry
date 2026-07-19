@@ -138,9 +138,11 @@ export default function ProductViewer360({ images, alt }: Props) {
           <div style={{ position: "relative", height: "2px", background: "#E8E8E8", borderRadius: "1px" }}>
             <div style={{
               position: "absolute", top: 0, left: 0,
-              width: `${percent}%`, height: "100%",
+              width: "100%", height: "100%",
               background: "#8B7355", borderRadius: "1px",
-              transition: isDragging ? "none" : "width 0.12s ease",
+              transform: `scaleX(${percent / 100})`,
+              transformOrigin: "left",
+              transition: isDragging ? "none" : "transform 0.12s ease-out",
             }} />
             {/* Frame dots */}
             {images.map((_, i) => (

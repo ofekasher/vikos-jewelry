@@ -193,7 +193,7 @@ function ShopContent() {
               <span style={{ position: "absolute", right: "12px", pointerEvents: "none", display: "flex" }}><IconSearch size={14} color="#AAA" /></span>
               <input ref={searchRef} value={search} onChange={e => setSearch(e.target.value)}
                 placeholder={lang === "en" ? "Search..." : "חיפוש..."}
-                style={{ paddingRight: "36px", paddingLeft: search ? "32px" : "14px", paddingTop: "9px", paddingBottom: "9px", border: `1px solid ${T.border}`, background: "#fff", fontFamily: T.sans, fontSize: "12px", color: T.black, outline: "none", width: "200px", transition: "border-color 0.2s, width 0.3s", borderRadius: 0 }}
+                style={{ paddingRight: "36px", paddingLeft: search ? "32px" : "14px", paddingTop: "9px", paddingBottom: "9px", border: `1px solid ${T.border}`, background: "#fff", fontFamily: T.sans, fontSize: "12px", color: T.black, outline: "none", width: "200px", transition: "border-color 0.2s", borderRadius: 0 }}
                 onFocus={e => { e.currentTarget.style.borderColor = T.gold; e.currentTarget.style.width = "260px"; }}
                 onBlur={e => { e.currentTarget.style.borderColor = T.border; e.currentTarget.style.width = "200px"; }}
               />

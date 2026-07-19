@@ -150,7 +150,7 @@ export async function POST(req: Request) {
           <div style="text-align: left; padding-top: 12px; border-top: 1px solid #eee;">
             <span style="font-size: 16px; font-weight: 600; color: #C9A96E;">סה"כ: ₪${order.total.toLocaleString()}</span>
           </div>
-          <div style="margin-top: 32px; padding: 16px; background: #fff8f0; border-right: 3px solid #C9A96E;">
+          <div style="margin-top: 32px; padding: 16px; background: #fff8f0; border: 1px solid #C9A96E;">
             <p style="margin: 0; font-size: 13px; color: #555; line-height: 1.7;">
               <strong>כתובת משלוח:</strong><br/>
               ${order.customer.address}, ${order.customer.city} ${order.customer.zip}

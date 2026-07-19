@@ -119,7 +119,7 @@ export default function ReviewsCarousel() {
                 border: "none",
                 cursor: "pointer",
                 padding: 0,
-                transition: "width 250ms ease-out, background 250ms ease-out",
+                transition: "transform 250ms cubic-bezier(0.23,1,0.32,1), background 250ms ease-out",
               }}
             />
           ))}

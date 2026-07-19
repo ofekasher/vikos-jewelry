@@ -89,8 +89,7 @@ export default function Navbar() {
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
                     style={{
-                      position: "absolute", top: "calc(100% + 14px)", left: "50%",
-                      transform: "translateX(-50%)",
+                      position: "absolute", top: "calc(100% + 14px)", left: 0,
                       background: "#FAFAFA",
                       border: "1px solid rgba(0,0,0,0.07)",
                       boxShadow: "0 8px 32px rgba(0,0,0,0.08)",

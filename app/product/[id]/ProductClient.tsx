@@ -43,28 +43,35 @@ export default function ProductPage({
   const [lightbox, setLightbox]         = useState(false);
 
   useEffect(() => {
-    fetch(`/api/admin/products/${productId}`)
-      .then(r => r.ok ? r.json() : Promise.reject())
-      .then(raw => {
-        const p: Product = {
-          id: raw.id,
-          nameHe: raw.name,
-          nameEn: raw.name,
-          descriptionHe: raw.description ?? "",
-          descriptionEn: raw.description ?? "",
-          price: raw.price,
-          category: raw.category,
-          image: raw.images?.[0] ?? "",
-          images: raw.images ?? [],
-          material: raw.material ?? "",
-          isNew: raw.badge === "חדש",
-          isBestseller: raw.badge === "נמכר ביותר",
-        };
-        setProduct(p);
-      })
-      .catch(() => {
-        if (!staticProduct) setNotFoundState(true);
-      });
+    function loadProduct() {
+      fetch(`/api/admin/products/${productId}`)
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(raw => {
+          const p: Product = {
+            id:            raw.id,
+            nameHe:        raw.name_he  || raw.nameHe  || raw.name || "",
+            nameEn:        raw.name_en  || raw.nameEn  || raw.name || "",
+            descriptionHe: raw.description_he || raw.descriptionHe || raw.description || "",
+            descriptionEn: raw.description_en || raw.descriptionEn || raw.description || "",
+            price:         raw.price,
+            category:      raw.category,
+            image:         raw.image || raw.images?.[0] || "",
+            hoverImage:    raw.hover_image || undefined,
+            images:        raw.images ?? [],
+            material:      raw.material || "",
+            isNew:         raw.is_new ?? raw.isNew ?? raw.badge === "חדש",
+            isBestseller:  raw.is_bestseller ?? raw.isBestseller ?? raw.badge === "נמכר ביותר",
+          };
+          setProduct(p);
+        })
+        .catch(() => {
+          if (!staticProduct) setNotFoundState(true);
+        });
+    }
+    loadProduct();
+    // Re-fetch when user returns to this tab (e.g. after admin edit)
+    window.addEventListener("focus", loadProduct);
+    return () => window.removeEventListener("focus", loadProduct);
   }, [productId, p_t]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (notFoundState) notFound();
@@ -74,7 +81,9 @@ export default function ProductPage({
     </div>
   );
 
-  const allImages = product.images.length > 0 ? product.images : [product.image];
+  const rawImages = product.images.length > 0 ? product.images : [product.image];
+  const filtered = rawImages.filter(src => src && src !== product.hoverImage);
+  const allImages = filtered.length > 0 ? filtered : [product.image].filter(Boolean);
   const isRing    = product.category === "rings";
 
   // Up to 4 related products from same category, excluding self
@@ -218,28 +227,29 @@ export default function ProductPage({
           <motion.div
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.08, ease: [0.23, 1, 0.32, 1] }}
-            className="flex flex-col"
+            className="flex flex-col order-first md:order-none"
             style={{ paddingTop: "4px" }}
           >
 
-            {/* 1. Category + badge inline */}
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+            {/* 1. Category label */}
+            <div style={{ marginBottom: "8px" }}>
               <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#999", margin: 0 }}>
                 {p_t.catLabels[product.category as keyof typeof p_t.catLabels]}
               </p>
             </div>
 
-            {/* 2. Product name — Cormorant Garamond */}
+            {/* 2. Product name — always visible, no risk of empty */}
             <h1 style={{
               fontFamily: "'Cormorant Garamond', Georgia, serif",
-              fontSize: "clamp(1.8rem, 3.2vw, 2.6rem)",
+              fontSize: "clamp(2rem, 3.5vw, 2.8rem)",
               fontWeight: 400,
               fontStyle: "italic",
               color: "#111",
-              lineHeight: 1.1,
-              marginBottom: "12px",
+              lineHeight: 1.15,
+              marginBottom: "14px",
+              paddingBottom: "2px",
             }}>
-              {displayName}
+              {displayName || product.nameHe || product.nameEn || "מוצר"}
             </h1>
 
             {/* 3. Material — prominent, near name */}

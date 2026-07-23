@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { createServerClient, mapProduct } from "@/lib/supabase";
+import { products as staticProducts } from "@/lib/products";
 
-export const revalidate = 60; // ISR: refresh every 60 seconds
+// No caching — always fetch fresh from Supabase so admin changes appear immediately
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
@@ -16,8 +18,6 @@ export async function GET() {
     return NextResponse.json((data ?? []).map(mapProduct));
   } catch (err) {
     console.error("[api/products] Supabase error:", err);
-    // Fallback to hardcoded data so the site never breaks
-    const { products } = await import("@/lib/products");
-    return NextResponse.json(products);
+    return NextResponse.json(staticProducts);
   }
 }

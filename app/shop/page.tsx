@@ -23,7 +23,7 @@ function IconBag({ size = 12, strokeWidth = 1.5 }: { size?: number; strokeWidth?
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
-import { categories, getMaterialEn } from "@/lib/products";
+import { products as allProducts, categories, getMaterialEn } from "@/lib/products";
 import type { Product } from "@/lib/products";
 import { useStore } from "@/lib/store";
 import { useLang } from "@/lib/LanguageContext";
@@ -61,63 +61,151 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
   const [hovered, setHovered] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const wishlisted = isWishlisted(p.id);
-  const displayName = lang === "en" ? p.nameEn : p.nameHe;
+  const displayName = lang === "en" ? (p.nameEn || p.nameHe) : (p.nameHe || p.nameEn);
+  const finalPrice = p.discount && p.discount > 0
+    ? Math.round(p.price * (1 - p.discount / 100)) : null;
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 16 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.28, delay: Math.min(index * 0.04, 0.24), ease: [0.23, 1, 0.32, 1] }}
+      viewport={{ once: true, margin: "-30px" }}
+      transition={{ duration: 0.32, delay: Math.min(index * 0.05, 0.3), ease: [0.23, 1, 0.32, 1] }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{ cursor: "pointer" }}
     >
       <Link href={`/product/${p.id}`} style={{ textDecoration: "none", display: "block" }}>
-        <div style={{ position: "relative", overflow: "hidden", background: "#F0EEEB", aspectRatio: "3/4", marginBottom: "12px" }}>
+        {/* Image container */}
+        <div style={{
+          position: "relative", overflow: "hidden",
+          background: "#F5F4F1",
+          aspectRatio: "3/4", marginBottom: "14px",
+          transform: hovered ? "scale(1.01)" : "scale(1)",
+          transition: "transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)",
+        }}>
 
-          {/* Skeleton with logo */}
+          {/* Skeleton */}
           {!imgLoaded && (
-            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "#F0EEEB" }}>
-              <img src="/logo.png" alt="" style={{ width: "48px", opacity: 0.18, mixBlendMode: "multiply" }} />
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "#F5F4F1" }}>
+              <div style={{ width: "40px", height: "40px", border: "1px solid #E0DDD8", borderRadius: "50%", opacity: 0.4 }} />
             </div>
           )}
 
-          {/* next/image */}
+          {/* Product image */}
           <Image
             src={p.image} alt={displayName}
             fill sizes="(max-width: 700px) 50vw, (max-width: 1100px) 33vw, 25vw"
             priority={index < 4}
-            style={{ objectFit: "cover", transition: "opacity 0.4s", opacity: imgLoaded ? 1 : 0 }}
+            style={{
+              objectFit: "cover",
+              transition: "opacity 0.5s ease, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)",
+              opacity: imgLoaded ? 1 : 0,
+              transform: hovered ? "scale(1.06)" : "scale(1)",
+            }}
             onLoad={() => setImgLoaded(true)}
           />
 
-          {/* Wishlist — always visible on touch, hover on desktop */}
-          <button onClick={e => { e.preventDefault(); e.stopPropagation(); toggleWishlist(p); toast.success(wishlisted ? (lang === "en" ? `${displayName} removed from wishlist` : `${displayName} הוסר ממועדפים`) : (lang === "en" ? `${displayName} added to wishlist` : `${displayName} נוסף למועדפים`)); }}
-            aria-label="מועדפים"
-            style={{ position: "absolute", top: "10px", left: "10px", width: "44px", height: "44px", borderRadius: "50%", background: "rgba(255,255,255,0.88)", border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "opacity 0.2s" }}
-            className={wishlisted ? "wish-active" : "wish-btn"}>
-            <IconHeart size={14} fill={wishlisted ? T.gold : "none"} color={wishlisted ? T.gold : "#666"} />
-          </button>
+          {/* Hover image (if exists) */}
+          {p.hoverImage && imgLoaded && (
+            <Image
+              src={p.hoverImage} alt=""
+              fill sizes="(max-width: 700px) 50vw, 25vw"
+              style={{
+                objectFit: "cover",
+                transition: "opacity 0.45s ease",
+                opacity: hovered ? 1 : 0,
+              }}
+            />
+          )}
 
-          {/* Quick-add — hover on desktop, always visible on touch */}
-          <button onClick={e => { e.preventDefault(); e.stopPropagation(); addToCart(p); toast.success(lang === "en" ? `${displayName} added to cart` : `${displayName} נוסף לסל`, { duration: 2200 }); }}
-            style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "14px", background: "rgba(255,255,255,0.92)", backdropFilter: "blur(4px)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "7px", fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase", color: T.black, transition: "transform 0.3s ease", minHeight: "44px" }}
-            className={hovered ? "add-btn-visible" : "add-btn-hidden"}>
-            <IconBag size={12} strokeWidth={1.5} />
-            {lang === "en" ? "Add to bag" : "הוסף לסל"}
-          </button>
-
-          {(p.isNew || p.isBestseller) && (
-            <span style={{ position: "absolute", top: "10px", right: "10px", background: p.isBestseller ? T.gold : T.black, color: "#fff", fontFamily: T.sans, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", padding: "3px 7px" }}>
-              {p.isBestseller ? (lang === "en" ? "Best Seller" : "נמכר ביותר") : (lang === "en" ? "New" : "חדש")}
+          {/* Badge */}
+          {(p.isNew || p.isBestseller || finalPrice) && (
+            <span style={{
+              position: "absolute", top: "12px", right: "12px",
+              background: finalPrice ? "#C0392B" : p.isBestseller ? T.gold : T.black,
+              color: "#fff", fontFamily: T.sans,
+              fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase",
+              padding: "4px 9px",
+            }}>
+              {finalPrice ? `-${p.discount}%` : p.isBestseller
+                ? (lang === "en" ? "Best Seller" : "נמכר ביותר")
+                : (lang === "en" ? "New" : "חדש")}
             </span>
           )}
+
+          {/* Wishlist */}
+          <button
+            onClick={e => {
+              e.preventDefault(); e.stopPropagation();
+              toggleWishlist(p);
+              toast.success(wishlisted
+                ? (lang === "en" ? `Removed from wishlist` : `הוסר ממועדפים`)
+                : (lang === "en" ? `Added to wishlist` : `נוסף למועדפים`));
+            }}
+            aria-label="מועדפים"
+            style={{
+              position: "absolute", top: "10px", left: "10px",
+              width: "36px", height: "36px",
+              background: "rgba(255,255,255,0.9)", border: "none",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer",
+              opacity: hovered || wishlisted ? 1 : 0,
+              transition: "opacity 0.2s",
+            }}>
+            <IconHeart size={13} fill={wishlisted ? T.gold : "none"} color={wishlisted ? T.gold : "#666"} />
+          </button>
+
+          {/* Quick add — slides up on hover */}
+          <div style={{
+            position: "absolute", bottom: 0, left: 0, right: 0,
+            transform: hovered ? "translateY(0)" : "translateY(100%)",
+            transition: "transform 0.32s cubic-bezier(0.23, 1, 0.32, 1)",
+          }}>
+            <button
+              onClick={e => {
+                e.preventDefault(); e.stopPropagation();
+                addToCart(p);
+                toast.success(lang === "en" ? `Added to bag` : `${displayName} נוסף לסל`, { duration: 2200 });
+              }}
+              style={{
+                width: "100%", padding: "13px 16px",
+                background: "#111",
+                border: "none", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.18em",
+                textTransform: "uppercase", color: "#fff",
+              }}>
+              <IconBag size={11} strokeWidth={1.5} />
+              {lang === "en" ? "Add to bag" : "הוסף לסל"}
+            </button>
+          </div>
         </div>
       </Link>
+
+      {/* Product info */}
       <Link href={`/product/${p.id}`} style={{ textDecoration: "none" }}>
-        <p style={{ fontFamily: T.serif, fontSize: "0.98rem", fontWeight: 400, color: T.black, marginBottom: "4px", lineHeight: 1.3 }}>{displayName}</p>
-        <p style={{ fontFamily: T.sans, fontSize: "13px", color: T.gray, fontWeight: 300 }}>₪{p.price.toLocaleString()}</p>
+        <p style={{
+          fontFamily: T.serif,
+          fontSize: "1rem",
+          fontWeight: 400,
+          color: T.black,
+          marginBottom: "5px",
+          lineHeight: 1.3,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}>
+          {displayName}
+        </p>
+        {finalPrice ? (
+          <p style={{ fontFamily: T.sans, fontSize: "13px", fontWeight: 300, display: "flex", gap: "6px", alignItems: "center" }}>
+            <span style={{ textDecoration: "line-through", color: "#BDBDBD" }}>₪{p.price.toLocaleString()}</span>
+            <span style={{ color: "#C0392B", fontWeight: 400 }}>₪{finalPrice.toLocaleString()}</span>
+          </p>
+        ) : (
+          <p style={{ fontFamily: T.sans, fontSize: "13px", color: "#888", fontWeight: 300 }}>₪{p.price.toLocaleString()}</p>
+        )}
       </Link>
     </motion.article>
   );
@@ -125,9 +213,19 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
 
 function ShopContent() {
   const { lang } = useLang();
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<typeof allProducts>(allProducts);
+
   useEffect(() => {
-    fetch("/api/products").then(r => r.json()).then(setProducts).catch(() => {});
+    function loadProducts() {
+      fetch("/api/products")
+        .then(r => r.ok ? r.json() : null)
+        .then(data => { if (data?.length) setProducts(data); })
+        .catch(() => {});
+    }
+    loadProducts();
+    // Re-fetch when user switches back to this tab (e.g. after editing in admin)
+    window.addEventListener("focus", loadProducts);
+    return () => window.removeEventListener("focus", loadProducts);
   }, []);
 
   const searchParams = useSearchParams();

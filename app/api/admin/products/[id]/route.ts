@@ -12,34 +12,37 @@ async function isAuthed() {
 
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-
   try {
     const db = createServerClient();
     const { data, error } = await db.from("products").select("*").eq("id", id).single();
     if (!error && data) return NextResponse.json(data);
   } catch {
-    // Supabase not configured — fall through to static data
+    // fall through to static
   }
 
-  // Fallback: find in static product catalogue so every listed product
-  // always has a working API response even without a database.
+  // Fallback: static product catalogue
   const { products } = await import("@/lib/products");
-  const p = products.find((x) => x.id === id);
+  const p = products.find(x => x.id === id);
   if (!p) return NextResponse.json({ error: "Product not found" }, { status: 404 });
 
-  // Shape static Product → DbProduct-compatible response
   return NextResponse.json({
-    id: p.id,
-    name: p.nameHe,
-    price: p.price,
-    category: p.category,
-    images: p.images,
-    badge: p.isBestseller ? "נמכר ביותר" : p.isNew ? "חדש" : null,
-    description: p.descriptionHe,
-    in_stock: true,
-    sizes: null,
-    material: p.material,
-    created_at: new Date().toISOString(),
+    id:            p.id,
+    name_he:       p.nameHe,
+    name_en:       p.nameEn,
+    description_he: p.descriptionHe ?? "",
+    description_en: p.descriptionEn ?? "",
+    price:         p.price,
+    category:      p.category,
+    image:         p.image,
+    hover_image:   p.hoverImage ?? null,
+    images:        p.images ?? [p.image],
+    material:      p.material ?? "",
+    is_new:        p.isNew ?? false,
+    is_bestseller: p.isBestseller ?? false,
+    in_stock:      true,
+    discount:      0,
+    created_at:    new Date().toISOString(),
+    updated_at:    new Date().toISOString(),
   });
 }
 

@@ -1,55 +1,105 @@
 "use client";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 
 interface AdminProduct {
   id: string;
-  name: string;
+  name_he: string;
+  name_en: string;
   price: number;
   category: string;
-  badge: string | null;
+  is_new: boolean;
+  is_bestseller: boolean;
   in_stock: boolean;
+  discount: number;
   images: string[];
-  created_at: string;
+  image: string;
+  hover_image: string | null;
+  material: string;
+  description_he: string;
+  description_en: string;
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  rings: "טבעות",
-  necklaces: "שרשראות",
-  bracelets: "צמידים",
-  earrings: "עגילים",
-};
+const CATS = [
+  { id: "all",       label: "הכל" },
+  { id: "rings",     label: "טבעות" },
+  { id: "bracelets", label: "צמידים" },
+  { id: "necklaces", label: "שרשראות" },
+  { id: "earrings",  label: "עגילים" },
+];
 
 export default function Dashboard() {
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState("");
+  const [cat, setCat]           = useState("all");
+  const [editTarget, setEditTarget] = useState<AdminProduct | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [form, setForm]         = useState<Partial<AdminProduct>>({});
+  const [saving, setSaving]     = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [filter, setFilter]     = useState("all");
 
   async function load() {
     setLoading(true);
+    setError("");
     try {
       const res = await fetch("/api/admin/products");
-      if (!res.ok) throw new Error("Failed to load");
-      const data = await res.json();
-      setProducts(data);
+      if (!res.ok) throw new Error();
+      setProducts(await res.json());
     } catch {
-      setError("שגיאה בטעינת המוצרים");
+      setError("שגיאה בטעינת מוצרים — ודא שהרצת את setup.sql");
     } finally {
       setLoading(false);
     }
   }
-
   useEffect(() => { load(); }, []);
 
-  async function handleDelete(id: string, name: string) {
-    if (!confirm(`למחוק את "${name}"?`)) return;
-    setDeleting(id);
+  function openEdit(p: AdminProduct) {
+    setEditTarget(p);
+    setForm({ ...p });
+    setDrawerOpen(true);
+  }
+  function closeDrawer() {
+    setDrawerOpen(false);
+    setTimeout(() => setEditTarget(null), 320);
+  }
+  function upd<K extends keyof AdminProduct>(key: K, val: AdminProduct[K]) {
+    setForm(f => ({ ...f, [key]: val }));
+  }
+
+  async function saveProduct() {
+    if (!editTarget) return;
+    setSaving(true);
     try {
-      const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
+      const payload = {
+        ...form,
+        price:       Number(form.price) || 0,
+        discount:    Math.min(100, Math.max(0, Math.round(Number(form.discount) || 0))),
+        image:       form.images?.[0] ?? form.image ?? "",
+        hover_image: form.images?.[1] ?? form.hover_image ?? null,
+      };
+      const res = await fetch(`/api/admin/products/${editTarget.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || "שגיאה");
+      const updated = await res.json();
+      setProducts(prev => prev.map(p => p.id === editTarget.id ? { ...p, ...updated } : p));
+      closeDrawer();
+    } catch (err: unknown) {
+      alert("שגיאה: " + (err as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function deleteProduct(p: AdminProduct) {
+    if (!confirm(`למחוק את "${p.name_he}"?`)) return;
+    setDeleting(p.id);
+    try {
+      const res = await fetch(`/api/admin/products/${p.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
-      setProducts(p => p.filter(x => x.id !== id));
+      setProducts(prev => prev.filter(x => x.id !== p.id));
     } catch {
       alert("שגיאה במחיקה");
     } finally {
@@ -57,131 +107,429 @@ export default function Dashboard() {
     }
   }
 
-  const filtered = filter === "all" ? products : products.filter(p => p.category === filter);
+  async function toggleStock(p: AdminProduct) {
+    try {
+      await fetch(`/api/admin/products/${p.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ in_stock: !p.in_stock }),
+      });
+      setProducts(prev => prev.map(x => x.id === p.id ? { ...x, in_stock: !p.in_stock } : x));
+    } catch { alert("שגיאה"); }
+  }
 
-  const stats = {
-    total:     products.length,
-    inStock:   products.filter(p => p.in_stock).length,
-    rings:     products.filter(p => p.category === "rings").length,
-    bracelets: products.filter(p => p.category === "bracelets").length,
-    necklaces: products.filter(p => p.category === "necklaces").length,
-    earrings:  products.filter(p => p.category === "earrings").length,
+  async function runMigration() {
+    if (!confirm("לטעון את כל המוצרים מהקטלוג לסופאבייס?")) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/migrate", { method: "POST" });
+      if (!res.ok) throw new Error((await res.json()).error || "שגיאה");
+      const { inserted } = await res.json();
+      alert(`✓ הועלו ${inserted} מוצרים`);
+      await load();
+    } catch (err: unknown) {
+      alert("שגיאה: " + (err as Error).message);
+      setLoading(false);
+    }
+  }
+
+  async function handleLogout() {
+    await fetch("/api/admin/logout", { method: "POST" }).catch(() => {});
+    window.location.href = "/admin/login";
+  }
+
+  const displayed = cat === "all" ? products : products.filter(p => p.category === cat);
+  const discountedPrice = (form.discount ?? 0) > 0 ? Math.round((form.price ?? 0) * (1 - (form.discount ?? 0) / 100)) : null;
+
+  const inputSx: React.CSSProperties = {
+    width: "100%", padding: "9px 12px", border: "1px solid #e0e0e0",
+    fontSize: "13px", outline: "none", boxSizing: "border-box",
+    background: "#fff", fontFamily: "inherit", borderRadius: 0,
+  };
+  const labelSx: React.CSSProperties = {
+    display: "block", fontSize: "10px", letterSpacing: "0.1em",
+    textTransform: "uppercase", color: "#888", marginBottom: "5px",
   };
 
   return (
-    <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "32px" }}>
-        <div>
-          <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "2rem", fontWeight: 300, color: "#111", margin: 0 }}>מוצרים</h1>
-          <p style={{ color: "#888", fontSize: "13px", margin: "4px 0 0" }}>{stats.total} מוצרים · {stats.inStock} במלאי</p>
-        </div>
-        <Link
-          href="/admin/dashboard/new"
-          style={{ padding: "10px 20px", background: "#111", color: "#fff", textDecoration: "none", fontSize: "12px", letterSpacing: "0.12em", textTransform: "uppercase" }}
-        >
-          + מוצר חדש
-        </Link>
-      </div>
+    <div style={{ minHeight: "100vh", background: "#F8F8F6", direction: "rtl", fontFamily: "'Inter', system-ui, sans-serif" }}>
 
-      {/* Stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "16px", marginBottom: "32px" }}>
-        {[
-          { label: "טבעות", count: stats.rings, cat: "rings" },
-          { label: "צמידים", count: stats.bracelets, cat: "bracelets" },
-          { label: "שרשראות", count: stats.necklaces, cat: "necklaces" },
-          { label: "עגילים", count: stats.earrings, cat: "earrings" },
-        ].map(s => (
-          <button
-            key={s.cat}
-            onClick={() => setFilter(filter === s.cat ? "all" : s.cat)}
-            style={{ padding: "20px", background: filter === s.cat ? "#111" : "#fff", color: filter === s.cat ? "#fff" : "#111", border: "1px solid #E8E8E4", cursor: "pointer", textAlign: "right", transition: "all 0.15s" }}
-          >
-            <div style={{ fontSize: "1.75rem", fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300 }}>{s.count}</div>
-            <div style={{ fontSize: "12px", color: filter === s.cat ? "#ccc" : "#888", marginTop: "2px" }}>{s.label}</div>
+      {/* ── Admin bar ── */}
+      <header style={{
+        position: "sticky", top: 0, zIndex: 100,
+        background: "#111", color: "#fff",
+        display: "flex", alignItems: "center", gap: "16px",
+        padding: "0 28px", height: "52px",
+      }}>
+        <span style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.2rem", letterSpacing: "0.12em", lineHeight: 1 }}>VIKOS</span>
+        <span style={{ fontSize: "9px", letterSpacing: "0.16em", textTransform: "uppercase", color: "#8B7355", border: "1px solid #8B7355", padding: "2px 8px" }}>מצב עריכה</span>
+        <div style={{ flex: 1 }} />
+        <span style={{ fontSize: "12px", color: "#777" }}>{products.length} מוצרים</span>
+        <a href="/shop" target="_blank" rel="noreferrer"
+          style={{ fontSize: "11px", color: "#999", textDecoration: "none", letterSpacing: "0.06em", padding: "5px 10px", border: "1px solid #333" }}>
+          צפה בחנות
+        </a>
+        {products.length === 0 && !loading && (
+          <button onClick={runMigration}
+            style={{ padding: "6px 14px", background: "#8B7355", color: "#fff", border: "none", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>
+            ⬆ טען מוצרים
           </button>
-        ))}
+        )}
+        <a href="/admin/dashboard/new"
+          style={{ padding: "6px 16px", background: "#fff", color: "#111", textDecoration: "none", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+          + מוצר חדש
+        </a>
+        <button onClick={handleLogout}
+          style={{ background: "none", border: "none", color: "#666", fontSize: "11px", cursor: "pointer", letterSpacing: "0.06em", padding: "5px" }}>
+          יציאה
+        </button>
+      </header>
+
+      {/* ── Category tabs ── */}
+      <div style={{ background: "#fff", borderBottom: "1px solid #E8E8E4", padding: "0 28px", display: "flex", overflowX: "auto" }}>
+        {CATS.map(c => {
+          const count = c.id === "all" ? products.length : products.filter(p => p.category === c.id).length;
+          return (
+            <button key={c.id} onClick={() => setCat(c.id)} style={{
+              padding: "13px 22px", background: "none", border: "none",
+              borderBottom: cat === c.id ? "2px solid #111" : "2px solid transparent",
+              fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase",
+              color: cat === c.id ? "#111" : "#999", cursor: "pointer",
+              whiteSpace: "nowrap", transition: "color 0.15s", fontFamily: "inherit",
+            }}>
+              {c.label} <span style={{ color: "#bbb", fontSize: "10px" }}>({count})</span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Table */}
-      {loading ? (
-        <div style={{ textAlign: "center", padding: "60px", color: "#888" }}>טוען...</div>
-      ) : error ? (
-        <div style={{ padding: "24px", background: "#fff5f5", color: "#e53e3e", fontSize: "14px" }}>{error}</div>
-      ) : (
-        <div style={{ background: "#fff", border: "1px solid #E8E8E4" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ borderBottom: "1px solid #E8E8E4" }}>
-                {["תמונה", "שם", "קטגוריה", "מחיר", "תג", "מלאי", "פעולות"].map(h => (
-                  <th key={h} style={{ padding: "12px 16px", textAlign: "right", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#888", fontWeight: 400 }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(p => (
-                <tr key={p.id} style={{ borderBottom: "1px solid #F0F0EC" }}>
-                  <td style={{ padding: "10px 16px" }}>
-                    {p.images?.[0] ? (
-                      <img
-                        src={p.images[0]}
-                        alt={p.name}
-                        style={{ width: "48px", height: "64px", objectFit: "cover", background: "#F7F7F5" }}
-                      />
-                    ) : (
-                      <div style={{ width: "48px", height: "64px", background: "#F7F7F5" }} />
-                    )}
-                  </td>
-                  <td style={{ padding: "10px 16px", fontSize: "14px", color: "#111", maxWidth: "240px" }}>
-                    <div style={{ fontWeight: 500 }}>{p.name}</div>
-                    <div style={{ fontSize: "11px", color: "#aaa", marginTop: "2px" }}>{p.id}</div>
-                  </td>
-                  <td style={{ padding: "10px 16px", fontSize: "13px", color: "#555" }}>
-                    {CATEGORY_LABELS[p.category] ?? p.category}
-                  </td>
-                  <td style={{ padding: "10px 16px", fontSize: "13px", color: "#111" }}>
-                    ₪{p.price.toLocaleString()}
-                  </td>
-                  <td style={{ padding: "10px 16px" }}>
-                    {p.badge && (
-                      <span style={{ fontSize: "11px", padding: "2px 8px", background: p.badge === "חדש" ? "#F0F7F0" : "#FFF7E6", color: p.badge === "חדש" ? "#2E7D32" : "#E65100" }}>
-                        {p.badge}
-                      </span>
-                    )}
-                  </td>
-                  <td style={{ padding: "10px 16px" }}>
-                    <span style={{ fontSize: "11px", color: p.in_stock ? "#2E7D32" : "#c0392b" }}>
-                      {p.in_stock ? "✓ במלאי" : "✗ אזל"}
-                    </span>
-                  </td>
-                  <td style={{ padding: "10px 16px" }}>
-                    <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
-                      <Link
-                        href={`/admin/dashboard/${p.id}/edit`}
-                        style={{ fontSize: "12px", color: "#555", textDecoration: "none", letterSpacing: "0.06em" }}
-                      >
-                        עריכה
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(p.id, p.name)}
-                        disabled={deleting === p.id}
-                        style={{ fontSize: "12px", color: "#e53e3e", background: "none", border: "none", cursor: "pointer", letterSpacing: "0.06em" }}
-                      >
-                        {deleting === p.id ? "..." : "מחיקה"}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {filtered.length === 0 && (
-            <div style={{ textAlign: "center", padding: "40px", color: "#aaa", fontSize: "14px" }}>
-              {products.length === 0 ? "אין מוצרים עדיין — צור מוצר חדש" : "אין מוצרים בקטגוריה זו"}
+      {/* ── Tip bar ── */}
+      <div style={{ background: "#FFFBF0", borderBottom: "1px solid #F0E8D0", padding: "10px 28px", fontSize: "12px", color: "#8B7355", display: "flex", alignItems: "center", gap: "8px" }}>
+        <span>💡</span>
+        <span>רחף על מוצר ולחץ <strong>עריכה</strong> לשינוי מחיר, שם, הנחה ועוד — ישירות מהתצוגה</span>
+      </div>
+
+      {/* ── Product grid ── */}
+      <main style={{ maxWidth: "1400px", margin: "0 auto", padding: "32px 28px" }}>
+        {loading ? (
+          <div style={{ textAlign: "center", padding: "80px", color: "#aaa", fontSize: "14px" }}>טוען...</div>
+        ) : error ? (
+          <div style={{ padding: "24px", background: "#fff5f5", color: "#e53e3e", fontSize: "14px", borderRadius: "4px" }}>{error}</div>
+        ) : displayed.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "80px", color: "#aaa", fontSize: "14px" }}>
+            {products.length === 0 ? "אין מוצרים — לחץ על «⬆ טען מוצרים» בסרגל העליון" : "אין מוצרים בקטגוריה זו"}
+          </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "24px" }}>
+            {displayed.map(p => (
+              <ProductCard
+                key={p.id}
+                p={p}
+                deleting={deleting === p.id}
+                onEdit={() => openEdit(p)}
+                onDelete={() => deleteProduct(p)}
+                onToggleStock={() => toggleStock(p)}
+              />
+            ))}
+          </div>
+        )}
+      </main>
+
+      {/* ── Backdrop ── */}
+      <div
+        onClick={closeDrawer}
+        style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)",
+          zIndex: 199, opacity: drawerOpen ? 1 : 0,
+          pointerEvents: drawerOpen ? "auto" : "none",
+          transition: "opacity 0.3s",
+        }}
+      />
+
+      {/* ── Edit drawer ── */}
+      <aside style={{
+        position: "fixed", top: 0, right: drawerOpen ? 0 : "-540px",
+        width: "520px", maxWidth: "100vw", height: "100dvh",
+        background: "#fff", zIndex: 200,
+        boxShadow: "-6px 0 40px rgba(0,0,0,0.14)",
+        transition: "right 0.32s cubic-bezier(0.23, 1, 0.32, 1)",
+        display: "flex", flexDirection: "column",
+        direction: "rtl",
+      }}>
+        {/* Drawer header */}
+        <div style={{ padding: "18px 24px", borderBottom: "1px solid #E8E8E4", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, background: "#FAFAF8" }}>
+          <div>
+            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1rem", color: "#111" }}>
+              {form.name_he || "עריכת מוצר"}
             </div>
+            <div style={{ fontSize: "10px", color: "#bbb", marginTop: "2px", letterSpacing: "0.04em" }}>{editTarget?.id}</div>
+          </div>
+          <button onClick={closeDrawer}
+            style={{ background: "none", border: "1px solid #E8E8E4", width: "32px", height: "32px", cursor: "pointer", fontSize: "14px", color: "#555", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            ✕
+          </button>
+        </div>
+
+        {/* Drawer body */}
+        {editTarget && (
+          <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: "18px" }}>
+
+            {/* Image preview */}
+            {(form.images?.length || form.image) ? (
+              <div>
+                <label style={labelSx}>תמונות המוצר</label>
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                  {(form.images?.length ? form.images : [form.image]).filter(Boolean).map((src, i) => (
+                    <div key={i} style={{ position: "relative" }}>
+                      <img src={src!} alt="" style={{ width: "70px", height: "93px", objectFit: "cover", background: "#F0EEEB", display: "block", border: i === 0 ? "2px solid #111" : "1px solid #E8E8E4" }} />
+                      {i === 0 && <span style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "rgba(0,0,0,0.5)", color: "#fff", fontSize: "8px", textAlign: "center", padding: "2px", letterSpacing: "0.06em" }}>ראשי</span>}
+                    </div>
+                  ))}
+                </div>
+                <a href={`/admin/dashboard/${editTarget.id}/edit`} style={{ fontSize: "11px", color: "#8B7355", display: "block", marginTop: "8px" }}>
+                  ← עריכת תמונות מלאה
+                </a>
+              </div>
+            ) : null}
+
+            {/* Names */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div>
+                <label style={labelSx}>שם בעברית</label>
+                <input style={inputSx} value={form.name_he ?? ""} onChange={e => upd("name_he", e.target.value)} />
+              </div>
+              <div>
+                <label style={labelSx}>English Name</label>
+                <input style={inputSx} value={form.name_en ?? ""} onChange={e => upd("name_en", e.target.value)} dir="ltr" />
+              </div>
+            </div>
+
+            {/* Price + Discount */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div>
+                <label style={labelSx}>מחיר (₪)</label>
+                <input style={inputSx} type="number" min={0} value={form.price ?? 0} onChange={e => upd("price", Number(e.target.value))} />
+              </div>
+              <div>
+                <label style={labelSx}>הנחה (%)</label>
+                <input style={inputSx} type="number" min={0} max={100} value={form.discount ?? 0} onChange={e => upd("discount", Number(e.target.value))} />
+              </div>
+            </div>
+
+            {discountedPrice && (
+              <div style={{ padding: "10px 14px", background: "#FFF3F3", fontSize: "13px", color: "#C0392B", border: "1px solid #fbc0c0" }}>
+                מחיר לאחר הנחה: <strong>₪{discountedPrice.toLocaleString()}</strong>
+              </div>
+            )}
+
+            {/* Category + Material */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div>
+                <label style={labelSx}>קטגוריה</label>
+                <select style={inputSx} value={form.category ?? "rings"} onChange={e => upd("category", e.target.value)}>
+                  <option value="rings">טבעות</option>
+                  <option value="bracelets">צמידים</option>
+                  <option value="necklaces">שרשראות</option>
+                  <option value="earrings">עגילים</option>
+                </select>
+              </div>
+              <div>
+                <label style={labelSx}>חומר</label>
+                <input style={inputSx} value={form.material ?? ""} onChange={e => upd("material", e.target.value)} placeholder="זהב 14K" />
+              </div>
+            </div>
+
+            {/* Flags */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
+              <div>
+                <label style={labelSx}>מלאי</label>
+                <select style={inputSx} value={form.in_stock ? "1" : "0"} onChange={e => upd("in_stock", e.target.value === "1")}>
+                  <option value="1">במלאי ✓</option>
+                  <option value="0">אזל ✗</option>
+                </select>
+              </div>
+              <div>
+                <label style={labelSx}>מוצר חדש</label>
+                <select style={inputSx} value={form.is_new ? "1" : "0"} onChange={e => upd("is_new", e.target.value === "1")}>
+                  <option value="0">לא</option>
+                  <option value="1">כן ✓</option>
+                </select>
+              </div>
+              <div>
+                <label style={labelSx}>נמכר ביותר</label>
+                <select style={inputSx} value={form.is_bestseller ? "1" : "0"} onChange={e => upd("is_bestseller", e.target.value === "1")}>
+                  <option value="0">לא</option>
+                  <option value="1">כן ✓</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label style={labelSx}>תיאור בעברית</label>
+              <textarea style={{ ...inputSx, height: "88px", resize: "vertical" }} value={form.description_he ?? ""} onChange={e => upd("description_he", e.target.value)} />
+            </div>
+
+            <div>
+              <label style={labelSx}>Description in English</label>
+              <textarea style={{ ...inputSx, height: "88px", resize: "vertical", direction: "ltr" }} value={form.description_en ?? ""} onChange={e => upd("description_en", e.target.value)} />
+            </div>
+          </div>
+        )}
+
+        {/* Drawer footer */}
+        <div style={{ padding: "16px 24px", borderTop: "1px solid #E8E8E4", display: "flex", gap: "10px", flexShrink: 0 }}>
+          <button onClick={saveProduct} disabled={saving} style={{
+            flex: 1, padding: "12px", background: saving ? "#888" : "#111", color: "#fff",
+            border: "none", fontSize: "12px", letterSpacing: "0.16em", textTransform: "uppercase",
+            cursor: saving ? "not-allowed" : "pointer", fontFamily: "inherit",
+          }}>
+            {saving ? "שומר..." : "שמור שינויים"}
+          </button>
+          <button onClick={closeDrawer} style={{ padding: "12px 18px", background: "none", border: "1px solid #E8E8E4", fontSize: "12px", color: "#555", cursor: "pointer", fontFamily: "inherit" }}>
+            ביטול
+          </button>
+        </div>
+      </aside>
+    </div>
+  );
+}
+
+/* ─── Product card — mirrors the shop's ProductCard exactly, with edit overlay ─── */
+function ProductCard({ p, deleting, onEdit, onDelete, onToggleStock }: {
+  p: AdminProduct;
+  deleting: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
+  onToggleStock: () => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const imgSrc = p.images?.[0] || p.image || "";
+  const hoverImg = p.images?.[1] || p.hover_image || null;
+  const finalPrice = p.discount > 0 ? Math.round(p.price * (1 - p.discount / 100)) : null;
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{ position: "relative", cursor: "pointer" }}
+    >
+      {/* Image block — same styling as shop */}
+      <div style={{
+        position: "relative", aspectRatio: "3/4", background: "#F5F4F1",
+        overflow: "hidden", marginBottom: "14px",
+        transform: hovered ? "scale(1.01)" : "scale(1)",
+        transition: "transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)",
+      }}>
+
+        {/* Main image with zoom on hover */}
+        {imgSrc && (
+          <img src={imgSrc} alt={p.name_he} style={{
+            position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover",
+            transform: hovered ? "scale(1.06)" : "scale(1)",
+            transition: "transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)",
+          }} />
+        )}
+
+        {/* Hover / second image — fades in */}
+        {hoverImg && (
+          <img src={hoverImg} alt="" style={{
+            position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover",
+            opacity: hovered ? 1 : 0, transition: "opacity 0.45s ease",
+          }} />
+        )}
+
+        {/* Status badges */}
+        {(p.is_new || p.is_bestseller || finalPrice) && (
+          <span style={{
+            position: "absolute", top: "12px", right: "12px",
+            background: finalPrice ? "#C0392B" : p.is_bestseller ? "#8B7355" : "#111",
+            color: "#fff", fontSize: "8px", letterSpacing: "0.14em",
+            textTransform: "uppercase", padding: "4px 9px",
+          }}>
+            {finalPrice ? `-${p.discount}%` : p.is_bestseller ? "נמכר ביותר" : "חדש"}
+          </span>
+        )}
+
+        {/* Out of stock overlay */}
+        {!p.in_stock && (
+          <div style={{
+            position: "absolute", inset: 0, background: "rgba(255,255,255,0.6)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "10px", color: "#888", letterSpacing: "0.14em", textTransform: "uppercase",
+          }}>
+            אזל מהמלאי
+          </div>
+        )}
+
+        {/* Edit overlay — slides up from bottom like shop's quick-add */}
+        <div style={{
+          position: "absolute", bottom: 0, left: 0, right: 0,
+          transform: hovered ? "translateY(0)" : "translateY(100%)",
+          transition: "transform 0.32s cubic-bezier(0.23, 1, 0.32, 1)",
+        }}>
+          <button onClick={e => { e.stopPropagation(); onEdit(); }} style={{
+            width: "100%", padding: "12px 16px",
+            background: "#111", border: "none", cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: "7px",
+            fontFamily: "'Inter', system-ui, sans-serif", fontSize: "10px",
+            letterSpacing: "0.18em", textTransform: "uppercase", color: "#fff",
+          }}>
+            ✏ עריכה
+          </button>
+        </div>
+
+        {/* Delete — small X top left */}
+        <button
+          onClick={e => { e.stopPropagation(); onDelete(); }}
+          disabled={deleting}
+          style={{
+            position: "absolute", top: "10px", left: "10px",
+            width: "30px", height: "30px",
+            background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "#fff", fontSize: "11px",
+            opacity: hovered ? 1 : 0, transition: "opacity 0.2s",
+          }}
+          title="מחיקה"
+        >
+          {deleting ? "…" : "✕"}
+        </button>
+      </div>
+
+      {/* Info row — matches shop exactly */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "6px" }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{
+            fontFamily: "'Cormorant Garamond', Georgia, serif",
+            fontSize: "1rem", fontWeight: 400, color: "#111",
+            marginBottom: "5px", lineHeight: 1.3,
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          }}>
+            {p.name_he}
+          </p>
+          {finalPrice ? (
+            <div style={{ fontSize: "12px" }}>
+              <span style={{ textDecoration: "line-through", color: "#bbb", marginLeft: "6px" }}>₪{p.price.toLocaleString()}</span>
+              <span style={{ color: "#C0392B", fontWeight: 500 }}>₪{finalPrice.toLocaleString()}</span>
+            </div>
+          ) : (
+            <p style={{ fontSize: "12px", color: "#555" }}>₪{p.price.toLocaleString()}</p>
           )}
         </div>
-      )}
+        {/* Stock toggle */}
+        <button
+          onClick={e => { e.stopPropagation(); onToggleStock(); }}
+          title={p.in_stock ? "לחץ להסרה מהמלאי" : "לחץ להוספה למלאי"}
+          style={{
+            fontSize: "9px", padding: "3px 7px", cursor: "pointer", flexShrink: 0,
+            border: `1px solid ${p.in_stock ? "#c8e6c9" : "#fbc0c0"}`,
+            color: p.in_stock ? "#2E7D32" : "#c0392b",
+            background: "none", letterSpacing: "0.04em", fontFamily: "inherit",
+          }}
+        >
+          {p.in_stock ? "✓" : "✗"}
+        </button>
+      </div>
     </div>
   );
 }

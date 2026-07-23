@@ -537,29 +537,40 @@ export default function ProductPage({
 
         {/* ── Related products ─────────────────────────────────── */}
         {related.length > 0 && (
-          <section style={{ marginTop: "80px", borderTop: "1px solid #EFEFEF", paddingTop: "90px", scrollMarginTop: "80px" }}>
-            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: "#999", marginBottom: "6px" }}>
-              {p_t.relatedEyebrow}
-            </p>
-            <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(1.4rem,2.4vw,2rem)", fontWeight: 400, fontStyle: "italic", color: "#111", marginBottom: "36px" }}>
-              {p_t.relatedTitle}
-            </h2>
+          <section style={{ marginTop: "100px", paddingTop: "60px", scrollMarginTop: "80px", borderTop: "1px solid #E8E8E4" }}>
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "48px", gap: "16px" }}>
+              <div>
+                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "9px", letterSpacing: "0.32em", textTransform: "uppercase", color: "#B0A898", marginBottom: "10px" }}>
+                  {p_t.relatedEyebrow}
+                </p>
+                <h2 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "clamp(1.6rem,2.8vw,2.4rem)", fontWeight: 300, fontStyle: "italic", color: "#1A1A1A", margin: 0, lineHeight: 1.15 }}>
+                  {p_t.relatedTitle}
+                </h2>
+              </div>
+              <div style={{ width: "48px", height: "1px", background: "#D4C9BB", flexShrink: 0, marginBottom: "4px" }} />
+            </div>
+
             <div className="related-grid">
               {related.map(p => (
                 <Link key={p.id} href={`/product/${p.id}`} style={{ textDecoration: "none" }} className="related-card">
-                  <div style={{ aspectRatio: "1/1", overflow: "hidden", background: "#FAFAFA", border: "1px solid #EFEFEF", marginBottom: "10px" }}>
+                  {/* Image */}
+                  <div className="related-img-wrap">
                     <img
                       src={p.image} alt={lang === "en" ? p.nameEn : p.nameHe} loading="lazy"
-                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 500ms ease" }}
+                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                       className="related-img"
                     />
                   </div>
-                  <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1rem", fontStyle: "italic", color: "#111", fontWeight: 400, margin: "0 0 4px" }}>
-                    {lang === "en" ? p.nameEn : p.nameHe}
-                  </p>
-                  <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "12px", color: "#888", fontWeight: 300 }}>
-                    ₪{p.price.toLocaleString()}
-                  </p>
+                  {/* Info */}
+                  <div style={{ paddingTop: "14px" }}>
+                    <p style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.05rem", fontStyle: "italic", color: "#1A1A1A", fontWeight: 400, margin: "0 0 5px", lineHeight: 1.3 }}>
+                      {lang === "en" ? p.nameEn : p.nameHe}
+                    </p>
+                    <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "11px", letterSpacing: "0.06em", color: "#8B7355", fontWeight: 400 }}>
+                      ₪{p.price.toLocaleString()}
+                    </p>
+                  </div>
                 </Link>
               ))}
             </div>
@@ -670,15 +681,24 @@ export default function ProductPage({
         .related-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 16px;
+          gap: 28px;
         }
         @media (max-width: 900px) {
-          .related-grid { grid-template-columns: repeat(2, 1fr); }
+          .related-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
         }
         @media (max-width: 480px) {
-          .related-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+          .related-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
         }
-        .related-card:hover .related-img { transform: scale(1.05); }
+        .related-card { display: block; }
+        .related-img-wrap {
+          aspect-ratio: 1/1;
+          overflow: hidden;
+          background: #F7F6F4;
+        }
+        .related-img {
+          transition: transform 600ms cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .related-card:hover .related-img { transform: scale(1.06); }
       `}</style>
     </div>
   );

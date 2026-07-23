@@ -153,34 +153,46 @@ export default function Dashboard() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#F8F8F6", direction: "rtl", fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <style>{`
+        @media (max-width: 640px) {
+          .adm-bar { flex-wrap: wrap; height: auto !important; padding: 10px 14px !important; row-gap: 8px !important; }
+          .adm-count { display: none !important; }
+          .adm-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; padding: 16px !important; }
+          .adm-tip { display: none !important; }
+          .adm-drawer { right: auto !important; left: 0 !important; bottom: 0 !important; top: auto !important; width: 100% !important; height: 85dvh !important; border-radius: 16px 16px 0 0 !important; transition: bottom 0.35s cubic-bezier(0.32,0.72,0,1) !important; }
+          .adm-drawer-hidden { bottom: -100% !important; }
+          .adm-edit-btn { transform: translateY(0) !important; opacity: 1 !important; }
+          .adm-delete-btn { opacity: 0.9 !important; }
+        }
+      `}</style>
 
       {/* ── Admin bar ── */}
-      <header style={{
+      <header className="adm-bar" style={{
         position: "sticky", top: 0, zIndex: 100,
         background: "#111", color: "#fff",
-        display: "flex", alignItems: "center", gap: "16px",
+        display: "flex", alignItems: "center", gap: "12px",
         padding: "0 28px", height: "52px",
       }}>
         <span style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.2rem", letterSpacing: "0.12em", lineHeight: 1 }}>VIKOS</span>
-        <span style={{ fontSize: "9px", letterSpacing: "0.16em", textTransform: "uppercase", color: "#8B7355", border: "1px solid #8B7355", padding: "2px 8px" }}>מצב עריכה</span>
+        <span style={{ fontSize: "9px", letterSpacing: "0.16em", textTransform: "uppercase", color: "#8B7355", border: "1px solid #8B7355", padding: "2px 7px", whiteSpace: "nowrap" }}>מצב עריכה</span>
         <div style={{ flex: 1 }} />
-        <span style={{ fontSize: "12px", color: "#777" }}>{products.length} מוצרים</span>
+        <span className="adm-count" style={{ fontSize: "12px", color: "#777", whiteSpace: "nowrap" }}>{products.length} מוצרים</span>
         <a href="/shop" target="_blank" rel="noreferrer"
-          style={{ fontSize: "11px", color: "#999", textDecoration: "none", letterSpacing: "0.06em", padding: "5px 10px", border: "1px solid #333" }}>
-          צפה בחנות
+          style={{ fontSize: "11px", color: "#999", textDecoration: "none", letterSpacing: "0.06em", padding: "5px 10px", border: "1px solid #333", whiteSpace: "nowrap" }}>
+          חנות ↗
         </a>
         {products.length === 0 && !loading && (
           <button onClick={runMigration}
-            style={{ padding: "6px 14px", background: "#8B7355", color: "#fff", border: "none", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>
-            ⬆ טען מוצרים
+            style={{ padding: "6px 12px", background: "#8B7355", color: "#fff", border: "none", fontSize: "11px", cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit" }}>
+            ⬆ טען
           </button>
         )}
         <a href="/admin/dashboard/new"
-          style={{ padding: "6px 16px", background: "#fff", color: "#111", textDecoration: "none", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-          + מוצר חדש
+          style={{ padding: "6px 14px", background: "#fff", color: "#111", textDecoration: "none", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", whiteSpace: "nowrap" }}>
+          + חדש
         </a>
         <button onClick={handleLogout}
-          style={{ background: "none", border: "none", color: "#666", fontSize: "11px", cursor: "pointer", letterSpacing: "0.06em", padding: "5px" }}>
+          style={{ background: "none", border: "none", color: "#666", fontSize: "11px", cursor: "pointer", padding: "5px", whiteSpace: "nowrap", fontFamily: "inherit" }}>
           יציאה
         </button>
       </header>
@@ -204,9 +216,9 @@ export default function Dashboard() {
       </div>
 
       {/* ── Tip bar ── */}
-      <div style={{ background: "#FFFBF0", borderBottom: "1px solid #F0E8D0", padding: "10px 28px", fontSize: "12px", color: "#8B7355", display: "flex", alignItems: "center", gap: "8px" }}>
+      <div className="adm-tip" style={{ background: "#FFFBF0", borderBottom: "1px solid #F0E8D0", padding: "10px 28px", fontSize: "12px", color: "#8B7355", display: "flex", alignItems: "center", gap: "8px" }}>
         <span>💡</span>
-        <span>רחף על מוצר ולחץ <strong>עריכה</strong> לשינוי מחיר, שם, הנחה ועוד — ישירות מהתצוגה</span>
+        <span>רחף על מוצר ולחץ <strong>עריכה</strong> לשינוי מחיר, שם, הנחה ועוד</span>
       </div>
 
       {/* ── Product grid ── */}
@@ -217,10 +229,10 @@ export default function Dashboard() {
           <div style={{ padding: "24px", background: "#fff5f5", color: "#e53e3e", fontSize: "14px", borderRadius: "4px" }}>{error}</div>
         ) : displayed.length === 0 ? (
           <div style={{ textAlign: "center", padding: "80px", color: "#aaa", fontSize: "14px" }}>
-            {products.length === 0 ? "אין מוצרים — לחץ על «⬆ טען מוצרים» בסרגל העליון" : "אין מוצרים בקטגוריה זו"}
+            {products.length === 0 ? "אין מוצרים — לחץ על «⬆ טען» בסרגל העליון" : "אין מוצרים בקטגוריה זו"}
           </div>
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "24px" }}>
+          <div className="adm-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "24px" }}>
             {displayed.map(p => (
               <ProductCard
                 key={p.id}
@@ -247,7 +259,7 @@ export default function Dashboard() {
       />
 
       {/* ── Edit drawer ── */}
-      <aside style={{
+      <aside className={drawerOpen ? "adm-drawer" : "adm-drawer adm-drawer-hidden"} style={{
         position: "fixed", top: 0, right: drawerOpen ? 0 : "-540px",
         width: "520px", maxWidth: "100vw", height: "100dvh",
         background: "#fff", zIndex: 200,
@@ -462,7 +474,7 @@ function ProductCard({ p, deleting, onEdit, onDelete, onToggleStock }: {
         )}
 
         {/* Edit overlay — slides up from bottom like shop's quick-add */}
-        <div style={{
+        <div className="adm-edit-btn" style={{
           position: "absolute", bottom: 0, left: 0, right: 0,
           transform: hovered ? "translateY(0)" : "translateY(100%)",
           transition: "transform 0.32s cubic-bezier(0.23, 1, 0.32, 1)",
@@ -482,6 +494,7 @@ function ProductCard({ p, deleting, onEdit, onDelete, onToggleStock }: {
         <button
           onClick={e => { e.stopPropagation(); onDelete(); }}
           disabled={deleting}
+          className="adm-delete-btn"
           style={{
             position: "absolute", top: "10px", left: "10px",
             width: "30px", height: "30px",

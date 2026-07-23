@@ -136,7 +136,7 @@ export default function ProductPage({
       <Navbar />
       <CartDrawer />
 
-      <main className="max-w-[1200px] mx-auto px-6 lg:px-10 pt-24 pb-20">
+      <main className="max-w-[1200px] mx-auto px-6 lg:px-10 pb-20" style={{ paddingTop: "96px" }}>
 
         {/* Breadcrumb */}
         <nav aria-label="breadcrumb" className="mb-10">

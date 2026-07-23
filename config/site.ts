@@ -3,7 +3,7 @@
 // ──────────────────────────────────────────────
 const siteConfig = {
   whatsapp: {
-    phone: "972500000000",          // ← שנה למספר שלך (ללא + ללא -)
+    phone: "972549784329",
     message: "שלום, אני מעוניין/ת בתכשיט מ-VIKOS 💎",
   },
   businessName: "VIKOS Jewelry",

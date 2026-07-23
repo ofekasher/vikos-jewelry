@@ -420,7 +420,7 @@ export default function ProductPage({
 
               {/* WhatsApp — ask about this product */}
               <a
-                href={`https://wa.me/972500000000?text=${encodeURIComponent(`שלום, אני מתעניין/ת במוצר: ${displayName} (₪${product?.price?.toLocaleString()})`)}`}
+                href={`https://wa.me/972549784329?text=${encodeURIComponent(`שלום, אני מתעניין/ת במוצר: ${displayName} (₪${product?.price?.toLocaleString()})`)}`}
                 target="_blank" rel="noreferrer"
                 style={{
                   width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",

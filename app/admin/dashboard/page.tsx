@@ -98,10 +98,11 @@ export default function Dashboard() {
     setDeleting(p.id);
     try {
       const res = await fetch(`/api/admin/products/${p.id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error();
+      if (res.status === 401) { alert("פג תוקף הכניסה — מתחבר/ת מחדש..."); window.location.href = "/admin/login"; return; }
+      if (!res.ok) { const body = await res.json().catch(() => ({})); throw new Error(body?.error || `שגיאה ${res.status}`); }
       setProducts(prev => prev.filter(x => x.id !== p.id));
-    } catch {
-      alert("שגיאה במחיקה");
+    } catch (e: unknown) {
+      alert("שגיאה במחיקה: " + (e instanceof Error ? e.message : "נסה שנית"));
     } finally {
       setDeleting(null);
     }

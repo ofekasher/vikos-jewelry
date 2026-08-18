@@ -17,13 +17,11 @@ export default function HeroVideo() {
       overflow: "hidden",
       background: "#0a0a0a",
     }}>
-      {/* Background video */}
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        poster="/hero-editorial.jpg"
+      {/* Background image */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/hero-editorial.jpg"
+        alt=""
         aria-hidden="true"
         style={{
           position: "absolute", inset: 0,
@@ -32,9 +30,7 @@ export default function HeroVideo() {
           objectPosition: "center 40%",
           display: "block",
         }}
-      >
-        <source src="/hero.mp4" type="video/mp4" />
-      </video>
+      />
 
       {/* Dark scrim for text readability */}
       <div style={{

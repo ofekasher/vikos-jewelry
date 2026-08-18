@@ -27,13 +27,25 @@ export default function ProductCard({ product, index = 0 }: Props) {
       {/* Image */}
       <Link href={`/shop/${product.id}`}>
         <div className="relative overflow-hidden mb-4" style={{ aspectRatio: "1 / 1", background: "#fafafa" }}>
+          {/* Main image */}
           <img
             src={product.image}
             alt={product.nameHe}
-            className="w-full h-full transition-transform duration-700 ease-out group-hover:scale-105"
+            className="absolute inset-0 w-full h-full transition-opacity duration-500 ease-in-out group-hover:opacity-0"
             style={{ objectFit: "contain" }}
             loading="lazy"
           />
+          {/* Hover image — crossfades over main */}
+          {product.hoverImage && (
+            <img
+              src={product.hoverImage}
+              alt=""
+              aria-hidden
+              className="absolute inset-0 w-full h-full opacity-0 transition-opacity duration-500 ease-in-out group-hover:opacity-100"
+              style={{ objectFit: "contain" }}
+              loading="lazy"
+            />
+          )}
           {/* Badges */}
           <div className="absolute top-4 start-4 flex flex-col gap-2">
             {product.isNew && (

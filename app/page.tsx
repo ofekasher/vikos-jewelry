@@ -12,6 +12,7 @@ import EditorialHero from "@/components/home/EditorialHero";
 import BrandMarquee from "@/components/home/BrandMarquee";
 import LookbookSection from "@/components/home/LookbookSection";
 import CategoryAccordion from "@/components/home/CategoryAccordion";
+import ScrollytellingSection from "@/components/home/ScrollytellingSection";
 import ReviewsCarousel from "@/components/home/ReviewsCarousel";
 import InstagramGallery from "@/components/home/InstagramGallery";
 import type { Product } from "@/lib/products";
@@ -27,7 +28,7 @@ const T = {
   border:  "#E8E8E8",
   warm:    "#F0F0EE",
   serif:   "'Cormorant Garamond', Georgia, serif",
-  sans:    "'Inter', system-ui, sans-serif",
+  sans:    "'Plus Jakarta Sans', var(--font-inter), system-ui, sans-serif",
 };
 
 /* ── Reusable section header ── */
@@ -82,6 +83,11 @@ export default function HomePage() {
           BRAND MARQUEE
       ══════════════════════════════════════ */}
       <BrandMarquee />
+
+      {/* ══════════════════════════════════════
+          SCROLLYTELLING — parallax ring reveal
+      ══════════════════════════════════════ */}
+      <ScrollytellingSection />
 
       {/* ══════════════════════════════════════
           NEWEST COLLECTION

@@ -5,7 +5,7 @@ import SplashScreen from "@/components/SplashScreen";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import AiChat from "@/components/AiChat";
 import { LanguageProvider } from "@/lib/LanguageContext";
-import { Cormorant_Garamond, Inter, Frank_Ruhl_Libre } from "next/font/google";
+import { Cormorant_Garamond, Plus_Jakarta_Sans, Frank_Ruhl_Libre } from "next/font/google";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -15,7 +15,7 @@ const cormorant = Cormorant_Garamond({
   display: "swap",
 });
 
-const inter = Inter({
+const inter = Plus_Jakarta_Sans({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
   variable: "--font-inter",

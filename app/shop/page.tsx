@@ -73,7 +73,12 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
       transition={{ duration: 0.32, delay: Math.min(index * 0.05, 0.3), ease: [0.23, 1, 0.32, 1] }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{ cursor: "pointer", display: "flex", flexDirection: "column" }}
+      style={{
+        cursor: "pointer", display: "flex", flexDirection: "column",
+        transform: hovered ? "translateY(-6px)" : "translateY(0)",
+        transition: "transform 0.45s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.45s cubic-bezier(0.23, 1, 0.32, 1)",
+        boxShadow: hovered ? "0 12px 32px rgba(0,0,0,0.09)" : "0 0 0 rgba(0,0,0,0)",
+      }}
     >
       <Link href={`/product/${p.id}`} style={{ textDecoration: "none", display: "block" }}>
         {/* Image container */}
@@ -81,8 +86,6 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
           position: "relative", overflow: "hidden",
           background: "#fffdf9",
           aspectRatio: "1/1", marginBottom: "14px",
-          transform: hovered ? "scale(1.01)" : "scale(1)",
-          transition: "transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)",
         }}>
 
           {/* Skeleton */}

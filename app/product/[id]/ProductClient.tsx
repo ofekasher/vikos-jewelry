@@ -878,7 +878,7 @@ export default function ProductPage({
             <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
               {/* Wishlist */}
               <button
-                onClick={() => useStore.getState().toggleWishlist(product.id)}
+                onClick={() => useStore.getState().toggleWishlist(product)}
                 aria-label="רשימת משאלות"
                 className="action-btn"
                 style={{

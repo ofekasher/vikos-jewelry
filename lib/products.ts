@@ -14,6 +14,7 @@ export interface Product {
   isBestseller?: boolean;
   inStock?: boolean;
   discount?: number;
+  variants?: string[];
 }
 
 // Pexels License — free for commercial use

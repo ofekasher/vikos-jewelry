@@ -26,6 +26,7 @@ export interface DbProduct {
   is_bestseller:  boolean;
   in_stock:       boolean;
   discount:       number;
+  variants:       string[] | null;
   created_at:     string;
   updated_at:     string;
 }
@@ -47,6 +48,7 @@ export interface Product {
   isBestseller?:  boolean;
   inStock:        boolean;
   discount:       number;
+  variants?:      string[];
 }
 
 /* ── mapper ── */
@@ -67,6 +69,7 @@ export function mapProduct(p: DbProduct): Product {
     isBestseller:  p.is_bestseller,
     inStock:       p.in_stock,
     discount:      p.discount ?? 0,
+    variants:      p.variants ?? undefined,
   };
 }
 

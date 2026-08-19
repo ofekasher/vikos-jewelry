@@ -204,11 +204,11 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
         </p>
         {finalPrice ? (
           <p style={{ fontFamily: T.sans, fontSize: "13px", fontWeight: 300, display: "flex", gap: "6px", alignItems: "center" }}>
-            <span style={{ textDecoration: "line-through", color: "#BDBDBD" }}>₪{p.price.toLocaleString()}</span>
-            <span style={{ color: "#C0392B", fontWeight: 400 }}>₪{finalPrice.toLocaleString()}</span>
+            <span dir="ltr" style={{ unicodeBidi: "isolate", textDecoration: "line-through", color: "#BDBDBD" }}>₪{p.price.toLocaleString()}</span>
+            <span dir="ltr" style={{ unicodeBidi: "isolate", color: "#C0392B", fontWeight: 400 }}>₪{finalPrice.toLocaleString()}</span>
           </p>
         ) : (
-          <p style={{ fontFamily: T.sans, fontSize: "13px", color: "#888", fontWeight: 300 }}>₪{p.price.toLocaleString()}</p>
+          <p style={{ fontFamily: T.sans, fontSize: "13px", color: "#888", fontWeight: 300 }}><span dir="ltr" style={{ unicodeBidi: "isolate" }}>₪{p.price.toLocaleString()}</span></p>
         )}
       </Link>
     </motion.article>

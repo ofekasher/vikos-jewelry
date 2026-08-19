@@ -73,21 +73,21 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
       transition={{ duration: 0.32, delay: Math.min(index * 0.05, 0.3), ease: [0.23, 1, 0.32, 1] }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{ cursor: "pointer" }}
+      style={{ cursor: "pointer", display: "flex", flexDirection: "column" }}
     >
       <Link href={`/product/${p.id}`} style={{ textDecoration: "none", display: "block" }}>
         {/* Image container */}
         <div style={{
           position: "relative", overflow: "hidden",
-          background: "#F5F4F1",
-          aspectRatio: "3/4", marginBottom: "14px",
+          background: "#fffdf9",
+          aspectRatio: "1/1", marginBottom: "14px",
           transform: hovered ? "scale(1.01)" : "scale(1)",
           transition: "transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)",
         }}>
 
           {/* Skeleton */}
           {!imgLoaded && (
-            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "#F5F4F1" }}>
+            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "#fffdf9" }}>
               <div style={{ width: "40px", height: "40px", border: "1px solid #E0DDD8", borderRadius: "50%", opacity: 0.4 }} />
             </div>
           )}
@@ -98,10 +98,9 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
             fill sizes="(max-width: 700px) 50vw, (max-width: 1100px) 33vw, 25vw"
             priority={index < 4}
             style={{
-              objectFit: "cover",
-              transition: "opacity 0.5s ease, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)",
+              objectFit: "contain",
+              transition: "opacity 0.5s ease",
               opacity: imgLoaded ? 1 : 0,
-              transform: hovered ? "scale(1.06)" : "scale(1)",
             }}
             onLoad={() => setImgLoaded(true)}
           />
@@ -112,7 +111,7 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
               src={p.hoverImage} alt=""
               fill sizes="(max-width: 700px) 50vw, 25vw"
               style={{
-                objectFit: "cover",
+                objectFit: "contain",
                 transition: "opacity 0.45s ease",
                 opacity: hovered ? 1 : 0,
               }}
@@ -192,9 +191,11 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
           color: T.black,
           marginBottom: "5px",
           lineHeight: 1.3,
+          display: "-webkit-box",
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: "vertical",
           overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
+          minHeight: "2.6em",
         }}>
           {displayName}
         </p>

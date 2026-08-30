@@ -129,14 +129,6 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
               onLoad={() => setImgLoaded(true)}
             />
 
-            {/* Hover image */}
-            {p.hoverImage && imgLoaded && (
-              <Image
-                src={p.hoverImage} alt=""
-                fill sizes="(max-width: 700px) 50vw, 25vw"
-                style={{ objectFit: "contain", padding: "8%", transition: "opacity 0.45s ease", opacity: hovered ? 1 : 0 }}
-              />
-            )}
 
             {/* ✨ Tilt shine overlay */}
             <div style={{

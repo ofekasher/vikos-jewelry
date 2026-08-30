@@ -200,7 +200,6 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
                 style={{
                   width: "100%", padding: "11px 16px",
                   background: "rgba(255,255,255,0.96)",
-                  borderTop: `1px solid ${T.gold}`,
                   border: "none", borderTop: `1px solid ${T.gold}`,
                   cursor: "pointer",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: "7px",

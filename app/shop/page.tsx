@@ -3,7 +3,7 @@ import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "motion/react";
 import { toast } from "sonner";
 function IconSearch({ size = 14, color = "currentColor" }: { size?: number; color?: string }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
@@ -58,160 +58,184 @@ const SORT_OPTIONS = [
 function ProductCard({ p, index }: { p: Product; index: number }) {
   const { addToCart, toggleWishlist, isWishlisted } = useStore();
   const { lang } = useLang();
-  const [hovered, setHovered] = useState(false);
+  const [hovered, setHovered]   = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
-  const wishlisted = isWishlisted(p.id);
+  const [shine, setShine]       = useState({ x: 50, y: 50 });
+  const cardRef = useRef<HTMLDivElement>(null);
+  const wishlisted  = isWishlisted(p.id);
   const displayName = lang === "en" ? (p.nameEn || p.nameHe) : (p.nameHe || p.nameEn);
-  const finalPrice = p.discount && p.discount > 0
+  const finalPrice  = p.discount && p.discount > 0
     ? Math.round(p.price * (1 - p.discount / 100)) : null;
 
+  /* ── tilt motion values ── */
+  const rawX = useMotionValue(0);
+  const rawY = useMotionValue(0);
+  const spring = { stiffness: 260, damping: 28, mass: 0.45 };
+  const rotateY = useSpring(useTransform(rawX, [-0.5, 0.5], [-11, 11]), spring);
+  const rotateX = useSpring(useTransform(rawY, [-0.5, 0.5], [8, -8]),  spring);
+
+  function onMove(e: React.MouseEvent<HTMLDivElement>) {
+    const r = cardRef.current?.getBoundingClientRect();
+    if (!r) return;
+    const x = (e.clientX - r.left) / r.width  - 0.5;
+    const y = (e.clientY - r.top)  / r.height - 0.5;
+    rawX.set(x); rawY.set(y);
+    setShine({ x: (x + 0.5) * 100, y: (y + 0.5) * 100 });
+  }
+
+  function onLeave() {
+    rawX.set(0); rawY.set(0);
+    setHovered(false);
+  }
+
   return (
-    <motion.article
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-30px" }}
-      transition={{ duration: 0.32, delay: Math.min(index * 0.05, 0.3), ease: [0.23, 1, 0.32, 1] }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        cursor: "pointer", display: "flex", flexDirection: "column",
-        transform: hovered ? "translateY(-6px)" : "translateY(0)",
-        transition: "transform 0.45s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.45s cubic-bezier(0.23, 1, 0.32, 1)",
-        boxShadow: hovered ? "0 12px 32px rgba(0,0,0,0.09)" : "0 0 0 rgba(0,0,0,0)",
-      }}
-    >
-      <Link href={`/product/${p.id}`} style={{ textDecoration: "none", display: "block" }}>
-        {/* Image container */}
-        <div style={{
-          position: "relative", overflow: "hidden",
-          background: "#fffdf9",
-          aspectRatio: "1/1", marginBottom: "14px",
-        }}>
+    /* perspective wrapper */
+    <div ref={cardRef} style={{ perspective: "900px", perspectiveOrigin: "center" }}
+      onMouseMove={onMove} onMouseEnter={() => setHovered(true)} onMouseLeave={onLeave}>
 
-          {/* Skeleton */}
-          {!imgLoaded && (
-            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "#fffdf9" }}>
-              <div style={{ width: "40px", height: "40px", border: "1px solid #E0DDD8", borderRadius: "50%", opacity: 0.4 }} />
-            </div>
-          )}
+      <motion.article
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-30px" }}
+        transition={{ duration: 0.32, delay: Math.min(index * 0.05, 0.3), ease: [0.23, 1, 0.32, 1] }}
+        style={{
+          cursor: "pointer", display: "flex", flexDirection: "column",
+          rotateX, rotateY,
+          transformStyle: "preserve-3d",
+        }}
+      >
+        <Link href={`/product/${p.id}`} style={{ textDecoration: "none", display: "block" }}>
+          {/* Image container */}
+          <div style={{ position: "relative", overflow: "hidden", background: "#FAFAF8", aspectRatio: "1/1" }}>
 
-          {/* Product image */}
-          <Image
-            src={p.image} alt={displayName}
-            fill sizes="(max-width: 700px) 50vw, (max-width: 1100px) 33vw, 25vw"
-            priority={index < 4}
-            style={{
-              objectFit: "contain",
-              transition: "opacity 0.5s ease",
-              opacity: imgLoaded ? 1 : 0,
-            }}
-            onLoad={() => setImgLoaded(true)}
-          />
+            {/* Skeleton */}
+            {!imgLoaded && (
+              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "#FAFAF8" }}>
+                <div style={{ width: "32px", height: "32px", border: "1px solid #E0DDD8", borderRadius: "50%", opacity: 0.4 }} />
+              </div>
+            )}
 
-          {/* Hover image (if exists) */}
-          {p.hoverImage && imgLoaded && (
+            {/* Product image */}
             <Image
-              src={p.hoverImage} alt=""
-              fill sizes="(max-width: 700px) 50vw, 25vw"
+              src={p.image} alt={displayName}
+              fill sizes="(max-width: 700px) 50vw, (max-width: 1100px) 33vw, 25vw"
+              priority={index < 4}
               style={{
-                objectFit: "contain",
-                transition: "opacity 0.45s ease",
-                opacity: hovered ? 1 : 0,
+                objectFit: "contain", padding: "8%",
+                transition: "opacity 0.5s ease, transform 0.6s cubic-bezier(0.23,1,0.32,1)",
+                opacity: imgLoaded ? 1 : 0,
+                transform: hovered ? "scale(1.04)" : "scale(1)",
               }}
+              onLoad={() => setImgLoaded(true)}
             />
-          )}
 
-          {/* Badge */}
-          {(p.isNew || p.isBestseller || finalPrice) && (
-            <span style={{
-              position: "absolute", top: "12px", right: "12px",
-              background: finalPrice ? "#C0392B" : p.isBestseller ? T.gold : T.black,
-              color: "#fff", fontFamily: T.sans,
-              fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase",
-              padding: "4px 9px",
-            }}>
-              {finalPrice ? `-${p.discount}%` : p.isBestseller
-                ? (lang === "en" ? "Best Seller" : "נמכר ביותר")
-                : (lang === "en" ? "New" : "חדש")}
-            </span>
-          )}
+            {/* Hover image */}
+            {p.hoverImage && imgLoaded && (
+              <Image
+                src={p.hoverImage} alt=""
+                fill sizes="(max-width: 700px) 50vw, 25vw"
+                style={{ objectFit: "contain", padding: "8%", transition: "opacity 0.45s ease", opacity: hovered ? 1 : 0 }}
+              />
+            )}
 
-          {/* Wishlist */}
-          <button
-            onClick={e => {
-              e.preventDefault(); e.stopPropagation();
-              toggleWishlist(p);
-              toast.success(wishlisted
-                ? (lang === "en" ? `Removed from wishlist` : `הוסר ממועדפים`)
-                : (lang === "en" ? `Added to wishlist` : `נוסף למועדפים`));
-            }}
-            aria-label="מועדפים"
-            style={{
-              position: "absolute", top: "10px", left: "10px",
-              width: "36px", height: "36px",
-              background: "rgba(255,255,255,0.9)", border: "none",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer",
-              opacity: hovered || wishlisted ? 1 : 0,
-              transition: "opacity 0.2s",
-            }}>
-            <IconHeart size={13} fill={wishlisted ? T.gold : "none"} color={wishlisted ? T.gold : "#666"} />
-          </button>
+            {/* ✨ Tilt shine overlay */}
+            <div style={{
+              position: "absolute", inset: 0, pointerEvents: "none", zIndex: 5,
+              opacity: hovered ? 1 : 0,
+              transition: "opacity 0.3s ease",
+              background: `radial-gradient(ellipse 55% 45% at ${shine.x}% ${shine.y}%, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.10) 45%, transparent 70%)`,
+              mixBlendMode: "screen",
+            }} />
 
-          {/* Quick add — slides up on hover */}
-          <div style={{
-            position: "absolute", bottom: 0, left: 0, right: 0,
-            transform: hovered ? "translateY(0)" : "translateY(100%)",
-            transition: "transform 0.32s cubic-bezier(0.23, 1, 0.32, 1)",
-          }}>
+            {/* Badge */}
+            {(p.isNew || p.isBestseller || finalPrice) && (
+              <span style={{
+                position: "absolute", top: "12px", right: "12px",
+                background: finalPrice ? "#C0392B" : p.isBestseller ? T.gold : T.black,
+                color: "#fff", fontFamily: T.sans,
+                fontSize: "7px", letterSpacing: "0.18em", textTransform: "uppercase", padding: "4px 8px",
+              }}>
+                {finalPrice ? `-${p.discount}%` : p.isBestseller
+                  ? (lang === "en" ? "Best Seller" : "נמכר ביותר")
+                  : (lang === "en" ? "New" : "חדש")}
+              </span>
+            )}
+
+            {/* Wishlist — top left */}
             <button
               onClick={e => {
                 e.preventDefault(); e.stopPropagation();
-                addToCart(p);
-                toast.success(lang === "en" ? `Added to bag` : `${displayName} נוסף לסל`, { duration: 2200 });
+                toggleWishlist(p);
+                toast.success(wishlisted
+                  ? (lang === "en" ? "Removed from wishlist" : "הוסר ממועדפים")
+                  : (lang === "en" ? "Added to wishlist" : "נוסף למועדפים"));
               }}
+              aria-label="מועדפים"
               style={{
-                width: "100%", padding: "13px 16px",
-                background: "#111",
-                border: "none", cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.18em",
-                textTransform: "uppercase", color: "#fff",
+                position: "absolute", top: "10px", left: "10px",
+                width: "32px", height: "32px",
+                background: wishlisted ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.75)",
+                border: wishlisted ? `1px solid ${T.gold}` : "1px solid rgba(0,0,0,0.08)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer",
+                opacity: hovered || wishlisted ? 1 : 0,
+                transition: "opacity 0.25s, background 0.2s, border 0.2s",
+                zIndex: 6,
               }}>
-              <IconBag size={11} strokeWidth={1.5} />
-              {lang === "en" ? "Add to bag" : "הוסף לסל"}
+              <IconHeart size={12} fill={wishlisted ? T.gold : "none"} color={wishlisted ? T.gold : "#888"} />
             </button>
-          </div>
-        </div>
-      </Link>
 
-      {/* Product info */}
-      <Link href={`/product/${p.id}`} style={{ textDecoration: "none" }}>
-        <p style={{
-          fontFamily: T.serif,
-          fontSize: "1rem",
-          fontWeight: 400,
-          color: T.black,
-          marginBottom: "5px",
-          lineHeight: 1.3,
-          display: "-webkit-box",
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: "vertical",
-          overflow: "hidden",
-          minHeight: "2.6em",
-        }}>
-          {displayName}
-        </p>
-        {finalPrice ? (
-          <p style={{ fontFamily: T.sans, fontSize: "13px", fontWeight: 300, display: "flex", gap: "6px", alignItems: "center" }}>
-            <span dir="ltr" style={{ unicodeBidi: "isolate", textDecoration: "line-through", color: "#BDBDBD" }}>₪{p.price.toLocaleString()}</span>
-            <span dir="ltr" style={{ unicodeBidi: "isolate", color: "#C0392B", fontWeight: 400 }}>₪{finalPrice.toLocaleString()}</span>
+            {/* Quick add — elegant gold bar on hover */}
+            <div style={{
+              position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 6,
+              transform: hovered ? "translateY(0)" : "translateY(100%)",
+              transition: "transform 0.34s cubic-bezier(0.23, 1, 0.32, 1)",
+            }}>
+              <button
+                onClick={e => {
+                  e.preventDefault(); e.stopPropagation();
+                  addToCart(p);
+                  toast.success(lang === "en" ? "Added to bag" : `${displayName} נוסף לסל`, { duration: 2200 });
+                }}
+                style={{
+                  width: "100%", padding: "11px 16px",
+                  background: "rgba(255,255,255,0.96)",
+                  borderTop: `1px solid ${T.gold}`,
+                  border: "none", borderTop: `1px solid ${T.gold}`,
+                  cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: "7px",
+                  fontFamily: T.sans, fontSize: "9px", letterSpacing: "0.22em",
+                  textTransform: "uppercase", color: T.gold,
+                  transition: "background 0.2s",
+                }}>
+                <IconBag size={10} strokeWidth={1.5} />
+                {lang === "en" ? "Add to bag" : "הוסף לסל"}
+              </button>
+            </div>
+          </div>
+        </Link>
+
+        {/* Product info — below image */}
+        <Link href={`/product/${p.id}`} style={{ textDecoration: "none", padding: "14px 2px 4px" }}>
+          <p style={{
+            fontFamily: T.serif, fontSize: "1.05rem", fontWeight: 400, color: T.black,
+            marginBottom: "6px", lineHeight: 1.35,
+            display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+            overflow: "hidden", minHeight: "2.7em",
+          }}>
+            {displayName}
           </p>
-        ) : (
-          <p style={{ fontFamily: T.sans, fontSize: "13px", color: "#888", fontWeight: 300 }}><span dir="ltr" style={{ unicodeBidi: "isolate" }}>₪{p.price.toLocaleString()}</span></p>
-        )}
-      </Link>
-    </motion.article>
+          {finalPrice ? (
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <span dir="ltr" style={{ unicodeBidi: "isolate", fontFamily: T.sans, fontSize: "12px", fontWeight: 300, textDecoration: "line-through", color: "#C8C8C8" }}>₪{p.price.toLocaleString()}</span>
+              <span dir="ltr" style={{ unicodeBidi: "isolate", fontFamily: T.sans, fontSize: "13px", fontWeight: 400, color: "#B83232" }}>₪{finalPrice.toLocaleString()}</span>
+            </div>
+          ) : (
+            <span dir="ltr" style={{ unicodeBidi: "isolate", fontFamily: T.sans, fontSize: "13px", color: T.gray, fontWeight: 300 }}>₪{p.price.toLocaleString()}</span>
+          )}
+        </Link>
+      </motion.article>
+    </div>
   );
 }
 

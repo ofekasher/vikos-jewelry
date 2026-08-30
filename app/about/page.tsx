@@ -1,5 +1,6 @@
 "use client";
-import { motion } from "motion/react";
+import { useRef } from "react";
+import { motion, useScroll, useTransform, useSpring } from "motion/react";
 import Navbar from "@/components/Navbar";
 import CartDrawer from "@/components/CartDrawer";
 import Footer from "@/components/Footer";
@@ -20,6 +21,9 @@ const STRINGS = {
   he: {
     eyebrow:     "הסיפור שלנו",
     heroSub:     "הרבה יותר ממותג תכשיטים — סיפור של אהבה, משפחה וחלומות",
+    heroLine1:   "תכשיטים",
+    heroLine2:   "שנולדים",
+    heroLine3:   "מאהבה",
     vikiEyebrow: "מאיפה הכל התחיל",
     vikiMeta:    "ויקי · אמא · השראה",
     vikiTitle:   "השם VIKOS נולד מתוך האדם שהיווה השראה להכל",
@@ -51,6 +55,9 @@ const STRINGS = {
   en: {
     eyebrow:     "Our Story",
     heroSub:     "More than a jewelry brand — a story of love, family, and dreams",
+    heroLine1:   "Jewelry",
+    heroLine2:   "Born From",
+    heroLine3:   "Love",
     vikiEyebrow: "Where It All Began",
     vikiMeta:    "Viki · Mother · Inspiration",
     vikiTitle:   "The name VIKOS was born from the person who inspired everything",
@@ -83,6 +90,132 @@ const STRINGS = {
 
 const fadeIn = { initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, amount: 0.15 }, transition: { duration: 0.7, ease: [0.22,1,0.36,1] as [number,number,number,number] } };
 
+function SmoothScrollHero({ s }: { s: typeof STRINGS["he"] }) {
+  const targetRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: targetRef,
+    offset: ["start start", "end start"],
+  });
+
+  const spring = { stiffness: 120, damping: 25, mass: 0.4 };
+
+  // All elements move at the same moderate rate
+  const groupY = useSpring(useTransform(scrollYProgress, [0, 1], ["0%", "-70%"]), spring);
+  const groupOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+
+  // Decorative lines: subtle outward drift
+  const lineLeftX = useSpring(useTransform(scrollYProgress, [0, 1], ["0%", "-20%"]), spring);
+  const lineRightX = useSpring(useTransform(scrollYProgress, [0, 1], ["0%", "20%"]), spring);
+  const lineOpacity = useTransform(scrollYProgress, [0, 0.5], [0.45, 0]);
+
+  // Scroll indicator: fades out quickly
+  const indicatorOpacity = useTransform(scrollYProgress, [0, 0.2], [0.5, 0]);
+
+  return (
+    <div ref={targetRef} style={{ height: "220vh", position: "relative" }}>
+      <div style={{
+        position: "sticky", top: 0,
+        height: "100dvh", overflow: "hidden",
+        background: C.black,
+        display: "flex", alignItems: "center", justifyContent: "center",
+      }}>
+        {/* Vertical grid lines */}
+        {[...Array(6)].map((_, i) => (
+          <div key={i} style={{
+            position: "absolute", top: 0, bottom: 0,
+            left: `${(i + 1) * 14.28}%`, width: "1px",
+            background: "rgba(201,169,110,0.06)", pointerEvents: "none",
+          }} />
+        ))}
+
+        {/* Horizontal decorative lines */}
+        <motion.div style={{
+          position: "absolute", top: "50%",
+          left: "6%", right: "auto",
+          width: "clamp(40px, 8vw, 100px)", height: "1px",
+          background: C.gold, opacity: lineOpacity, x: lineLeftX,
+        }} />
+        <motion.div style={{
+          position: "absolute", top: "50%",
+          right: "6%", left: "auto",
+          width: "clamp(40px, 8vw, 100px)", height: "1px",
+          background: C.gold, opacity: lineOpacity, x: lineRightX,
+        }} />
+
+        <div style={{
+          textAlign: "center", position: "relative", zIndex: 10,
+          padding: "0 32px", userSelect: "none",
+        }}>
+          {/* Eyebrow */}
+          <motion.p style={{
+            fontFamily: C.sans, fontSize: "10px", letterSpacing: "0.42em",
+            textTransform: "uppercase", color: C.gold, marginBottom: "28px",
+            y: groupY, opacity: groupOpacity,
+          }}>
+            {s.eyebrow}
+          </motion.p>
+
+          {/* Main title */}
+          <motion.h1
+            style={{
+              fontFamily: C.serif,
+              fontSize: "clamp(4rem, 12vw, 10rem)",
+              fontWeight: 300, color: "#FAFAF8", lineHeight: 0.9,
+              letterSpacing: "-0.01em", margin: 0,
+              y: groupY, opacity: groupOpacity,
+            }}
+          >
+            VIKOS
+          </motion.h1>
+
+          {/* Thin gold rule */}
+          <motion.div style={{
+            width: "1px", height: "48px",
+            background: `linear-gradient(to bottom, ${C.gold}, transparent)`,
+            margin: "28px auto",
+            y: groupY, opacity: groupOpacity,
+          }} />
+
+          {/* Subtitle */}
+          <motion.p style={{
+            fontFamily: C.frank,
+            fontSize: "clamp(0.95rem, 2vw, 1.25rem)",
+            fontWeight: 300, color: "rgba(250,250,248,0.55)",
+            maxWidth: "480px", lineHeight: 1.7, margin: "0 auto",
+            y: groupY, opacity: groupOpacity,
+          }}>
+            {s.heroSub}
+          </motion.p>
+        </div>
+
+        {/* Scroll indicator */}
+        <motion.div style={{
+          position: "absolute", bottom: "40px", left: "50%",
+          transform: "translateX(-50%)", opacity: indicatorOpacity,
+        }}>
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+            style={{ width: "1px", height: "48px", background: C.gold, margin: "0 auto" }}
+          />
+        </motion.div>
+
+        {/* VIKOS watermark */}
+        <div style={{
+          position: "absolute", inset: 0,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontFamily: C.serif, fontSize: "clamp(18vw, 28vw, 38vw)",
+          fontWeight: 300, color: "rgba(201,169,110,0.025)",
+          lineHeight: 1, pointerEvents: "none", userSelect: "none",
+          letterSpacing: "-0.04em",
+        }}>
+          V
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AboutPage() {
   const { lang } = useLang();
   const s = STRINGS[lang === "en" ? "en" : "he"];
@@ -92,58 +225,8 @@ export default function AboutPage() {
       <Navbar />
       <CartDrawer />
 
-      {/* ── 1. HERO ── */}
-      <section style={{
-        background: C.black, minHeight: "100vh",
-        display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center",
-        padding: "120px 32px 80px", textAlign: "center", position: "relative", overflow: "hidden",
-      }}>
-        {[...Array(6)].map((_, i) => (
-          <div key={i} style={{
-            position: "absolute", top: 0, bottom: 0,
-            left: `${(i + 1) * 14.28}%`, width: "1px",
-            background: "rgba(201,169,110,0.06)", pointerEvents: "none",
-          }} />
-        ))}
-
-        <p style={{ fontFamily: C.sans, fontSize: "10px", letterSpacing: "0.42em", textTransform: "uppercase", color: C.gold, marginBottom: "28px" }}>
-          {s.eyebrow}
-        </p>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.05, ease: [0.22,1,0.36,1] }}
-          style={{
-            fontFamily: C.serif, fontSize: "clamp(3.5rem, 10vw, 8rem)",
-            fontWeight: 300, color: "#FAFAF8", lineHeight: 0.95,
-            letterSpacing: "-0.01em", margin: 0,
-          }}
-        >
-          VIKOS
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.35 }}
-          style={{
-            fontFamily: C.frank, fontSize: "clamp(1rem, 2.2vw, 1.35rem)",
-            fontWeight: 300, color: "rgba(250,250,248,0.55)",
-            marginTop: "28px", maxWidth: "520px", lineHeight: 1.7,
-          }}
-        >
-          {s.heroSub}
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0 }} animate={{ opacity: 0.5 }} transition={{ duration: 1, delay: 1.2 }}
-          style={{ position: "absolute", bottom: "40px", left: "50%", transform: "translateX(-50%)" }}
-        >
-          <motion.div
-            animate={{ y: [0, 8, 0] }} transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-            style={{ width: "1px", height: "48px", background: C.gold, margin: "0 auto" }}
-          />
-        </motion.div>
-      </section>
+      {/* ── 1. SMOOTH-SCROLL HERO ── */}
+      <SmoothScrollHero s={s} />
 
       {/* ── 2. VIKI ── */}
       <section style={{ background: C.warm, padding: "0 32px" }}>
@@ -298,7 +381,6 @@ export default function AboutPage() {
             </p>
           </div>
 
-          {/* Editorial values grid — replaces the bar chart */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "rgba(201,169,110,0.2)", marginTop: "40px" }}>
             {s.values.map((v, i) => (
               <motion.div

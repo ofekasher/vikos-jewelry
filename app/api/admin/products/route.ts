@@ -1,35 +1,46 @@
 import { NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { verifySessionToken } from "@/lib/session";
 
-async function isAuthed(cookieStore: Awaited<ReturnType<typeof cookies>>) {
-  const token = cookieStore.get("admin_session")?.value;
-  if (!token) return false;
-  return verifySessionToken(token);
+const SB_URL    = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SB_ANON   = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const EDGE_URL  = `${SB_URL}/functions/v1/admin-products`;
+const EDGE_SECRET = process.env.EDGE_SECRET ?? "vikos-edge-admin-2026";
+
+function anonClient() {
+  return createClient(SB_URL, SB_ANON, { auth: { persistSession: false } });
+}
+
+function edgeHeaders() {
+  return { "Authorization": `Bearer ${EDGE_SECRET}`, "Content-Type": "application/json" };
+}
+
+async function isAuthed(): Promise<boolean> {
+  const jar = await cookies();
+  const token = jar.get("admin_session")?.value;
+  return token ? verifySessionToken(token) : false;
 }
 
 export async function GET() {
   try {
-    const db = createServerClient();
+    const db = anonClient();
     const { data, error } = await db
       .from("products")
-      .select("id,name_he,name_en,price,category,image,images,is_new,is_bestseller,in_stock,discount,created_at")
+      .select("id,name_he,name_en,price,category,image,images,hover_image,is_new,is_bestseller,in_stock,discount,material,description_he,description_en,created_at")
       .order("created_at", { ascending: true });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json(data ?? []);
-  } catch {
-    return NextResponse.json({ error: "Supabase not configured" }, { status: 503 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e as Error).message }, { status: 503 });
   }
 }
 
 export async function POST(req: Request) {
-  const jar = await cookies();
-  if (!(await isAuthed(jar))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
+  if (!(await isAuthed())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await req.json();
-  const db = createServerClient();
-  const { data, error } = await db.from("products").insert([body]).select().single();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  const res = await fetch(EDGE_URL, { method: "POST", headers: edgeHeaders(), body: JSON.stringify(body) });
+  const data = await res.json();
+  if (!res.ok) return NextResponse.json(data, { status: res.status });
   return NextResponse.json(data, { status: 201 });
 }

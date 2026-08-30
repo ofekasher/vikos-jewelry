@@ -1,5 +1,20 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { motion } from "motion/react";
+import Image from "next/image";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+
+/* ── same tokens as the shop ── */
+const T = {
+  gold:   "#8B7355",
+  black:  "#111111",
+  gray:   "#6B6B6B",
+  light:  "#AAAAAA",
+  border: "#E8E8E8",
+  serif:  "'Cormorant Garamond', Georgia, serif",
+  sans:   "'Inter', system-ui, sans-serif",
+};
 
 interface AdminProduct {
   id: string;
@@ -20,77 +35,72 @@ interface AdminProduct {
 }
 
 const CATS = [
-  { id: "all",       label: "הכל" },
-  { id: "rings",     label: "טבעות" },
-  { id: "bracelets", label: "צמידים" },
-  { id: "necklaces", label: "שרשראות" },
-  { id: "earrings",  label: "עגילים" },
+  { id: "all",       labelHe: "הכל" },
+  { id: "rings",     labelHe: "טבעות" },
+  { id: "bracelets", labelHe: "צמידים" },
+  { id: "necklaces", labelHe: "שרשראות" },
+  { id: "earrings",  labelHe: "עגילים" },
 ];
 
 export default function Dashboard() {
   const [products, setProducts] = useState<AdminProduct[]>([]);
   const [loading, setLoading]   = useState(true);
-  const [error, setError]       = useState("");
   const [cat, setCat]           = useState("all");
   const [editTarget, setEditTarget] = useState<AdminProduct | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [form, setForm]         = useState<Partial<AdminProduct>>({});
   const [saving, setSaving]     = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   async function load() {
     setLoading(true);
-    setError("");
     try {
       const res = await fetch("/api/admin/products");
       if (!res.ok) throw new Error();
       setProducts(await res.json());
-    } catch {
-      setError("שגיאה בטעינת מוצרים — ודא שהרצת את setup.sql");
-    } finally {
-      setLoading(false);
-    }
+    } catch { /* silent */ }
+    finally { setLoading(false); }
   }
   useEffect(() => { load(); }, []);
 
   function openEdit(p: AdminProduct) {
     setEditTarget(p);
-    setForm({ ...p });
+    const imgs = [...(p.images ?? [])];
+    if (p.image && !imgs.includes(p.image)) imgs.unshift(p.image);
+    setForm({ ...p, images: imgs });
     setDrawerOpen(true);
   }
-  function closeDrawer() {
-    setDrawerOpen(false);
-    setTimeout(() => setEditTarget(null), 320);
-  }
-  function upd<K extends keyof AdminProduct>(key: K, val: AdminProduct[K]) {
-    setForm(f => ({ ...f, [key]: val }));
+  function closeDrawer() { setDrawerOpen(false); setTimeout(() => setEditTarget(null), 320); }
+  function upd<K extends keyof AdminProduct>(key: K, val: AdminProduct[K]) { setForm(f => ({ ...f, [key]: val })); }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]; if (!file) return;
+    setUploading(true);
+    try {
+      const fd = new FormData(); fd.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+      if (!res.ok) throw new Error();
+      const { url } = await res.json();
+      upd("images", [...(form.images ?? []), url] as string[] & AdminProduct["images"]);
+    } catch { alert("שגיאה בהעלאת תמונה"); }
+    finally { setUploading(false); if (fileRef.current) fileRef.current.value = ""; }
   }
 
   async function saveProduct() {
     if (!editTarget) return;
     setSaving(true);
     try {
-      const payload = {
-        ...form,
-        price:       Number(form.price) || 0,
-        discount:    Math.min(100, Math.max(0, Math.round(Number(form.discount) || 0))),
-        image:       form.images?.[0] ?? form.image ?? "",
-        hover_image: form.images?.[1] ?? form.hover_image ?? null,
-      };
-      const res = await fetch(`/api/admin/products/${editTarget.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error((await res.json()).error || "שגיאה");
+      const imgs = (form.images ?? []).filter(Boolean);
+      const payload = { ...form, price: Number(form.price) || 0, discount: Math.min(100, Math.max(0, Math.round(Number(form.discount) || 0))), images: imgs, image: imgs[0] ?? "", hover_image: imgs[1] ?? null };
+      const res = await fetch(`/api/admin/products/${editTarget.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error((await res.json()).error);
       const updated = await res.json();
       setProducts(prev => prev.map(p => p.id === editTarget.id ? { ...p, ...updated } : p));
       closeDrawer();
-    } catch (err: unknown) {
-      alert("שגיאה: " + (err as Error).message);
-    } finally {
-      setSaving(false);
-    }
+    } catch (err: unknown) { alert("שגיאה: " + (err as Error).message); }
+    finally { setSaving(false); }
   }
 
   async function deleteProduct(p: AdminProduct) {
@@ -98,146 +108,154 @@ export default function Dashboard() {
     setDeleting(p.id);
     try {
       const res = await fetch(`/api/admin/products/${p.id}`, { method: "DELETE" });
-      if (res.status === 401) { alert("פג תוקף הכניסה — מתחבר/ת מחדש..."); window.location.href = "/admin/login"; return; }
-      if (!res.ok) { const body = await res.json().catch(() => ({})); throw new Error(body?.error || `שגיאה ${res.status}`); }
+      if (!res.ok) throw new Error();
       setProducts(prev => prev.filter(x => x.id !== p.id));
-    } catch (e: unknown) {
-      alert("שגיאה במחיקה: " + (e instanceof Error ? e.message : "נסה שנית"));
-    } finally {
-      setDeleting(null);
-    }
+      if (editTarget?.id === p.id) closeDrawer();
+    } catch { alert("שגיאה במחיקה"); }
+    finally { setDeleting(null); }
   }
 
   async function toggleStock(p: AdminProduct) {
-    try {
-      await fetch(`/api/admin/products/${p.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ in_stock: !p.in_stock }),
-      });
-      setProducts(prev => prev.map(x => x.id === p.id ? { ...x, in_stock: !p.in_stock } : x));
-    } catch { alert("שגיאה"); }
+    await fetch(`/api/admin/products/${p.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ in_stock: !p.in_stock }) });
+    setProducts(prev => prev.map(x => x.id === p.id ? { ...x, in_stock: !p.in_stock } : x));
   }
 
   async function runMigration() {
-    if (!confirm("לטעון את כל המוצרים מהקטלוג לסופאבייס?")) return;
+    if (!confirm("לטעון את כל המוצרים מהקטלוג?")) return;
     setLoading(true);
-    try {
-      const res = await fetch("/api/admin/migrate", { method: "POST" });
-      if (!res.ok) throw new Error((await res.json()).error || "שגיאה");
-      const { inserted } = await res.json();
-      alert(`✓ הועלו ${inserted} מוצרים`);
-      await load();
-    } catch (err: unknown) {
-      alert("שגיאה: " + (err as Error).message);
-      setLoading(false);
-    }
-  }
-
-  async function handleLogout() {
-    await fetch("/api/admin/logout", { method: "POST" }).catch(() => {});
-    window.location.href = "/admin/login";
+    const res = await fetch("/api/admin/migrate", { method: "POST" });
+    if (res.ok) { const { inserted } = await res.json(); alert(`✓ הועלו ${inserted} מוצרים`); await load(); }
+    else { alert("שגיאה"); setLoading(false); }
   }
 
   const displayed = cat === "all" ? products : products.filter(p => p.category === cat);
   const discountedPrice = (form.discount ?? 0) > 0 ? Math.round((form.price ?? 0) * (1 - (form.discount ?? 0) / 100)) : null;
 
-  const inputSx: React.CSSProperties = {
-    width: "100%", padding: "9px 12px", border: "1px solid #e0e0e0",
-    fontSize: "13px", outline: "none", boxSizing: "border-box",
-    background: "#fff", fontFamily: "inherit", borderRadius: 0,
-  };
-  const labelSx: React.CSSProperties = {
-    display: "block", fontSize: "10px", letterSpacing: "0.1em",
-    textTransform: "uppercase", color: "#888", marginBottom: "5px",
-  };
+  const inputSx: React.CSSProperties = { width: "100%", padding: "9px 12px", border: `1px solid ${T.border}`, fontSize: "13px", outline: "none", boxSizing: "border-box", background: "#fff", fontFamily: T.sans, borderRadius: 0 };
+  const labelSx: React.CSSProperties = { display: "block", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "#888", marginBottom: "5px" };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F8F8F6", direction: "rtl", fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <>
       <style>{`
-        @media (max-width: 640px) {
-          .adm-bar { flex-wrap: wrap; height: auto !important; padding: 10px 14px !important; row-gap: 8px !important; }
-          .adm-count { display: none !important; }
-          .adm-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; padding: 16px !important; }
-          .adm-tip { display: none !important; }
-          .adm-drawer { right: auto !important; left: 0 !important; bottom: 0 !important; top: auto !important; width: 100% !important; height: 85dvh !important; border-radius: 16px 16px 0 0 !important; transition: bottom 0.35s cubic-bezier(0.32,0.72,0,1) !important; }
-          .adm-drawer-hidden { bottom: -100% !important; }
-          .adm-edit-btn { transform: translateY(0) !important; opacity: 1 !important; }
-          .adm-delete-btn { opacity: 0.9 !important; }
+        /* grid — same as shop */
+        .adm-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 48px 20px; }
+        @media (max-width: 1100px) { .adm-grid { grid-template-columns: repeat(3,1fr); } }
+        @media (max-width: 700px)  { .adm-grid { grid-template-columns: repeat(2,1fr); gap: 20px 12px; } }
+
+        /* card hover overlay — desktop only */
+        @media (hover: hover) {
+          .adm-card:hover .adm-ov  { opacity: 1 !important; }
+          .adm-card:hover .adm-del { opacity: 1 !important; }
+        }
+        /* mobile: always show edit bar */
+        @media (hover: none) {
+          .adm-ov  { opacity: 1 !important; }
+          .adm-del { opacity: 1 !important; }
+        }
+
+        /* drawer: desktop slides from right, mobile slides from bottom */
+        .adm-drawer {
+          position: fixed; top: 0; right: 0;
+          width: 520px; max-width: 100vw; height: 100dvh;
+          background: #fff; z-index: 200;
+          box-shadow: -6px 0 40px rgba(0,0,0,0.14);
+          display: flex; flex-direction: column; direction: rtl;
+          transform: translateX(100%);
+          transition: transform 0.32s cubic-bezier(0.23,1,0.32,1);
+        }
+        .adm-drawer.open { transform: translateX(0); }
+
+        @media (max-width: 600px) {
+          .adm-drawer {
+            top: auto; bottom: 0; right: 0; left: 0;
+            width: 100%; height: 90dvh;
+            border-radius: 18px 18px 0 0;
+            transform: translateY(100%);
+            transition: transform 0.32s cubic-bezier(0.23,1,0.32,1);
+            box-shadow: 0 -6px 40px rgba(0,0,0,0.14);
+          }
+          .adm-drawer.open { transform: translateY(0); }
+        }
+
+        /* toolbar mobile */
+        @media (max-width: 480px) {
+          .adm-toolbar-label { display: none !important; }
+          .adm-toolbar-count { display: none !important; }
+        }
+
+        /* tabs mobile */
+        @media (max-width: 600px) {
+          .adm-tabs { top: 60px !important; padding: 0 12px !important; }
+          .adm-tabs button { padding: 12px 14px !important; font-size: 10px !important; }
+        }
+
+        /* main mobile */
+        @media (max-width: 600px) {
+          .adm-main { padding: 24px 16px 100px !important; }
+        }
+
+        /* no horizontal scroll on body */
+        body { overflow-x: hidden; }
+
+        /* drawer form grids collapse on very narrow screens */
+        @media (max-width: 400px) {
+          .adm-form-2col { grid-template-columns: 1fr !important; }
+          .adm-form-3col { grid-template-columns: 1fr 1fr !important; }
+        }
+
+        /* larger touch targets in drawer */
+        @media (max-width: 600px) {
+          .adm-drawer input, .adm-drawer select, .adm-drawer textarea { font-size: 16px !important; padding: 11px 14px !important; }
+          .adm-drawer button[type=button] { min-height: 44px; }
+        }
+
+        /* drawer handle bar on mobile */
+        .adm-handle { display: none; }
+        @media (max-width: 600px) {
+          .adm-handle { display: block; width: 40px; height: 4px; background: #ddd; border-radius: 2px; margin: 12px auto 0; }
         }
       `}</style>
 
-      {/* ── Admin bar ── */}
-      <header className="adm-bar" style={{
-        position: "sticky", top: 0, zIndex: 100,
-        background: "#111", color: "#fff",
-        display: "flex", alignItems: "center", gap: "12px",
-        padding: "0 28px", height: "52px",
-      }}>
-        <span style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1.2rem", letterSpacing: "0.12em", lineHeight: 1 }}>VIKOS</span>
-        <span style={{ fontSize: "9px", letterSpacing: "0.16em", textTransform: "uppercase", color: "#8B7355", border: "1px solid #8B7355", padding: "2px 7px", whiteSpace: "nowrap" }}>מצב עריכה</span>
-        <div style={{ flex: 1 }} />
-        <span className="adm-count" style={{ fontSize: "12px", color: "#777", whiteSpace: "nowrap" }}>{products.length} מוצרים</span>
-        <a href="/shop" target="_blank" rel="noreferrer"
-          style={{ fontSize: "11px", color: "#999", textDecoration: "none", letterSpacing: "0.06em", padding: "5px 10px", border: "1px solid #333", whiteSpace: "nowrap" }}>
-          חנות ↗
-        </a>
-        {products.length === 0 && !loading && (
-          <button onClick={runMigration}
-            style={{ padding: "6px 12px", background: "#8B7355", color: "#fff", border: "none", fontSize: "11px", cursor: "pointer", whiteSpace: "nowrap", fontFamily: "inherit" }}>
-            ⬆ טען
-          </button>
-        )}
-        <a href="/admin/dashboard/new"
-          style={{ padding: "6px 14px", background: "#fff", color: "#111", textDecoration: "none", fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", whiteSpace: "nowrap" }}>
-          + חדש
-        </a>
-        <button onClick={handleLogout}
-          style={{ background: "none", border: "none", color: "#666", fontSize: "11px", cursor: "pointer", padding: "5px", whiteSpace: "nowrap", fontFamily: "inherit" }}>
-          יציאה
-        </button>
-      </header>
+      {/* Real shop navbar */}
+      <Navbar />
 
-      {/* ── Category tabs ── */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #E8E8E4", padding: "0 28px", display: "flex", overflowX: "auto" }}>
+      {/* Category tabs — same style as shop */}
+      <div className="adm-tabs" style={{ position: "sticky", top: "76px", zIndex: 40, borderBottom: `1px solid ${T.border}`, background: "#FAFAFA", padding: "0 40px", display: "flex", overflowX: "auto", direction: "rtl", scrollbarWidth: "none" }}>
         {CATS.map(c => {
           const count = c.id === "all" ? products.length : products.filter(p => p.category === c.id).length;
+          const active = cat === c.id;
           return (
-            <button key={c.id} onClick={() => setCat(c.id)} style={{
-              padding: "13px 22px", background: "none", border: "none",
-              borderBottom: cat === c.id ? "2px solid #111" : "2px solid transparent",
-              fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase",
-              color: cat === c.id ? "#111" : "#999", cursor: "pointer",
-              whiteSpace: "nowrap", transition: "color 0.15s", fontFamily: "inherit",
-            }}>
-              {c.label} <span style={{ color: "#bbb", fontSize: "10px" }}>({count})</span>
+            <button key={c.id} onClick={() => setCat(c.id)} style={{ padding: "14px 20px", background: "none", border: "none", borderBottom: active ? `2px solid ${T.black}` : "2px solid transparent", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: active ? T.black : T.light, cursor: "pointer", whiteSpace: "nowrap", fontFamily: T.sans, transition: "color 0.15s", flexShrink: 0 }}>
+              {c.labelHe} <span style={{ color: "#ddd", fontSize: "10px" }}>({count})</span>
             </button>
           );
         })}
       </div>
 
-      {/* ── Tip bar ── */}
-      <div className="adm-tip" style={{ background: "#FFFBF0", borderBottom: "1px solid #F0E8D0", padding: "10px 28px", fontSize: "12px", color: "#8B7355", display: "flex", alignItems: "center", gap: "8px" }}>
-        <span>💡</span>
-        <span>רחף על מוצר ולחץ <strong>עריכה</strong> לשינוי מחיר, שם, הנחה ועוד</span>
-      </div>
-
-      {/* ── Product grid ── */}
-      <main style={{ maxWidth: "1400px", margin: "0 auto", padding: "32px 28px" }}>
+      {/* Product grid — shop-identical */}
+      <main className="adm-main" style={{ maxWidth: "1200px", margin: "0 auto", padding: "56px 40px 120px", direction: "rtl" }}>
         {loading ? (
-          <div style={{ textAlign: "center", padding: "80px", color: "#aaa", fontSize: "14px" }}>טוען...</div>
-        ) : error ? (
-          <div style={{ padding: "24px", background: "#fff5f5", color: "#e53e3e", fontSize: "14px", borderRadius: "4px" }}>{error}</div>
+          /* Skeleton — same as shop */
+          <div className="adm-grid">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i}>
+                <div style={{ aspectRatio: "1/1", background: "#F5F4F1", marginBottom: "14px", opacity: 0.6 + i * 0.02 }} />
+                <div style={{ height: "16px", background: "#F0EEEB", marginBottom: "6px", width: "70%" }} />
+                <div style={{ height: "12px", background: "#F5F4F1", width: "40%" }} />
+              </div>
+            ))}
+          </div>
         ) : displayed.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "80px", color: "#aaa", fontSize: "14px" }}>
-            {products.length === 0 ? "אין מוצרים — לחץ על «⬆ טען» בסרגל העליון" : "אין מוצרים בקטגוריה זו"}
+          <div style={{ textAlign: "center", padding: "120px 0", color: T.light }}>
+            {products.length === 0 ? "אין מוצרים — לחץ «⬆ טען» בסרגל האדמין" : "אין מוצרים בקטגוריה זו"}
           </div>
         ) : (
-          <div className="adm-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "24px" }}>
-            {displayed.map(p => (
-              <ProductCard
+          <div className="adm-grid">
+            {displayed.map((p, i) => (
+              <AdminCard
                 key={p.id}
                 p={p}
+                index={i}
                 deleting={deleting === p.id}
                 onEdit={() => openEdit(p)}
                 onDelete={() => deleteProduct(p)}
@@ -248,94 +266,74 @@ export default function Dashboard() {
         )}
       </main>
 
-      {/* ── Backdrop ── */}
-      <div
-        onClick={closeDrawer}
-        style={{
-          position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)",
-          zIndex: 199, opacity: drawerOpen ? 1 : 0,
-          pointerEvents: drawerOpen ? "auto" : "none",
-          transition: "opacity 0.3s",
-        }}
-      />
+      <Footer />
 
-      {/* ── Edit drawer ── */}
-      <aside className={drawerOpen ? "adm-drawer" : "adm-drawer adm-drawer-hidden"} style={{
-        position: "fixed", top: 0, right: drawerOpen ? 0 : "-540px",
-        width: "520px", maxWidth: "100vw", height: "100dvh",
-        background: "#fff", zIndex: 200,
-        boxShadow: "-6px 0 40px rgba(0,0,0,0.14)",
-        transition: "right 0.32s cubic-bezier(0.23, 1, 0.32, 1)",
-        display: "flex", flexDirection: "column",
-        direction: "rtl",
-      }}>
+      {/* ── Fixed admin toolbar at bottom ── */}
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 90, background: T.black, color: "#fff", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 16px", height: "52px", direction: "rtl", fontFamily: T.sans, gap: "8px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+          <span style={{ fontSize: "9px", letterSpacing: "0.16em", textTransform: "uppercase", color: T.gold, border: `1px solid ${T.gold}`, padding: "3px 7px", whiteSpace: "nowrap" }}>✏ עריכה</span>
+          <span className="adm-toolbar-count" style={{ fontSize: "11px", color: "#555", whiteSpace: "nowrap" }}>{products.length} מוצרים</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          {products.length === 0 && !loading && (
+            <button onClick={runMigration} style={{ padding: "6px 10px", background: T.gold, color: "#fff", border: "none", fontSize: "10px", cursor: "pointer", fontFamily: T.sans, whiteSpace: "nowrap" }}>⬆ טען</button>
+          )}
+          <a href="/admin/dashboard/new" style={{ padding: "6px 12px", background: "#fff", color: T.black, textDecoration: "none", fontSize: "10px", fontFamily: T.sans, whiteSpace: "nowrap" }}>+ חדש</a>
+          <a href="/admin/orders" style={{ padding: "6px 10px", background: "transparent", color: "#aaa", textDecoration: "none", fontSize: "10px", fontFamily: T.sans, border: "1px solid #333", whiteSpace: "nowrap" }}>הזמנות</a>
+          <button onClick={async () => { await fetch("/api/admin/auth", { method: "DELETE" }); window.location.href = "/admin/login"; }} style={{ padding: "6px 8px", background: "none", border: "none", color: "#555", fontSize: "12px", cursor: "pointer", fontFamily: T.sans }}>↩</button>
+        </div>
+      </div>
+
+      {/* ── Backdrop ── */}
+      <div onClick={closeDrawer} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 199, opacity: drawerOpen ? 1 : 0, pointerEvents: drawerOpen ? "auto" : "none", transition: "opacity 0.3s" }} />
+
+      {/* ── Edit drawer — uses CSS class for both desktop (translateX) and mobile (translateY) ── */}
+      <aside className={`adm-drawer${drawerOpen ? " open" : ""}`}>
+        {/* Mobile drag handle */}
+        <div className="adm-handle" />
         {/* Drawer header */}
-        <div style={{ padding: "18px 24px", borderBottom: "1px solid #E8E8E4", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, background: "#FAFAF8" }}>
+        <div style={{ padding: "18px 24px", borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0, background: "#FAFAFA" }}>
           <div>
-            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "1rem", color: "#111" }}>
-              {form.name_he || "עריכת מוצר"}
-            </div>
-            <div style={{ fontSize: "10px", color: "#bbb", marginTop: "2px", letterSpacing: "0.04em" }}>{editTarget?.id}</div>
+            <div style={{ fontFamily: T.serif, fontSize: "1.1rem", color: T.black }}>{form.name_he || "עריכת מוצר"}</div>
+            <div style={{ fontSize: "10px", color: "#bbb", marginTop: "2px" }}>{editTarget?.id}</div>
           </div>
-          <button onClick={closeDrawer}
-            style={{ background: "none", border: "1px solid #E8E8E4", width: "32px", height: "32px", cursor: "pointer", fontSize: "14px", color: "#555", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            ✕
-          </button>
+          <button onClick={closeDrawer} style={{ background: "none", border: `1px solid ${T.border}`, width: "32px", height: "32px", cursor: "pointer", fontSize: "14px", color: "#555", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
         </div>
 
-        {/* Drawer body */}
         {editTarget && (
           <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: "18px" }}>
-
-            {/* Image preview */}
-            {(form.images?.length || form.image) ? (
-              <div>
-                <label style={labelSx}>תמונות המוצר</label>
-                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                  {(form.images?.length ? form.images : [form.image]).filter(Boolean).map((src, i) => (
-                    <div key={i} style={{ position: "relative" }}>
-                      <img src={src!} alt="" style={{ width: "70px", height: "93px", objectFit: "cover", background: "#F0EEEB", display: "block", border: i === 0 ? "2px solid #111" : "1px solid #E8E8E4" }} />
-                      {i === 0 && <span style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "rgba(0,0,0,0.5)", color: "#fff", fontSize: "8px", textAlign: "center", padding: "2px", letterSpacing: "0.06em" }}>ראשי</span>}
-                    </div>
-                  ))}
-                </div>
-                <a href={`/admin/dashboard/${editTarget.id}/edit`} style={{ fontSize: "11px", color: "#8B7355", display: "block", marginTop: "8px" }}>
-                  ← עריכת תמונות מלאה
-                </a>
+            {/* Images */}
+            <div>
+              <label style={labelSx}>תמונות ({(form.images ?? []).filter(Boolean).length})</label>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "8px" }}>
+                {(form.images ?? []).filter(Boolean).map((src, i) => (
+                  <div key={i} style={{ position: "relative" }}>
+                    <img src={src} alt="" style={{ width: "72px", height: "72px", objectFit: "cover", background: "#F5F4F1", border: i === 0 ? `2px solid ${T.black}` : `1px solid ${T.border}` }} />
+                    {i === 0 && <span style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "rgba(0,0,0,0.55)", color: "#fff", fontSize: "8px", textAlign: "center", padding: "2px" }}>ראשי</span>}
+                    <button onClick={() => upd("images", (form.images ?? []).filter((_, j) => j !== i) as string[] & AdminProduct["images"])} style={{ position: "absolute", top: "-6px", left: "-6px", width: "18px", height: "18px", background: "#e53e3e", border: "none", cursor: "pointer", color: "#fff", fontSize: "10px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+                  </div>
+                ))}
+                <button onClick={() => fileRef.current?.click()} disabled={uploading} style={{ width: "72px", height: "72px", border: `1px dashed ${T.border}`, background: "#FAFAFA", cursor: "pointer", fontSize: "24px", color: "#ccc", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {uploading ? "…" : "+"}
+                </button>
               </div>
-            ) : null}
-
-            {/* Names */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-              <div>
-                <label style={labelSx}>שם בעברית</label>
-                <input style={inputSx} value={form.name_he ?? ""} onChange={e => upd("name_he", e.target.value)} />
-              </div>
-              <div>
-                <label style={labelSx}>English Name</label>
-                <input style={inputSx} value={form.name_en ?? ""} onChange={e => upd("name_en", e.target.value)} dir="ltr" />
-              </div>
+              <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleImageUpload} />
+              <p style={{ fontSize: "11px", color: T.light, margin: 0 }}>תמונה ראשונה = ראשית · שנייה = hover</p>
             </div>
 
-            {/* Price + Discount */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-              <div>
-                <label style={labelSx}>מחיר (₪)</label>
-                <input style={inputSx} type="number" min={0} value={form.price ?? 0} onChange={e => upd("price", Number(e.target.value))} />
-              </div>
-              <div>
-                <label style={labelSx}>הנחה (%)</label>
-                <input style={inputSx} type="number" min={0} max={100} value={form.discount ?? 0} onChange={e => upd("discount", Number(e.target.value))} />
-              </div>
+            <div className="adm-form-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div><label style={labelSx}>שם בעברית</label><input style={inputSx} value={form.name_he ?? ""} onChange={e => upd("name_he", e.target.value)} /></div>
+              <div><label style={labelSx}>English Name</label><input style={inputSx} value={form.name_en ?? ""} onChange={e => upd("name_en", e.target.value)} dir="ltr" /></div>
             </div>
-
+            <div className="adm-form-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div><label style={labelSx}>מחיר (₪)</label><input style={inputSx} type="number" min={0} value={form.price ?? 0} onChange={e => upd("price", Number(e.target.value))} /></div>
+              <div><label style={labelSx}>הנחה (%)</label><input style={inputSx} type="number" min={0} max={100} value={form.discount ?? 0} onChange={e => upd("discount", Number(e.target.value))} /></div>
+            </div>
             {discountedPrice && (
               <div style={{ padding: "10px 14px", background: "#FFF3F3", fontSize: "13px", color: "#C0392B", border: "1px solid #fbc0c0" }}>
                 מחיר לאחר הנחה: <strong>₪{discountedPrice.toLocaleString()}</strong>
               </div>
             )}
-
-            {/* Category + Material */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
               <div>
                 <label style={labelSx}>קטגוריה</label>
@@ -346,204 +344,134 @@ export default function Dashboard() {
                   <option value="earrings">עגילים</option>
                 </select>
               </div>
-              <div>
-                <label style={labelSx}>חומר</label>
-                <input style={inputSx} value={form.material ?? ""} onChange={e => upd("material", e.target.value)} placeholder="זהב 14K" />
-              </div>
+              <div><label style={labelSx}>חומר</label><input style={inputSx} value={form.material ?? ""} onChange={e => upd("material", e.target.value)} placeholder="זהב 14K" /></div>
             </div>
-
-            {/* Flags */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
-              <div>
-                <label style={labelSx}>מלאי</label>
-                <select style={inputSx} value={form.in_stock ? "1" : "0"} onChange={e => upd("in_stock", e.target.value === "1")}>
-                  <option value="1">במלאי ✓</option>
-                  <option value="0">אזל ✗</option>
-                </select>
-              </div>
-              <div>
-                <label style={labelSx}>מוצר חדש</label>
-                <select style={inputSx} value={form.is_new ? "1" : "0"} onChange={e => upd("is_new", e.target.value === "1")}>
-                  <option value="0">לא</option>
-                  <option value="1">כן ✓</option>
-                </select>
-              </div>
-              <div>
-                <label style={labelSx}>נמכר ביותר</label>
-                <select style={inputSx} value={form.is_bestseller ? "1" : "0"} onChange={e => upd("is_bestseller", e.target.value === "1")}>
-                  <option value="0">לא</option>
-                  <option value="1">כן ✓</option>
-                </select>
-              </div>
+            <div className="adm-form-3col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
+              <div><label style={labelSx}>מלאי</label><select style={inputSx} value={form.in_stock ? "1" : "0"} onChange={e => upd("in_stock", e.target.value === "1")}><option value="1">במלאי ✓</option><option value="0">אזל ✗</option></select></div>
+              <div><label style={labelSx}>חדש</label><select style={inputSx} value={form.is_new ? "1" : "0"} onChange={e => upd("is_new", e.target.value === "1")}><option value="0">לא</option><option value="1">כן ✓</option></select></div>
+              <div><label style={labelSx}>נמכר ביותר</label><select style={inputSx} value={form.is_bestseller ? "1" : "0"} onChange={e => upd("is_bestseller", e.target.value === "1")}><option value="0">לא</option><option value="1">כן ✓</option></select></div>
             </div>
-
-            <div>
-              <label style={labelSx}>תיאור בעברית</label>
-              <textarea style={{ ...inputSx, height: "88px", resize: "vertical" }} value={form.description_he ?? ""} onChange={e => upd("description_he", e.target.value)} />
-            </div>
-
-            <div>
-              <label style={labelSx}>Description in English</label>
-              <textarea style={{ ...inputSx, height: "88px", resize: "vertical", direction: "ltr" }} value={form.description_en ?? ""} onChange={e => upd("description_en", e.target.value)} />
-            </div>
+            <div><label style={labelSx}>תיאור בעברית</label><textarea style={{ ...inputSx, height: "80px", resize: "vertical" }} value={form.description_he ?? ""} onChange={e => upd("description_he", e.target.value)} /></div>
+            <div><label style={labelSx}>Description in English</label><textarea style={{ ...inputSx, height: "80px", resize: "vertical", direction: "ltr" }} value={form.description_en ?? ""} onChange={e => upd("description_en", e.target.value)} /></div>
           </div>
         )}
 
-        {/* Drawer footer */}
-        <div style={{ padding: "16px 24px", borderTop: "1px solid #E8E8E4", display: "flex", gap: "10px", flexShrink: 0 }}>
-          <button onClick={saveProduct} disabled={saving} style={{
-            flex: 1, padding: "12px", background: saving ? "#888" : "#111", color: "#fff",
-            border: "none", fontSize: "12px", letterSpacing: "0.16em", textTransform: "uppercase",
-            cursor: saving ? "not-allowed" : "pointer", fontFamily: "inherit",
-          }}>
+        <div style={{ padding: "16px 24px", borderTop: `1px solid ${T.border}`, display: "flex", gap: "10px", flexShrink: 0 }}>
+          <button onClick={saveProduct} disabled={saving} style={{ flex: 1, padding: "12px", background: saving ? "#888" : T.black, color: "#fff", border: "none", fontSize: "12px", letterSpacing: "0.16em", textTransform: "uppercase", cursor: saving ? "not-allowed" : "pointer", fontFamily: T.sans }}>
             {saving ? "שומר..." : "שמור שינויים"}
           </button>
-          <button onClick={closeDrawer} style={{ padding: "12px 18px", background: "none", border: "1px solid #E8E8E4", fontSize: "12px", color: "#555", cursor: "pointer", fontFamily: "inherit" }}>
-            ביטול
-          </button>
+          <button onClick={closeDrawer} style={{ padding: "12px 18px", background: "none", border: `1px solid ${T.border}`, fontSize: "12px", color: "#555", cursor: "pointer", fontFamily: T.sans }}>ביטול</button>
         </div>
       </aside>
-    </div>
+    </>
   );
 }
 
-/* ─── Product card — mirrors the shop's ProductCard exactly, with edit overlay ─── */
-function ProductCard({ p, deleting, onEdit, onDelete, onToggleStock }: {
-  p: AdminProduct;
-  deleting: boolean;
-  onEdit: () => void;
-  onDelete: () => void;
-  onToggleStock: () => void;
+/* ── Card that looks exactly like the shop's ProductCard, with admin edit overlay ── */
+function AdminCard({ p, index, deleting, onEdit, onDelete, onToggleStock }: {
+  p: AdminProduct; index: number; deleting: boolean;
+  onEdit: () => void; onDelete: () => void; onToggleStock: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
-  const imgSrc = p.images?.[0] || p.image || "";
+  const imgSrc   = p.images?.[0] || p.image || "";
   const hoverImg = p.images?.[1] || p.hover_image || null;
   const finalPrice = p.discount > 0 ? Math.round(p.price * (1 - p.discount / 100)) : null;
 
   return (
-    <div
+    <motion.article
+      className="adm-card"
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-30px" }}
+      transition={{ duration: 0.32, delay: Math.min(index * 0.05, 0.3), ease: [0.23, 1, 0.32, 1] }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{ position: "relative", cursor: "pointer" }}
+      style={{
+        cursor: "pointer", display: "flex", flexDirection: "column",
+        transform: hovered ? "translateY(-6px)" : "translateY(0)",
+        transition: "transform 0.45s cubic-bezier(0.23,1,0.32,1), box-shadow 0.45s cubic-bezier(0.23,1,0.32,1)",
+        boxShadow: hovered ? "0 12px 32px rgba(0,0,0,0.09)" : "none",
+      }}
     >
-      {/* Image block — same styling as shop */}
-      <div style={{
-        position: "relative", aspectRatio: "3/4", background: "#F5F4F1",
-        overflow: "hidden", marginBottom: "14px",
-        transform: hovered ? "scale(1.01)" : "scale(1)",
-        transition: "transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)",
-      }}>
+      {/* Image block — identical to shop */}
+      <div style={{ position: "relative", overflow: "hidden", background: "#fffdf9", aspectRatio: "1/1", marginBottom: "14px" }}>
 
-        {/* Main image with zoom on hover */}
+        {/* Main image */}
         {imgSrc && (
-          <img src={imgSrc} alt={p.name_he} style={{
-            position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover",
-            transform: hovered ? "scale(1.06)" : "scale(1)",
-            transition: "transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)",
-          }} />
+          <Image
+            src={imgSrc} alt={p.name_he} fill
+            style={{ objectFit: "contain", transition: "transform 0.6s cubic-bezier(0.23,1,0.32,1)", transform: hovered ? "scale(1.05)" : "scale(1)" }}
+            sizes="(max-width:700px) 50vw, (max-width:1100px) 33vw, 25vw"
+          />
         )}
 
-        {/* Hover / second image — fades in */}
+        {/* Hover / second image */}
         {hoverImg && (
-          <img src={hoverImg} alt="" style={{
-            position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover",
-            opacity: hovered ? 1 : 0, transition: "opacity 0.45s ease",
-          }} />
+          <Image
+            src={hoverImg} alt="" fill
+            style={{ objectFit: "contain", opacity: hovered ? 1 : 0, transition: "opacity 0.45s ease", position: "absolute", inset: 0 }}
+            sizes="(max-width:700px) 50vw, 25vw"
+          />
         )}
 
-        {/* Status badges */}
+        {/* Badge — same as shop */}
         {(p.is_new || p.is_bestseller || finalPrice) && (
-          <span style={{
-            position: "absolute", top: "12px", right: "12px",
-            background: finalPrice ? "#C0392B" : p.is_bestseller ? "#8B7355" : "#111",
-            color: "#fff", fontSize: "8px", letterSpacing: "0.14em",
-            textTransform: "uppercase", padding: "4px 9px",
-          }}>
+          <span style={{ position: "absolute", top: "12px", right: "12px", background: finalPrice ? "#C0392B" : p.is_bestseller ? T.gold : T.black, color: "#fff", fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", padding: "4px 9px", zIndex: 2 }}>
             {finalPrice ? `-${p.discount}%` : p.is_bestseller ? "נמכר ביותר" : "חדש"}
           </span>
         )}
 
         {/* Out of stock overlay */}
         {!p.in_stock && (
-          <div style={{
-            position: "absolute", inset: 0, background: "rgba(255,255,255,0.6)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: "10px", color: "#888", letterSpacing: "0.14em", textTransform: "uppercase",
-          }}>
+          <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.65)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", color: "#888", letterSpacing: "0.14em", textTransform: "uppercase", zIndex: 2 }}>
             אזל מהמלאי
           </div>
         )}
 
-        {/* Edit overlay — slides up from bottom like shop's quick-add */}
-        <div className="adm-edit-btn" style={{
-          position: "absolute", bottom: 0, left: 0, right: 0,
-          transform: hovered ? "translateY(0)" : "translateY(100%)",
-          transition: "transform 0.32s cubic-bezier(0.23, 1, 0.32, 1)",
-        }}>
-          <button onClick={e => { e.stopPropagation(); onEdit(); }} style={{
-            width: "100%", padding: "12px 16px",
-            background: "#111", border: "none", cursor: "pointer",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: "7px",
-            fontFamily: "'Inter', system-ui, sans-serif", fontSize: "10px",
-            letterSpacing: "0.18em", textTransform: "uppercase", color: "#fff",
-          }}>
+        {/* Admin overlay — replaces the "add to cart" bar of the shop */}
+        <div className="adm-ov" onClick={onEdit} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.36)", opacity: 0, transition: "opacity 0.22s", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", zIndex: 3 }}>
+          <button style={{ width: "100%", padding: "12px 0", background: "#fff", border: "none", cursor: "pointer", fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase", fontFamily: T.sans, fontWeight: 500, color: T.black }}>
             ✏ עריכה
           </button>
         </div>
 
-        {/* Delete — small X top left */}
+        {/* Delete X — top-left corner, appears on hover */}
         <button
+          className="adm-del"
           onClick={e => { e.stopPropagation(); onDelete(); }}
           disabled={deleting}
-          className="adm-delete-btn"
-          style={{
-            position: "absolute", top: "10px", left: "10px",
-            width: "30px", height: "30px",
-            background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#fff", fontSize: "11px",
-            opacity: hovered ? 1 : 0, transition: "opacity 0.2s",
-          }}
+          style={{ position: "absolute", top: "10px", left: "10px", width: "28px", height: "28px", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", color: "#fff", fontSize: "11px", opacity: 0, transition: "opacity 0.2s", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 4 }}
           title="מחיקה"
         >
           {deleting ? "…" : "✕"}
         </button>
       </div>
 
-      {/* Info row — matches shop exactly */}
+      {/* Product info — same as shop */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "6px" }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{
-            fontFamily: "'Cormorant Garamond', Georgia, serif",
-            fontSize: "1rem", fontWeight: 400, color: "#111",
-            marginBottom: "5px", lineHeight: 1.3,
-            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-          }}>
+          <p style={{ fontFamily: T.serif, fontSize: "1rem", fontWeight: 400, color: T.black, marginBottom: "4px", lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {p.name_he}
           </p>
+          {p.material && (
+            <p style={{ fontSize: "10px", color: T.light, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "5px" }}>{p.material}</p>
+          )}
           {finalPrice ? (
-            <div style={{ fontSize: "12px" }}>
-              <span style={{ textDecoration: "line-through", color: "#bbb", marginLeft: "6px" }}>₪{p.price.toLocaleString()}</span>
+            <div style={{ fontSize: "13px" }}>
+              <span style={{ textDecoration: "line-through", color: "#ccc", marginLeft: "6px" }}>₪{p.price.toLocaleString()}</span>
               <span style={{ color: "#C0392B", fontWeight: 500 }}>₪{finalPrice.toLocaleString()}</span>
             </div>
           ) : (
-            <p style={{ fontSize: "12px", color: "#555" }}>₪{p.price.toLocaleString()}</p>
+            <p style={{ fontSize: "13px", color: T.gray, fontWeight: 300 }}>₪{p.price.toLocaleString()}</p>
           )}
         </div>
-        {/* Stock toggle */}
-        <button
-          onClick={e => { e.stopPropagation(); onToggleStock(); }}
-          title={p.in_stock ? "לחץ להסרה מהמלאי" : "לחץ להוספה למלאי"}
-          style={{
-            fontSize: "9px", padding: "3px 7px", cursor: "pointer", flexShrink: 0,
-            border: `1px solid ${p.in_stock ? "#c8e6c9" : "#fbc0c0"}`,
-            color: p.in_stock ? "#2E7D32" : "#c0392b",
-            background: "none", letterSpacing: "0.04em", fontFamily: "inherit",
-          }}
-        >
+
+        {/* Stock toggle — small pill */}
+        <button onClick={e => { e.stopPropagation(); onToggleStock(); }} title={p.in_stock ? "לחץ להסרה מהמלאי" : "לחץ להוספה למלאי"}
+          style={{ fontSize: "9px", padding: "3px 8px", cursor: "pointer", flexShrink: 0, marginTop: "2px", border: `1px solid ${p.in_stock ? "#c8e6c9" : "#fbc0c0"}`, color: p.in_stock ? "#2E7D32" : "#c0392b", background: "none", fontFamily: T.sans }}>
           {p.in_stock ? "✓" : "✗"}
         </button>
       </div>
-    </div>
+    </motion.article>
   );
 }

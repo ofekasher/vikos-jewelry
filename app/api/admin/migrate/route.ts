@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
-import { createServerClient } from "@/lib/supabase";
 import { products } from "@/lib/products";
 
-// One-time migration: POST /api/admin/migrate
-// Requires x-admin-token header matching ADMIN_PASSWORD
+const SB_URL      = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const EDGE_URL    = `${SB_URL}/functions/v1/admin-products?action=upsert`;
+const EDGE_SECRET = process.env.EDGE_SECRET ?? "vikos-edge-admin-2026";
+
 export async function POST(req: Request) {
   const { cookies } = await import("next/headers");
   const { verifySessionToken } = await import("@/lib/session");
@@ -13,11 +14,8 @@ export async function POST(req: Request) {
   const authed =
     (sessionToken && (await verifySessionToken(sessionToken))) ||
     headerToken === process.env.ADMIN_PASSWORD;
-  if (!authed) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!authed) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const db = createServerClient();
   const rows = products.map(p => ({
     id:             p.id,
     name_he:        p.nameHe,
@@ -36,14 +34,20 @@ export async function POST(req: Request) {
     discount:       0,
   }));
 
+  const headers = { "Authorization": `Bearer ${EDGE_SECRET}`, "Content-Type": "application/json" };
+
   // Batch upsert in groups of 50
   let inserted = 0;
   const BATCH = 50;
   for (let i = 0; i < rows.length; i += BATCH) {
     const batch = rows.slice(i, i + BATCH);
-    const { error } = await db.from("products").upsert(batch);
-    if (error) return NextResponse.json({ error: error.message, done: inserted }, { status: 500 });
-    inserted += batch.length;
+    const res = await fetch(EDGE_URL, { method: "POST", headers, body: JSON.stringify(batch) });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return NextResponse.json({ error: err.error ?? "Edge function error", done: inserted }, { status: 500 });
+    }
+    const data = await res.json();
+    inserted += data.inserted ?? batch.length;
   }
 
   return NextResponse.json({ inserted, total: rows.length });

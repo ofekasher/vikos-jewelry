@@ -65,7 +65,7 @@ function ThumbnailStrip({
             width: "64px", height: "64px", padding: 0, border: "none",
             outline: active === i ? `2px solid ${T.gold}` : "2px solid transparent",
             outlineOffset: "2px",
-            background: T.bg, overflow: "hidden", flexShrink: 0,
+            background: "#fff", overflow: "hidden", flexShrink: 0,
             cursor: "pointer",
             transition: "outline-color 120ms ease-out",
             position: "relative",
@@ -123,7 +123,7 @@ function MobileCarousel({ images, active, onSelect }: {
         style={{
           display: "flex", overflowX: "scroll", scrollSnapType: "x mandatory",
           scrollbarWidth: "none", WebkitOverflowScrolling: "touch",
-          aspectRatio: "1/1", background: T.bg,
+          aspectRatio: "1/1", background: "#fff",
         }}
       >
         {images.map((src, i) => (
@@ -643,7 +643,7 @@ export default function ProductPage({
               className="gallery-main-desktop"
               onClick={() => setLightbox(true)}
               style={{
-                position: "relative", background: T.bg,
+                position: "relative", background: "#fff",
                 aspectRatio: "1/1", overflow: "hidden",
                 cursor: "zoom-in",
               }}
@@ -1148,7 +1148,7 @@ export default function ProductPage({
         @media (max-width: 480px) { .related-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; } }
 
         .related-card { display: block; }
-        .related-img-wrap { aspect-ratio: 1/1; overflow: hidden; background: ${T.bg}; }
+        .related-img-wrap { aspect-ratio: 1/1; overflow: hidden; background: #fff; }
         .related-img { transition: transform 600ms cubic-bezier(0.23, 1, 0.32, 1); }
         .related-card:hover .related-img { transform: scale(1.04); }
 

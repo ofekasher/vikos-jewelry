@@ -106,11 +106,11 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
       >
         <Link href={`/product/${p.id}`} style={{ textDecoration: "none", display: "block" }}>
           {/* Image container */}
-          <div style={{ position: "relative", overflow: "hidden", background: "#FAFAF8", aspectRatio: "1/1" }}>
+          <div style={{ position: "relative", overflow: "hidden", background: "#fff", aspectRatio: "1/1" }}>
 
             {/* Skeleton */}
             {!imgLoaded && (
-              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "#FAFAF8" }}>
+              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "#fff" }}>
                 <div style={{ width: "32px", height: "32px", border: "1px solid #E0DDD8", borderRadius: "50%", opacity: 0.4 }} />
               </div>
             )}

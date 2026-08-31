@@ -24,6 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div style={{ display: "flex", gap: "24px" }}>
               <NavLink href="/admin/dashboard" active={false}>מוצרים</NavLink>
               <NavLink href="/admin/orders" active={pathname.startsWith("/admin/orders")}>הזמנות</NavLink>
+              <NavLink href="/admin/preview" active={pathname.startsWith("/admin/preview")}>תצוגת אתר</NavLink>
             </div>
           </div>
           <button onClick={logout} style={{ fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: "#888", background: "none", border: "none", cursor: "pointer", padding: "4px 8px" }}>

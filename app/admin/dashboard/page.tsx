@@ -279,6 +279,7 @@ export default function Dashboard() {
             <button onClick={runMigration} style={{ padding: "6px 10px", background: T.gold, color: "#fff", border: "none", fontSize: "10px", cursor: "pointer", fontFamily: T.sans, whiteSpace: "nowrap" }}>⬆ טען</button>
           )}
           <a href="/admin/dashboard/new" style={{ padding: "6px 12px", background: "#fff", color: T.black, textDecoration: "none", fontSize: "10px", fontFamily: T.sans, whiteSpace: "nowrap" }}>+ חדש</a>
+          <a href="/admin/preview" style={{ padding: "6px 10px", background: "transparent", color: "#aaa", textDecoration: "none", fontSize: "10px", fontFamily: T.sans, border: "1px solid #333", whiteSpace: "nowrap" }}>👁 תצוגת אתר</a>
           <a href="/admin/orders" style={{ padding: "6px 10px", background: "transparent", color: "#aaa", textDecoration: "none", fontSize: "10px", fontFamily: T.sans, border: "1px solid #333", whiteSpace: "nowrap" }}>הזמנות</a>
           <button onClick={async () => { await fetch("/api/admin/auth", { method: "DELETE" }); window.location.href = "/admin/login"; }} style={{ padding: "6px 8px", background: "none", border: "none", color: "#555", fontSize: "12px", cursor: "pointer", fontFamily: T.sans }}>↩</button>
         </div>

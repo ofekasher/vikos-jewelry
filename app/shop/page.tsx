@@ -232,9 +232,9 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
 
 function ShopContent() {
   const { lang } = useLang();
-  // Rings exist only in Supabase — exclude static placeholders from initial state
+  // Rings and bracelets exist only in Supabase — exclude static placeholders from initial state
   const [products, setProducts] = useState<typeof allProducts>(
-    allProducts.filter(p => p.category !== "rings")
+    allProducts.filter(p => p.category !== "rings" && p.category !== "bracelets")
   );
 
   useEffect(() => {

@@ -72,15 +72,18 @@ async function nk02() {
   await crop('gfen_nk_02.jpg', 'gfen_nk_02_closeup.jpg', midX, midY, w - midX, h - midY);
 }
 
-// nk_03: 1080×1080, 3 equal columns
+// nk_03: 1080×1080, top floating pendant + 3 framed cells in lower portion
+// Cells start at ~y=375 (below the large floating butterfly pendant area)
 async function nk03() {
-  const w = 1080, h = 1080;
-  const cW = Math.round(w / 3);  // 360
+  const w = 1080;
+  const cW      = Math.round(w / 3);  // 360
+  const cellTop = 375;
+  const cellH   = 680;
 
-  console.log('gfen_nk_03 → Layout: 3 equal columns');
-  await crop('gfen_nk_03.jpg', 'gfen_nk_03_front.jpg',   0,    0, cW,     h);
-  await crop('gfen_nk_03.jpg', 'gfen_nk_03_angle.jpg',   cW,   0, cW,     h);
-  await crop('gfen_nk_03.jpg', 'gfen_nk_03_closeup.jpg', cW*2, 0, w-cW*2, h);
+  console.log('gfen_nk_03 → Layout: 3 cells from y=375 (skip top floating area)');
+  await crop('gfen_nk_03.jpg', 'gfen_nk_03_front.jpg',   0,    cellTop, cW,     cellH);
+  await crop('gfen_nk_03.jpg', 'gfen_nk_03_angle.jpg',   cW*2, cellTop, w-cW*2, cellH);
+  await crop('gfen_nk_03.jpg', 'gfen_nk_03_closeup.jpg', cW,   cellTop, cW,     cellH);
 }
 
 // nk_04 & nk_05: 1402×1122

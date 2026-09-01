@@ -232,17 +232,17 @@ function ProductCard({ p, index }: { p: Product; index: number }) {
 
 function ShopContent() {
   const { lang } = useLang();
-  // Rings and bracelets exist only in Supabase — exclude static placeholders from initial state
-  const [products, setProducts] = useState<typeof allProducts>(
-    allProducts.filter(p => p.category !== "rings" && p.category !== "bracelets")
-  );
+  // Supabase is the single source of truth — start empty with a skeleton (no stale static flash)
+  const [products, setProducts] = useState<typeof allProducts>([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     function loadProducts() {
       fetch("/api/products")
         .then(r => r.ok ? r.json() : null)
         .then(data => { if (data?.length) setProducts(data); })
-        .catch(() => {});
+        .catch(() => {})
+        .finally(() => setLoaded(true));
     }
     loadProducts();
     // Re-fetch when user switches back to this tab (e.g. after editing in admin)
@@ -448,11 +448,19 @@ function ShopContent() {
           <motion.div key={activeCategory + sort + material + search + onlyNew + onlyBestseller + maxPrice}
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}
             style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "40px 20px" }} className="shop-grid">
-            {filtered.map((p, i) => <ProductCard key={p.id} p={p} index={i} />)}
+            {!loaded
+              ? Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i}>
+                    <div style={{ aspectRatio: "1/1", background: "#F7F6F4", marginBottom: "14px", opacity: 0.7 }} />
+                    <div style={{ height: "14px", background: "#F2F0ED", marginBottom: "6px", width: "70%" }} />
+                    <div style={{ height: "11px", background: "#F7F6F4", width: "40%" }} />
+                  </div>
+                ))
+              : filtered.map((p, i) => <ProductCard key={p.id} p={p} index={i} />)}
           </motion.div>
         </AnimatePresence>
 
-        {filtered.length === 0 && (
+        {loaded && filtered.length === 0 && (
           <div style={{ textAlign: "center", padding: "96px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
             <IconX size={32} color={T.light} />
             <p style={{ fontFamily: T.serif, fontSize: "1.2rem", color: T.light, fontWeight: 300 }}>{lang === "en" ? "No items found" : "לא נמצאו פריטים"}</p>

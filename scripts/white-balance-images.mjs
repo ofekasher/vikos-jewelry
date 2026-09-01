@@ -11,7 +11,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const pub = p => path.join(__dirname, '..', 'public', p);
 
-const DIRS = [pub('necklaces/gfen/cropped'), pub('bracelets/gfen/cropped')];
+const DIRS = [pub('necklaces/gfen/cropped'), pub('bracelets/gfen/cropped'), pub('earrings/real'), pub('rings/new')];
 const EXTRA = fs.readdirSync(pub('bracelets'))
   .filter(f => /^(br_d|hand_d)\d+\.jpg$/.test(f))
   .map(f => pub(path.join('bracelets', f)));

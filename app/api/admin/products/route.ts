@@ -6,7 +6,7 @@ import { verifySessionToken } from "@/lib/session";
 const SB_URL    = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SB_ANON   = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const EDGE_URL  = `${SB_URL}/functions/v1/admin-products`;
-const EDGE_SECRET = process.env.EDGE_SECRET ?? "vikos-edge-admin-2026";
+const EDGE_SECRET = process.env.EDGE_SECRET; // no hardcoded fallback — must come from env
 
 function anonClient() {
   return createClient(SB_URL, SB_ANON, { auth: { persistSession: false } });
@@ -38,6 +38,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   if (!(await isAuthed())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!EDGE_SECRET) return NextResponse.json({ error: "EDGE_SECRET not configured" }, { status: 503 });
   const body = await req.json();
   const res = await fetch(EDGE_URL, { method: "POST", headers: edgeHeaders(), body: JSON.stringify(body) });
   const data = await res.json();

@@ -319,7 +319,7 @@ export default function Navbar() {
                       caretColor: "#8B7355",
                     }}
                   />
-                  <button type="button" onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+                  <button type="button" aria-label="סגירת חיפוש" onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
                     style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#AAA", padding: "8px" }}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                       <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -352,7 +352,7 @@ export default function Navbar() {
               {/* Drawer header */}
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px", borderBottom: "1px solid #EBEBEB" }}>
                 <span style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: "22px", fontWeight: 600, letterSpacing: "0.2em", color: "#111" }}>VIKOS</span>
-                <button onClick={() => setMenuOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#888", padding: "4px" }}>
+                <button onClick={() => setMenuOpen(false)} aria-label="סגירת תפריט" style={{ background: "none", border: "none", cursor: "pointer", color: "#888", padding: "4px" }}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                   </svg>

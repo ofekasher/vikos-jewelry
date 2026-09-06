@@ -1,8 +1,10 @@
 import { SignJWT, jwtVerify } from "jose";
 
-const secret = new TextEncoder().encode(
-  process.env.ADMIN_JWT_SECRET ?? process.env.ADMIN_PASSWORD ?? "fallback-secret-change-me"
-);
+const rawSecret = process.env.ADMIN_JWT_SECRET ?? process.env.ADMIN_PASSWORD;
+if (!rawSecret) {
+  throw new Error("ADMIN_JWT_SECRET (or ADMIN_PASSWORD) must be set — refusing to run with a known default secret");
+}
+const secret = new TextEncoder().encode(rawSecret);
 
 export async function createSessionToken(username: string): Promise<string> {
   return new SignJWT({ role: "admin", username })

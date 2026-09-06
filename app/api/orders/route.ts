@@ -5,6 +5,7 @@ const BUSINESS_EMAIL = process.env.BUSINESS_EMAIL ?? "studio@vikosjewelry.com";
 const getResend = () => new Resend(process.env.RESEND_API_KEY ?? "");
 
 interface OrderItem {
+  id?: string;
   name: string;
   nameHe: string;
   price: number;
@@ -22,10 +23,20 @@ interface OrderPayload {
   paypalOrderId: string;
 }
 
-async function verifyPayPalOrder(paypalOrderId: string): Promise<boolean> {
+interface PayPalVerification {
+  ok: boolean;
+  paidAmount: number | null;   // total actually captured, null when verification is skipped (dev only)
+  currency: string | null;
+}
+
+async function verifyPayPalOrder(paypalOrderId: string): Promise<PayPalVerification> {
   const clientId = process.env.PAYPAL_CLIENT_ID;
   const secret   = process.env.PAYPAL_SECRET;
-  if (!clientId || !secret) return true; // skip verification if not configured
+  if (!clientId || !secret) {
+    // Never accept unverified payments in production
+    if (process.env.NODE_ENV === "production") return { ok: false, paidAmount: null, currency: null };
+    return { ok: true, paidAmount: null, currency: null };
+  }
 
   const base = process.env.PAYPAL_MODE === "live"
     ? "https://api-m.paypal.com"
@@ -39,23 +50,70 @@ async function verifyPayPalOrder(paypalOrderId: string): Promise<boolean> {
     },
     body: "grant_type=client_credentials",
   });
-  if (!tokenRes.ok) return false;
+  if (!tokenRes.ok) return { ok: false, paidAmount: null, currency: null };
   const { access_token } = await tokenRes.json() as { access_token: string };
 
   const orderRes = await fetch(`${base}/v2/checkout/orders/${paypalOrderId}`, {
     headers: { Authorization: `Bearer ${access_token}` },
   });
-  if (!orderRes.ok) return false;
-  const paypalOrder = await orderRes.json() as { status: string };
-  return paypalOrder.status === "COMPLETED";
+  if (!orderRes.ok) return { ok: false, paidAmount: null, currency: null };
+  const paypalOrder = await orderRes.json() as {
+    status: string;
+    purchase_units?: { amount?: { value?: string; currency_code?: string } }[];
+  };
+  const amount = paypalOrder.purchase_units?.[0]?.amount;
+  return {
+    ok: paypalOrder.status === "COMPLETED",
+    paidAmount: amount?.value ? parseFloat(amount.value) : null,
+    currency: amount?.currency_code ?? null,
+  };
+}
+
+/** Recompute the order total from the database — client-sent prices are never trusted. */
+async function priceOrderFromDb(items: OrderItem[]): Promise<{ subtotal: number; shipping: number; total: number; items: OrderItem[] } | null> {
+  const ids = items.map(i => i.id).filter(Boolean) as string[];
+  if (ids.length !== items.length) return null; // every item must carry a product id
+
+  const { createServerClient } = await import("@/lib/supabase");
+  const db = createServerClient();
+  const { data, error } = await db.from("products").select("id,price,discount,name_he,name_en,image").in("id", ids);
+  if (error || !data) return null;
+  const byId = new Map(data.map(p => [p.id, p]));
+
+  const priced: OrderItem[] = [];
+  let subtotal = 0;
+  for (const item of items) {
+    const p = byId.get(item.id!);
+    if (!p) return null; // unknown product
+    const qty = Math.max(1, Math.min(20, Math.floor(item.quantity)));
+    const unit = p.discount > 0 ? Math.round(p.price * (1 - p.discount / 100)) : p.price;
+    subtotal += unit * qty;
+    priced.push({ id: p.id, name: p.name_en ?? p.name_he, nameHe: p.name_he, price: unit, quantity: qty, image: p.image });
+  }
+  const shipping = subtotal >= 500 ? 0 : 30;
+  return { subtotal, shipping, total: subtotal + shipping, items: priced };
 }
 
 export async function POST(req: Request) {
   const order: OrderPayload = await req.json();
 
-  const paypalValid = await verifyPayPalOrder(order.paypalOrderId);
-  if (!paypalValid) {
+  // 1. Recompute all prices from the database — ignore whatever the client sent
+  const priced = await priceOrderFromDb(order.items);
+  if (!priced) {
+    return NextResponse.json({ error: "Invalid order items" }, { status: 400 });
+  }
+  order.items = priced.items;
+  order.subtotal = priced.subtotal;
+  order.shipping = priced.shipping;
+  order.total = priced.total;
+
+  // 2. Verify the PayPal payment is completed AND matches the real total
+  const paypal = await verifyPayPalOrder(order.paypalOrderId);
+  if (!paypal.ok) {
     return NextResponse.json({ error: "PayPal order verification failed" }, { status: 402 });
+  }
+  if (paypal.paidAmount !== null && Math.abs(paypal.paidAmount - priced.total) > 0.01) {
+    return NextResponse.json({ error: "Paid amount does not match order total" }, { status: 402 });
   }
 
   // Save to Supabase if configured

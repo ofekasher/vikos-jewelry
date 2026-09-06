@@ -55,7 +55,7 @@ export default function ScrollytellingSection() {
       >
         <img
           src="/cat-rings.jpg"
-          alt=""
+          alt="טבעות VIKOS — צילום קטגוריה"
           style={{
             width: "100%",
             height: "100%",

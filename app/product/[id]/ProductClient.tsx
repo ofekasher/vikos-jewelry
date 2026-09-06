@@ -48,8 +48,8 @@ function getSwatchColor(material: string): string {
 
 /** Desktop thumbnail strip — 5 visible, +N overflow tile */
 function ThumbnailStrip({
-  images, active, onSelect,
-}: { images: string[]; active: number; onSelect: (i: number) => void }) {
+  images, active, onSelect, alt = "",
+}: { images: string[]; active: number; onSelect: (i: number) => void; alt?: string }) {
   const MAX = 5;
   const visible = images.slice(0, MAX);
   const extra = images.length - MAX;
@@ -71,7 +71,7 @@ function ThumbnailStrip({
             position: "relative",
           }}
         >
-          <Image src={src} alt="" fill sizes="64px"
+          <Image src={src} alt={alt ? `${alt} — תצוגה ${i + 1}` : ""} fill sizes="64px"
             style={{ objectFit: "contain", padding: "6px" }} />
         </button>
       ))}
@@ -93,8 +93,8 @@ function ThumbnailStrip({
 }
 
 /** Mobile swipeable carousel with dot indicators */
-function MobileCarousel({ images, active, onSelect }: {
-  images: string[]; active: number; onSelect: (i: number) => void;
+function MobileCarousel({ images, active, onSelect, alt = "" }: {
+  images: string[]; active: number; onSelect: (i: number) => void; alt?: string;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -128,7 +128,7 @@ function MobileCarousel({ images, active, onSelect }: {
       >
         {images.map((src, i) => (
           <div key={i} style={{ minWidth: "100%", scrollSnapAlign: "start", position: "relative", aspectRatio: "1/1" }}>
-            <Image src={src} alt="" fill sizes="100vw"
+            <Image src={src} alt={alt ? `${alt} — תצוגה ${i + 1}` : ""} fill sizes="100vw"
               style={{ objectFit: "contain", padding: "8%" }} />
           </div>
         ))}
@@ -703,13 +703,13 @@ export default function ProductPage({
 
             {/* Mobile carousel */}
             <div className="gallery-main-mobile">
-              <MobileCarousel images={galleryImages} active={activeImg} onSelect={setActiveImg} />
+              <MobileCarousel images={galleryImages} active={activeImg} onSelect={setActiveImg} alt={displayName} />
             </div>
 
             {/* Desktop thumbnails */}
             {galleryImages.length > 1 && (
               <div className="gallery-thumbs-desktop">
-                <ThumbnailStrip images={galleryImages} active={activeImg} onSelect={i => { setActiveImg(i); }} />
+                <ThumbnailStrip images={galleryImages} active={activeImg} onSelect={i => { setActiveImg(i); }} alt={displayName} />
               </div>
             )}
           </motion.div>

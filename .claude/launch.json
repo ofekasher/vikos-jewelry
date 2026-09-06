@@ -3,9 +3,9 @@
   "configurations": [
     {
       "name": "vikos-dev",
-      "runtimeExecutable": "C:\\Users\\ofeka\\start-vikos.cmd",
-      "runtimeArgs": [],
-      "port": 3002
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000
     }
   ]
 }

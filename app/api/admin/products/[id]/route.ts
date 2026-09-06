@@ -6,7 +6,7 @@ import { verifySessionToken } from "@/lib/session";
 const SB_URL      = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SB_ANON     = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const EDGE_URL    = `${SB_URL}/functions/v1/admin-products`;
-const EDGE_SECRET = process.env.EDGE_SECRET ?? "vikos-edge-admin-2026";
+const EDGE_SECRET = process.env.EDGE_SECRET; // no hardcoded fallback — must come from env
 
 function anonClient() {
   return createClient(SB_URL, SB_ANON, { auth: { persistSession: false } });
@@ -58,6 +58,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!(await isAuthed())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!EDGE_SECRET) return NextResponse.json({ error: "EDGE_SECRET not configured" }, { status: 503 });
   const { id } = await params;
   const body = await req.json();
   const res = await fetch(`${EDGE_URL}?id=${id}`, { method: "PATCH", headers: edgeHeaders(), body: JSON.stringify(body) });
@@ -68,6 +69,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
 export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!(await isAuthed())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!EDGE_SECRET) return NextResponse.json({ error: "EDGE_SECRET not configured" }, { status: 503 });
   const { id } = await params;
   const res = await fetch(`${EDGE_URL}?id=${id}`, { method: "DELETE", headers: edgeHeaders() });
   const data = await res.json();

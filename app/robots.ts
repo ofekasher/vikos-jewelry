@@ -4,7 +4,7 @@ const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://vikos-jewelry.com";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: "*", allow: "/", disallow: ["/api/", "/studio/"] },
+    rules: { userAgent: "*", allow: "/", disallow: ["/api/", "/admin/"] },
     sitemap: `${BASE}/sitemap.xml`,
   };
 }

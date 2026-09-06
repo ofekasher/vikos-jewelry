@@ -90,6 +90,7 @@ export default function CartDrawer() {
                           <div className="flex items-center justify-between mt-3">
                             <div className="flex items-center border border-[#E5E5E5]">
                               <button onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                                aria-label="הפחת כמות"
                                 className="w-7 h-7 flex items-center justify-center text-[#888] hover:text-[#111] transition-colors cursor-pointer">
                                 <Minus size={11} />
                               </button>
@@ -98,6 +99,7 @@ export default function CartDrawer() {
                                 {item.quantity}
                               </span>
                               <button onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                                aria-label="הוסף כמות"
                                 className="w-7 h-7 flex items-center justify-center text-[#888] hover:text-[#111] transition-colors cursor-pointer">
                                 <Plus size={11} />
                               </button>

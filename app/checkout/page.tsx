@@ -86,6 +86,7 @@ export default function CheckoutPage() {
           orderId,
           customer: form,
           items: cartItems.map(i => ({
+            id: i.product.id,
             name: i.product.nameEn ?? i.product.nameHe,
             nameHe: i.product.nameHe,
             price: i.product.price,

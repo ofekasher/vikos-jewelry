@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
-import { products as allProducts, getMaterialEn } from "@/lib/products";
+import { getMaterialEn } from "@/lib/products";
 import type { Product } from "@/lib/products";
 import { useStore } from "@/lib/store";
 import Navbar from "@/components/Navbar";
@@ -428,6 +428,13 @@ export default function ProductPage({
   const { lang } = useLang();
 
   const [product, setProduct]           = useState<Product | null>(staticProduct);
+  const [liveProducts, setLiveProducts] = useState<Product[]>([]);
+  useEffect(() => {
+    fetch("/api/products")
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.length) setLiveProducts(data); })
+      .catch(() => {});
+  }, []);
   const [notFoundState, setNotFoundState] = useState(false);
   const [adding, setAdding]             = useState(false);
   const [activeImg, setActiveImg]       = useState(0);
@@ -552,7 +559,8 @@ export default function ProductPage({
     ? Math.round(product.price * (1 - product.discount / 100))
     : null;
 
-  const related = allProducts
+  // Related items come from the live catalog (Supabase) — never the static list
+  const related = liveProducts
     .filter(p => p.category === product.category && p.id !== product.id)
     .slice(0, 4);
 

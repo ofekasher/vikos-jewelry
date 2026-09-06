@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
-import SplashScreen from "@/components/SplashScreen";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import AiChat from "@/components/AiChat";
 import { LanguageProvider } from "@/lib/LanguageContext";
@@ -57,7 +56,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="antialiased">
         <LanguageProvider>
-        <SplashScreen />
         {children}
         <WhatsAppButton />
         <AiChat />

@@ -205,6 +205,53 @@ function MetalSelector({
   );
 }
 
+/** Illustration: measuring the finger with a strip of paper */
+function PaperMethodDiagram() {
+  return (
+    <svg viewBox="0 0 220 140" width="100%" style={{ maxWidth: "220px", display: "block", margin: "0 auto 12px" }}>
+      {/* finger */}
+      <rect x="88" y="10" width="44" height="110" rx="22" fill="#F3E9DD" stroke="#D8C3A5" strokeWidth="1.5" />
+      <line x1="88" y1="70" x2="132" y2="70" stroke="#D8C3A5" strokeWidth="1" strokeDasharray="2 3" />
+      {/* paper strip wrapped around */}
+      <path d="M 78 62 Q 110 50 142 62 L 142 78 Q 110 66 78 78 Z" fill="#fff" stroke="#8B7355" strokeWidth="1.5" />
+      {/* overlap marker */}
+      <circle cx="142" cy="70" r="3" fill="#8B7355" />
+      {/* ruler ticks under */}
+      <g stroke="#B5A78E" strokeWidth="1">
+        {Array.from({ length: 9 }).map((_, i) => (
+          <line key={i} x1={20 + i * 10} y1="128" x2={20 + i * 10} y2={i % 2 === 0 ? 136 : 133} />
+        ))}
+      </g>
+      <line x1="20" y1="128" x2="100" y2="128" stroke="#B5A78E" strokeWidth="1" />
+      <text x="20" y="122" fontSize="9" fill="#8B7355" fontFamily="Inter, sans-serif">מ"מ</text>
+    </svg>
+  );
+}
+
+/** Illustration: measuring an existing ring's inner diameter, like the screenshot example */
+function RingMethodDiagram() {
+  return (
+    <svg viewBox="0 0 220 150" width="100%" style={{ maxWidth: "220px", display: "block", margin: "0 auto 12px" }}>
+      {/* ring */}
+      <circle cx="110" cy="70" r="42" fill="none" stroke="#8B7355" strokeWidth="7" />
+      {/* diameter arrow */}
+      <line x1="68" y1="70" x2="152" y2="70" stroke="#C9463B" strokeWidth="1.5" />
+      <polygon points="68,70 76,65 76,75" fill="#C9463B" />
+      <polygon points="152,70 144,65 144,75" fill="#C9463B" />
+      <text x="110" y="60" fontSize="12" fill="#C9463B" fontFamily="Inter, sans-serif" textAnchor="middle" fontWeight={600}>18mm</text>
+      {/* ruler under */}
+      <g stroke="#B5A78E" strokeWidth="1">
+        {Array.from({ length: 15 }).map((_, i) => (
+          <line key={i} x1={40 + i * 10} y1="125" x2={40 + i * 10} y2={i % 5 === 0 ? 136 : 130} />
+        ))}
+      </g>
+      <line x1="40" y1="125" x2="180" y2="125" stroke="#B5A78E" strokeWidth="1" />
+      <text x="40" y="148" fontSize="10" fill="#8B7355" fontFamily="Inter, sans-serif">0</text>
+      <text x="130" y="148" fontSize="10" fill="#8B7355" fontFamily="Inter, sans-serif">2 ס"מ</text>
+    </svg>
+  );
+}
+
 /** Size guide modal */
 function SizeGuideModal({ onClose }: { onClose: () => void }) {
   const [method, setMethod] = useState<"paper" | "ring">("paper");
@@ -283,6 +330,7 @@ function SizeGuideModal({ onClose }: { onClose: () => void }) {
 
         {method === "paper" ? (
           <div style={{ background: "#F9F8F6", padding: "16px", marginBottom: "20px" }}>
+            <PaperMethodDiagram />
             <p style={{ fontFamily: T.sans, fontSize: "12px", fontWeight: 600, color: "#333", marginBottom: "8px" }}>
               מדדו הערכה בעזרת פס נייר — אומדן טוב אם אין לכם טבעת מתאימה:
             </p>
@@ -303,6 +351,7 @@ function SizeGuideModal({ onClose }: { onClose: () => void }) {
           </div>
         ) : (
           <div style={{ background: "#F9F8F6", padding: "16px", marginBottom: "20px" }}>
+            <RingMethodDiagram />
             <p style={{ fontFamily: T.sans, fontSize: "12px", fontWeight: 600, color: "#333", marginBottom: "8px" }}>
               מדדו את הקוטר הפנימי של טבעת שכבר מתאימה לאצבע:
             </p>

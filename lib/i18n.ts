@@ -138,10 +138,10 @@ export const translations = {
         {
           head: "Help",
           links: [
-            { href: "#", label: "Shipping" },
-            { href: "#", label: "Returns" },
-            { href: "#", label: "Jewelry care" },
-            { href: "#", label: "Contact us" },
+            { href: "/shipping", label: "Shipping" },
+            { href: "/returns",  label: "Returns" },
+            { href: "/custom",   label: "Jewelry care" },
+            { href: "/custom",   label: "Contact us" },
           ],
         },
       ],
@@ -327,10 +327,10 @@ export const translations = {
         {
           head: "עזרה",
           links: [
-            { href: "#", label: "משלוחים" },
-            { href: "#", label: "החזרות" },
-            { href: "#", label: "טיפול בתכשיט" },
-            { href: "#", label: "יצור קשר" },
+            { href: "/shipping", label: "משלוחים" },
+            { href: "/returns",  label: "החזרות" },
+            { href: "/custom",   label: "טיפול בתכשיט" },
+            { href: "/custom",   label: "יצור קשר" },
           ],
         },
       ],

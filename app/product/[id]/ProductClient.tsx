@@ -207,6 +207,7 @@ function MetalSelector({
 
 /** Size guide modal */
 function SizeGuideModal({ onClose }: { onClose: () => void }) {
+  const [method, setMethod] = useState<"paper" | "ring">("paper");
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("keydown", onKey);
@@ -255,32 +256,78 @@ function SizeGuideModal({ onClose }: { onClose: () => void }) {
         </h2>
 
         <p style={{ fontFamily: T.sans, fontSize: "13px", color: "#555", lineHeight: 1.75, marginBottom: "16px" }}>
-          מידת טבעת ישראלית מחושבת לפי היקף האצבע במילימטרים.
+          מידת טבעת ישראלית מחושבת לפי היקף האצבע במילימטרים. לא בטוחים מה המידה שלכם? בחרו את השיטה הנוחה לכם:
         </p>
 
-        <div style={{ background: "#F9F8F6", padding: "16px", marginBottom: "20px" }}>
-          <p style={{ fontFamily: T.sans, fontSize: "12px", fontWeight: 600, color: "#333", marginBottom: "8px" }}>
-            כיצד למדוד בבית:
-          </p>
-          {[
-            "חתכו רצועת נייר ברוחב ~0.5 ס\"מ.",
-            "כרכו אותה סביב בסיס האצבע (לא צמוד מדי).",
-            "סמנו את נקודת החפיפה ומדדו את האורך במ\"מ.",
-            "זהו מספר המידה שלכם.",
-          ].map((step, i) => (
-            <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "6px" }}>
-              <span style={{ fontFamily: T.sans, fontSize: "11px", color: T.gold, minWidth: "16px", fontWeight: 600 }}>{i + 1}.</span>
-              <span style={{ fontFamily: T.sans, fontSize: "12px", color: "#555" }}>{step}</span>
-            </div>
+        {/* Method switcher */}
+        <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+          {([
+            { id: "paper", label: "אין לי טבעת מתאימה" },
+            { id: "ring",  label: "יש לי טבעת שמתאימה" },
+          ] as const).map(m => (
+            <button
+              key={m.id}
+              onClick={() => setMethod(m.id)}
+              style={{
+                flex: 1, padding: "10px 8px", fontFamily: T.sans, fontSize: "11.5px", fontWeight: 500,
+                border: method === m.id ? `1.5px solid ${T.gold}` : "1px solid #E0DDD8",
+                background: method === m.id ? "#FBF8F3" : "#fff",
+                color: method === m.id ? T.gold : "#888",
+                cursor: "pointer", transition: "all 0.15s",
+              }}
+            >
+              {m.label}
+            </button>
           ))}
         </div>
+
+        {method === "paper" ? (
+          <div style={{ background: "#F9F8F6", padding: "16px", marginBottom: "20px" }}>
+            <p style={{ fontFamily: T.sans, fontSize: "12px", fontWeight: 600, color: "#333", marginBottom: "8px" }}>
+              מדדו הערכה בעזרת פס נייר — אומדן טוב אם אין לכם טבעת מתאימה:
+            </p>
+            {[
+              "חתכו רצועת נייר ברוחב ~0.5 ס\"מ.",
+              "כרכו אותה סביב בסיס האצבע (לא צמוד מדי).",
+              "סמנו את נקודת החפיפה ומדדו את האורך במ\"מ.",
+              "התאימו את המספר שקיבלתם לעמודת \"היקף\" בטבלה למטה.",
+            ].map((step, i) => (
+              <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "6px" }}>
+                <span style={{ fontFamily: T.sans, fontSize: "11px", color: T.gold, minWidth: "16px", fontWeight: 600 }}>{i + 1}.</span>
+                <span style={{ fontFamily: T.sans, fontSize: "12px", color: "#555" }}>{step}</span>
+              </div>
+            ))}
+            <p style={{ fontFamily: T.sans, fontSize: "11px", color: "#AAA", marginTop: "10px" }}>
+              💡 זו שיטת הערכה בלבד — לדיוק מרבי עדיף למדוד טבעת קיימת אם יש לכם אחת.
+            </p>
+          </div>
+        ) : (
+          <div style={{ background: "#F9F8F6", padding: "16px", marginBottom: "20px" }}>
+            <p style={{ fontFamily: T.sans, fontSize: "12px", fontWeight: 600, color: "#333", marginBottom: "8px" }}>
+              מדדו את הקוטר הפנימי של טבעת שכבר מתאימה לאצבע:
+            </p>
+            {[
+              "בחרו טבעת שיושבת נוח על האצבע שעבורה מזמינים.",
+              "הניחו אותה על סרגל או סרט מדידה, ומדדו את הקוטר הפנימי — מקצה לקצה של הפער הפנימי, לא כולל עובי המתכת.",
+              "התאימו את המספר שקיבלתם (במ\"מ) לעמודת \"קוטר פנימי\" בטבלה למטה.",
+            ].map((step, i) => (
+              <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "6px" }}>
+                <span style={{ fontFamily: T.sans, fontSize: "11px", color: T.gold, minWidth: "16px", fontWeight: 600 }}>{i + 1}.</span>
+                <span style={{ fontFamily: T.sans, fontSize: "12px", color: "#555" }}>{step}</span>
+              </div>
+            ))}
+            <p style={{ fontFamily: T.sans, fontSize: "11px", color: "#AAA", marginTop: "10px" }}>
+              💡 זו השיטה המדויקת ביותר למדידה עצמית בבית.
+            </p>
+          </div>
+        )}
 
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", fontFamily: T.sans }}>
           <thead>
             <tr style={{ borderBottom: "1px solid #E8E8E4" }}>
               <th style={{ textAlign: "start", padding: "6px 8px", color: "#AAA", fontWeight: 400, letterSpacing: "0.1em" }}>מידה</th>
-              <th style={{ textAlign: "start", padding: "6px 8px", color: "#AAA", fontWeight: 400, letterSpacing: "0.1em" }}>היקף (מ"מ)</th>
-              <th style={{ textAlign: "start", padding: "6px 8px", color: "#AAA", fontWeight: 400, letterSpacing: "0.1em" }}>קוטר פנימי</th>
+              <th style={{ textAlign: "start", padding: "6px 8px", color: method === "paper" ? "#333" : "#AAA", fontWeight: method === "paper" ? 600 : 400, letterSpacing: "0.1em" }}>היקף (מ"מ)</th>
+              <th style={{ textAlign: "start", padding: "6px 8px", color: method === "ring" ? "#333" : "#AAA", fontWeight: method === "ring" ? 600 : 400, letterSpacing: "0.1em" }}>קוטר פנימי (מ"מ)</th>
             </tr>
           </thead>
           <tbody>
@@ -295,15 +342,17 @@ function SizeGuideModal({ onClose }: { onClose: () => void }) {
             ].map(([size, circ, diam]) => (
               <tr key={size} style={{ borderBottom: "1px solid #F0EDE9" }}>
                 <td style={{ padding: "7px 8px", color: "#333", fontWeight: 500 }}>{size}</td>
-                <td style={{ padding: "7px 8px", color: "#555" }}>{circ} מ"מ</td>
-                <td style={{ padding: "7px 8px", color: "#555" }}>{diam} ס"מ</td>
+                <td style={{ padding: "7px 8px", color: method === "paper" ? "#333" : "#999" }}>{circ} מ"מ</td>
+                <td style={{ padding: "7px 8px", color: method === "ring" ? "#333" : "#999" }}>{diam} מ"מ</td>
               </tr>
             ))}
           </tbody>
         </table>
 
         <p style={{ fontFamily: T.sans, fontSize: "11px", color: "#AAA", marginTop: "14px" }}>
-          לא בטוחים? צרו איתנו קשר בוואטסאפ ונעזור לכם.
+          לא בטוחים? צרו איתנו קשר ב-
+          <a href="https://wa.me/972549784329" style={{ color: T.gold, textDecoration: "none" }}> וואטסאפ</a>
+          {" "}ונעזור לכם למדוד.
         </p>
       </motion.div>
     </motion.div>

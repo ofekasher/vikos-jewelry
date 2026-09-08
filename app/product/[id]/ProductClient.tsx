@@ -228,26 +228,34 @@ function PaperMethodDiagram() {
   );
 }
 
-/** Illustration: measuring an existing ring's inner diameter, like the screenshot example */
+/** Illustration: measuring an existing ring's inner diameter — matches the reference example exactly:
+ *  a ring resting on a ruler, red double-arrow across the inner diameter labeled "18mm". */
 function RingMethodDiagram() {
+  const rulerY = 158, left = 20, right = 220;
+  const cx = (left + right) / 2, cy = 88, r = 58;
   return (
-    <svg viewBox="0 0 220 150" width="100%" style={{ maxWidth: "220px", display: "block", margin: "0 auto 12px" }}>
+    <svg viewBox="0 0 240 190" width="100%" style={{ maxWidth: "260px", display: "block", margin: "0 auto 12px" }}>
       {/* ring */}
-      <circle cx="110" cy="70" r="42" fill="none" stroke="#8B7355" strokeWidth="7" />
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#3A3A3A" strokeWidth="13" />
       {/* diameter arrow */}
-      <line x1="68" y1="70" x2="152" y2="70" stroke="#C9463B" strokeWidth="1.5" />
-      <polygon points="68,70 76,65 76,75" fill="#C9463B" />
-      <polygon points="152,70 144,65 144,75" fill="#C9463B" />
-      <text x="110" y="60" fontSize="12" fill="#C9463B" fontFamily="Inter, sans-serif" textAnchor="middle" fontWeight={600}>18mm</text>
-      {/* ruler under */}
-      <g stroke="#B5A78E" strokeWidth="1">
-        {Array.from({ length: 15 }).map((_, i) => (
-          <line key={i} x1={40 + i * 10} y1="125" x2={40 + i * 10} y2={i % 5 === 0 ? 136 : 130} />
-        ))}
+      <line x1={cx - r + 8} y1={cy} x2={cx + r - 8} y2={cy} stroke="#D1332B" strokeWidth="2" />
+      <polygon points={`${cx - r + 8},${cy} ${cx - r + 18},${cy - 6} ${cx - r + 18},${cy + 6}`} fill="#D1332B" />
+      <polygon points={`${cx + r - 8},${cy} ${cx + r - 18},${cy - 6} ${cx + r - 18},${cy + 6}`} fill="#D1332B" />
+      <text x={cx} y={cy - 14} fontSize="15" fill="#D1332B" fontFamily="Inter, sans-serif" textAnchor="middle" fontWeight={700}>18mm</text>
+      {/* ruler */}
+      <line x1={left} y1={rulerY} x2={right} y2={rulerY} stroke="#333" strokeWidth="1.5" />
+      <g stroke="#333" strokeWidth="1">
+        {Array.from({ length: 21 }).map((_, i) => {
+          const x = left + i * ((right - left) / 20);
+          const major = i % 10 === 0;
+          const mid = i % 5 === 0;
+          return <line key={i} x1={x} y1={rulerY} x2={x} y2={rulerY + (major ? 16 : mid ? 11 : 7)} />;
+        })}
       </g>
-      <line x1="40" y1="125" x2="180" y2="125" stroke="#B5A78E" strokeWidth="1" />
-      <text x="40" y="148" fontSize="10" fill="#8B7355" fontFamily="Inter, sans-serif">0</text>
-      <text x="130" y="148" fontSize="10" fill="#8B7355" fontFamily="Inter, sans-serif">2 ס"מ</text>
+      <text x={left} y={rulerY + 32} fontSize="13" fill="#333" fontFamily="Inter, sans-serif" textAnchor="middle">0</text>
+      <text x={(left + right) / 2} y={rulerY + 32} fontSize="13" fill="#333" fontFamily="Inter, sans-serif" textAnchor="middle">1</text>
+      <text x={right} y={rulerY + 32} fontSize="13" fill="#333" fontFamily="Inter, sans-serif" textAnchor="middle">2</text>
+      <text x={left} y={rulerY + 50} fontSize="12" fill="#333" fontFamily="Inter, sans-serif">cm</text>
     </svg>
   );
 }
@@ -351,52 +359,49 @@ function SizeGuideModal({ onClose }: { onClose: () => void }) {
           </div>
         ) : (
           <div style={{ background: "#F9F8F6", padding: "16px", marginBottom: "20px" }}>
-            <RingMethodDiagram />
-            <p style={{ fontFamily: T.sans, fontSize: "12px", fontWeight: 600, color: "#333", marginBottom: "8px" }}>
-              מדדו את הקוטר הפנימי של טבעת שכבר מתאימה לאצבע:
+            <h3 style={{ fontFamily: T.serif, fontSize: "1.1rem", fontWeight: 500, color: T.black, textAlign: "center", marginBottom: "10px" }}>
+              מה המידה שלי?
+            </h3>
+            <p style={{ fontFamily: T.sans, fontSize: "12px", color: "#555", lineHeight: 1.7, textAlign: "center", marginBottom: "14px" }}>
+              הניחי את אחת הטבעות שלך על גבי סרגל או סרט מדידה ומדדי את הקוטר הפנימי של הטבעת מצד לצד העיגול הפנימי.
             </p>
-            {[
-              "בחרו טבעת שיושבת נוח על האצבע שעבורה מזמינים.",
-              "הניחו אותה על סרגל או סרט מדידה, ומדדו את הקוטר הפנימי — מקצה לקצה של הפער הפנימי, לא כולל עובי המתכת.",
-              "התאימו את המספר שקיבלתם (במ\"מ) לעמודת \"קוטר פנימי\" בטבלה למטה.",
-            ].map((step, i) => (
-              <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "6px" }}>
-                <span style={{ fontFamily: T.sans, fontSize: "11px", color: T.gold, minWidth: "16px", fontWeight: 600 }}>{i + 1}.</span>
-                <span style={{ fontFamily: T.sans, fontSize: "12px", color: "#555" }}>{step}</span>
-              </div>
-            ))}
-            <p style={{ fontFamily: T.sans, fontSize: "11px", color: "#AAA", marginTop: "10px" }}>
+            <RingMethodDiagram />
+            <p style={{ fontFamily: T.sans, fontSize: "11px", color: "#AAA", marginTop: "10px", textAlign: "center" }}>
               💡 זו השיטה המדויקת ביותר למדידה עצמית בבית.
             </p>
           </div>
         )}
 
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", fontFamily: T.sans }}>
-          <thead>
-            <tr style={{ borderBottom: "1px solid #E8E8E4" }}>
-              <th style={{ textAlign: "start", padding: "6px 8px", color: "#AAA", fontWeight: 400, letterSpacing: "0.1em" }}>מידה</th>
-              <th style={{ textAlign: "start", padding: "6px 8px", color: method === "paper" ? "#333" : "#AAA", fontWeight: method === "paper" ? 600 : 400, letterSpacing: "0.1em" }}>היקף (מ"מ)</th>
-              <th style={{ textAlign: "start", padding: "6px 8px", color: method === "ring" ? "#333" : "#AAA", fontWeight: method === "ring" ? 600 : 400, letterSpacing: "0.1em" }}>קוטר פנימי (מ"מ)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[
-              ["46", "46", "14.6"],
-              ["48", "48", "15.3"],
-              ["50", "50", "15.9"],
-              ["52", "52", "16.5"],
-              ["54", "54", "17.2"],
-              ["56", "56", "17.8"],
-              ["58", "58", "18.5"],
-            ].map(([size, circ, diam]) => (
-              <tr key={size} style={{ borderBottom: "1px solid #F0EDE9" }}>
-                <td style={{ padding: "7px 8px", color: "#333", fontWeight: 500 }}>{size}</td>
-                <td style={{ padding: "7px 8px", color: method === "paper" ? "#333" : "#999" }}>{circ} מ"מ</td>
-                <td style={{ padding: "7px 8px", color: method === "ring" ? "#333" : "#999" }}>{diam} מ"מ</td>
+        {method === "paper" ? (
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", fontFamily: T.sans }}>
+            <thead>
+              <tr style={{ borderBottom: "1px solid #E8E8E4" }}>
+                <th style={{ textAlign: "start", padding: "6px 8px", color: "#AAA", fontWeight: 400, letterSpacing: "0.1em" }}>מידה</th>
+                <th style={{ textAlign: "start", padding: "6px 8px", color: "#333", fontWeight: 600, letterSpacing: "0.1em" }}>היקף (מ"מ)</th>
               </tr>
+            </thead>
+            <tbody>
+              {[
+                ["46", "46"], ["48", "48"], ["50", "50"], ["52", "52"], ["54", "54"], ["56", "56"], ["58", "58"],
+              ].map(([size, circ]) => (
+                <tr key={size} style={{ borderBottom: "1px solid #F0EDE9" }}>
+                  <td style={{ padding: "7px 8px", color: "#333", fontWeight: 500 }}>{size}</td>
+                  <td style={{ padding: "7px 8px", color: "#333" }}>{circ} מ"מ</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontFamily: T.sans, fontSize: "13px", color: "#333", textAlign: "center" }}>
+            {[
+              ["14.6", "46"], ["15.3", "48"], ["15.9", "50"], ["16.5", "52"], ["17.2", "54"], ["17.8", "56"], ["18.5", "58"],
+            ].map(([diam, size]) => (
+              <p key={size} style={{ margin: 0 }}>
+                קוטר {diam} מ"מ — גודל הטבעת שלך <strong style={{ color: T.gold }}>{size}</strong>
+              </p>
             ))}
-          </tbody>
-        </table>
+          </div>
+        )}
 
         <p style={{ fontFamily: T.sans, fontSize: "11px", color: "#AAA", marginTop: "14px" }}>
           לא בטוחים? צרו איתנו קשר ב-

@@ -248,8 +248,8 @@ export default function CustomPage() {
             {/* Contact info */}
             <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
               {[
-                { icon: Phone, text: "050-000-0000" },
-                { icon: Mail, text: "studio@vikosjewelry.com" },
+                { icon: Phone, text: "054-978-4329" },
+                { icon: Mail, text: "hello.vikosjewelry@gmail.com" },
                 { icon: MapPin, text: "תל אביב, ישראל" },
               ].map(({ icon: Icon, text }) => (
                 <div key={text} style={{ display: "flex", alignItems: "center", gap: "12px" }}>

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const BUSINESS_EMAIL = process.env.BUSINESS_EMAIL ?? "studio@vikosjewelry.com";
+const BUSINESS_EMAIL = process.env.BUSINESS_EMAIL ?? "hello.vikosjewelry@gmail.com";
 const getResend = () => new Resend(process.env.RESEND_API_KEY ?? "");
 
 interface OrderItem {

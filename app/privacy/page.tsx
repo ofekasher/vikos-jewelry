@@ -17,7 +17,7 @@ export default function PrivacyPage() {
         <p><strong style={{ color: "#111" }}>מידע שנאסף:</strong> שם, כתובת אימייל, כתובת למשלוח, ומספר טלפון — בעת ביצוע הזמנה בלבד.</p>
         <p><strong style={{ color: "#111" }}>שימוש במידע:</strong> אנו משתמשים במידע לעיבוד הזמנות, שליחת אישורים, ויצירת קשר בנוגע להזמנתך.</p>
         <p><strong style={{ color: "#111" }}>אבטחה:</strong> כל תשלומים מעובדים דרך PayPal בצורה מאובטחת. אנו לא שומרים פרטי כרטיס אשראי.</p>
-        <p><strong style={{ color: "#111" }}>צור קשר:</strong> לשאלות בנוגע לפרטיות, צור קשר: <a href="mailto:studio@vikosjewelry.com" style={{ color: "#8B7355" }}>studio@vikosjewelry.com</a></p>
+        <p><strong style={{ color: "#111" }}>צור קשר:</strong> לשאלות בנוגע לפרטיות, צור קשר: <a href="mailto:hello.vikosjewelry@gmail.com" style={{ color: "#8B7355" }}>hello.vikosjewelry@gmail.com</a></p>
       </div>
     </main>
   );

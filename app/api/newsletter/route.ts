@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const BUSINESS_EMAIL = process.env.BUSINESS_EMAIL ?? "studio@vikosjewelry.com";
+const BUSINESS_EMAIL = process.env.BUSINESS_EMAIL ?? "hello.vikosjewelry@gmail.com";
 
 export async function POST(req: Request) {
   const { email } = await req.json();

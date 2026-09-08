@@ -103,6 +103,8 @@ export default function FooterClient() {
         </p>
         <div style={{ display: "flex", gap: "24px" }}>
           {[
+            { label: "משלוחים",   href: "/shipping" },
+            { label: "החזרות",    href: "/returns" },
             { label: f.privacy,   href: "/privacy" },
             { label: f.terms,     href: "/terms" },
             { label: "Instagram", href: "https://instagram.com/vikosjewelry" },

@@ -18,7 +18,7 @@ export default function TermsPage() {
         <p><strong style={{ color: "#111" }}>קניין רוחני:</strong> כל התכנים, התמונות והעיצובים באתר הם קניין בלעדי של VIKOS Jewelry.</p>
         <p><strong style={{ color: "#111" }}>אחריות:</strong> תכשיטינו מגיעים עם אחריות לשנה על פגמי ייצור.</p>
         <p><strong style={{ color: "#111" }}>שינויים:</strong> תנאים אלו עשויים להשתנות ללא הודעה מוקדמת.</p>
-        <p><strong style={{ color: "#111" }}>צור קשר:</strong> <a href="mailto:studio@vikosjewelry.com" style={{ color: "#8B7355" }}>studio@vikosjewelry.com</a></p>
+        <p><strong style={{ color: "#111" }}>צור קשר:</strong> <a href="mailto:hello.vikosjewelry@gmail.com" style={{ color: "#8B7355" }}>hello.vikosjewelry@gmail.com</a></p>
       </div>
     </main>
   );

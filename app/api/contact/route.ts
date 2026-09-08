@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const BUSINESS_EMAIL = process.env.BUSINESS_EMAIL ?? "studio@vikosjewelry.com";
+const BUSINESS_EMAIL = process.env.BUSINESS_EMAIL ?? "hello.vikosjewelry@gmail.com";
 const getResend = () => new Resend(process.env.RESEND_API_KEY ?? "");
 
 export async function POST(req: Request) {
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
           <div style="width: 40px; height: 1px; background: #C9A96E; margin-bottom: 24px;"></div>
           <p style="line-height: 1.8; color: #555;">קיבלנו את פנייתך להזמנה מותאמת אישית. הצוות שלנו יחזור אליך תוך <strong>24 שעות</strong> עם הצעה אישית.</p>
           <p style="line-height: 1.8; color: #555; margin-top: 16px;">בכל שאלה דחופה ניתן ליצור קשר ישירות:</p>
-          <p style="color: #C9A96E;">📞 ${process.env.WHATSAPP_NUMBER ?? "050-000-0000"}</p>
+          <p style="color: #C9A96E;">📞 ${process.env.WHATSAPP_NUMBER ?? "054-978-4329"}</p>
           <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #eee; text-align: center;">
             <span style="font-family: Georgia, serif; font-size: 22px; letter-spacing: 0.2em; color: #111;">VIKOS</span>
             <p style="font-size: 11px; color: #aaa; margin-top: 8px; letter-spacing: 0.1em;">תכשיטים בעבודת יד · ישראל</p>

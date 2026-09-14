@@ -9,13 +9,13 @@ type LanguageContextType = {
 };
 
 const LanguageContext = createContext<LanguageContextType>({
-  lang: "he",
+  lang: "en",
   setLang: () => {},
-  t: translations.he,
+  t: translations.en,
 });
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("he");
+  const [lang, setLangState] = useState<Lang>("en");
 
   // Restore from localStorage on mount
   useEffect(() => {
@@ -25,9 +25,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Keep <html> lang in sync (dir stays ltr always)
+  // Keep <html> lang + dir in sync — Hebrew renders right-to-left, English left-to-right
   useEffect(() => {
     document.documentElement.lang = lang;
+    document.documentElement.dir = translations[lang].dir;
   }, [lang]);
 
   const setLang = (l: Lang) => {

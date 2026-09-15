@@ -3,10 +3,10 @@ import Link from "next/link";
 import { useT } from "@/lib/LanguageContext";
 
 const CARDS = [
-  { id: "rings",     img: "/cat-rings.jpg",                href: "/shop?category=rings" },
-  { id: "earrings",  img: "/cat-earrings.jpg",             href: "/shop?category=earrings" },
-  { id: "necklaces", img: "/necklaces/pe7k_neck_01.png",   href: "/shop?category=necklaces" },
-  { id: "bracelets", img: "/cat-bracelets.jpg",            href: "/shop?category=bracelets" },
+  { id: "rings",     img: "/cat-rings-v2.jpg",     href: "/shop?category=rings" },
+  { id: "earrings",  img: "/cat-earrings-v2.jpg",  href: "/shop?category=earrings" },
+  { id: "necklaces", img: "/cat-necklaces-v2.jpg", href: "/shop?category=necklaces" },
+  { id: "bracelets", img: "/cat-bracelets-v2.jpg", href: "/shop?category=bracelets" },
 ];
 
 export default function CategoryAccordion() {
@@ -25,6 +25,7 @@ export default function CategoryAccordion() {
         {CARDS.map(({ id, img, href }) => (
           <Link key={id} href={href} className="cat-block" style={{ textDecoration: "none" }}>
             <img src={img} alt={labels[id]} loading="lazy" className="cat-block-img" />
+            <div className="cat-block-scrim" />
             <div className="cat-block-footer">
               <span className="cat-block-label">{labels[id]}</span>
               <span className="cat-block-arrow">→</span>
@@ -45,59 +46,65 @@ export default function CategoryAccordion() {
 
         .cat-block {
           position: relative;
-          display: flex;
-          flex-direction: column;
-          background: #ffffff;
+          display: block;
+          aspect-ratio: 4 / 3;
+          overflow: hidden;
           cursor: pointer;
-          border: 1px solid rgba(0,0,0,0.06);
-          transition: box-shadow 300ms ease;
-        }
-
-        @media (hover: hover) and (pointer: fine) {
-          .cat-block:hover {
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-          }
+          background: #ffffff;
         }
 
         .cat-block-img {
-          width: calc(100% - 32px);
-          height: 260px;
-          object-fit: contain;
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
           object-position: center center;
-          margin: 16px;
           display: block;
-          background: #f5f0eb;
-          transition: transform 500ms cubic-bezier(0.23, 1, 0.32, 1);
+          transition: transform 700ms cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         @media (hover: hover) and (pointer: fine) {
           .cat-block:hover .cat-block-img {
-            transform: scale(1.02);
+            transform: scale(1.06);
           }
         }
 
+        .cat-block-scrim {
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          height: 40%;
+          background: linear-gradient(to top, rgba(0,0,0,0.42), rgba(0,0,0,0));
+          pointer-events: none;
+        }
+
         .cat-block-footer {
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 0;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 12px 20px;
-          border-top: 1px solid rgba(0,0,0,0.06);
-          background: #ffffff;
+          padding: 18px 20px;
         }
 
         .cat-block-label {
           font-family: 'Inter', system-ui, sans-serif;
-          font-size: 10px;
+          font-size: 11px;
           font-weight: 500;
           letter-spacing: 0.28em;
           text-transform: uppercase;
-          color: #111111;
+          color: #ffffff;
           padding-right: 0.28em;
+          text-shadow: 0 1px 6px rgba(0,0,0,0.25);
         }
 
         .cat-block-arrow {
-          font-size: 12px;
-          color: #8B7355;
+          font-size: 13px;
+          color: #ffffff;
           transition: transform 200ms ease;
         }
 
@@ -109,12 +116,8 @@ export default function CategoryAccordion() {
 
         @media (max-width: 768px) {
           .cat-grid { gap: 6px; }
-          .cat-block-img { height: 180px; padding: 16px; }
-          .cat-block-footer { padding: 10px 14px; }
-        }
-
-        @media (max-width: 480px) {
-          .cat-block-img { height: 140px; }
+          .cat-block-footer { padding: 14px 16px; }
+          .cat-block-label { font-size: 10px; }
         }
       `}</style>
     </section>

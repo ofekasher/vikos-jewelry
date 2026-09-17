@@ -24,8 +24,9 @@ export default function CategoryAccordion() {
       <div className="cat-grid">
         {CARDS.map(({ id, img, href }) => (
           <Link key={id} href={href} className="cat-block" style={{ textDecoration: "none" }}>
-            <img src={img} alt={labels[id]} loading="lazy" className="cat-block-img" />
-            <div className="cat-block-scrim" />
+            <div className="cat-block-imgwrap">
+              <img src={img} alt={labels[id]} loading="lazy" className="cat-block-img" />
+            </div>
             <div className="cat-block-footer">
               <span className="cat-block-label">{labels[id]}</span>
               <span className="cat-block-arrow">→</span>
@@ -46,65 +47,64 @@ export default function CategoryAccordion() {
 
         .cat-block {
           position: relative;
-          display: block;
-          aspect-ratio: 4 / 3;
-          overflow: hidden;
-          cursor: pointer;
+          display: flex;
+          flex-direction: column;
           background: #ffffff;
+          cursor: pointer;
+          border: 1px solid rgba(0,0,0,0.06);
+          transition: box-shadow 300ms ease;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+          .cat-block:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+          }
+        }
+
+        .cat-block-imgwrap {
+          aspect-ratio: 4 / 3;
+          background: #F5F3EF;
+          overflow: hidden;
+          padding: 20px;
         }
 
         .cat-block-img {
-          position: absolute;
-          inset: 0;
           width: 100%;
           height: 100%;
-          object-fit: cover;
+          object-fit: contain;
           object-position: center center;
           display: block;
-          transition: transform 700ms cubic-bezier(0.23, 1, 0.32, 1);
+          transition: transform 500ms cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         @media (hover: hover) and (pointer: fine) {
           .cat-block:hover .cat-block-img {
-            transform: scale(1.06);
+            transform: scale(1.04);
           }
         }
 
-        .cat-block-scrim {
-          position: absolute;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          height: 40%;
-          background: linear-gradient(to top, rgba(0,0,0,0.42), rgba(0,0,0,0));
-          pointer-events: none;
-        }
-
         .cat-block-footer {
-          position: absolute;
-          left: 0;
-          right: 0;
-          bottom: 0;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 18px 20px;
+          padding: 12px 20px;
+          border-top: 1px solid rgba(0,0,0,0.06);
+          background: #ffffff;
         }
 
         .cat-block-label {
           font-family: 'Inter', system-ui, sans-serif;
-          font-size: 11px;
+          font-size: 10px;
           font-weight: 500;
           letter-spacing: 0.28em;
           text-transform: uppercase;
-          color: #ffffff;
+          color: #111111;
           padding-right: 0.28em;
-          text-shadow: 0 1px 6px rgba(0,0,0,0.25);
         }
 
         .cat-block-arrow {
-          font-size: 13px;
-          color: #ffffff;
+          font-size: 12px;
+          color: #8B7355;
           transition: transform 200ms ease;
         }
 
@@ -116,8 +116,8 @@ export default function CategoryAccordion() {
 
         @media (max-width: 768px) {
           .cat-grid { gap: 6px; }
-          .cat-block-footer { padding: 14px 16px; }
-          .cat-block-label { font-size: 10px; }
+          .cat-block-imgwrap { padding: 14px; }
+          .cat-block-footer { padding: 10px 14px; }
         }
       `}</style>
     </section>

@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import AiChat from "@/components/AiChat";
 import { LanguageProvider } from "@/lib/LanguageContext";
+import { SITE_URL } from "@/lib/site-url";
 import { Cormorant_Garamond, Plus_Jakarta_Sans, Frank_Ruhl_Libre } from "next/font/google";
 
 const cormorant = Cormorant_Garamond({
@@ -29,13 +30,14 @@ const frankRuhl = Frank_Ruhl_Libre({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Vikos Jewelry | תכשיטים יוקרתיים",
   description: "Vikos Jewelry — תכשיטים מעוצבים בסגנון סקנדינבי מינימליסטי. Handcrafted fine jewelry with Scandinavian elegance.",
   keywords: "תכשיטים, jewelry, luxury, handcrafted, gold, israel, vikos",
   openGraph: {
     title: "Vikos Jewelry | תכשיטים יוקרתיים",
     description: "תכשיטים מעוצבים בסגנון סקנדינבי מינימליסטי. Handcrafted fine jewelry.",
-    url: "https://vikosjewelry.com",
+    url: SITE_URL,
     siteName: "Vikos Jewelry",
     images: [{ url: "/og-image.jpg", width: 1200, height: 630, alt: "Vikos Jewelry" }],
     type: "website",

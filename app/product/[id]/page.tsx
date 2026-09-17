@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { products } from "@/lib/products";
 import type { Product } from "@/lib/products";
+import { getProduct } from "@/lib/products-server";
+import { SITE_URL } from "@/lib/site-url";
 import ProductClient from "./ProductClient";
 
 // Pre-generate a static page for every product in lib/products.ts at build time.
@@ -12,7 +14,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  const p = products.find((x) => x.id === id);
+  const p = await getProduct(id);
   if (!p) return { title: "מוצר | VIKOS Jewelry" };
   return {
     title: `${p.nameHe} | VIKOS Jewelry`,
@@ -36,8 +38,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const p = products.find((x) => x.id === id) ?? null;
-  const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://vikos-jewelry.com";
+  const p = await getProduct(id);
 
   const jsonLd = p ? {
     "@context": "https://schema.org",
@@ -45,13 +46,14 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     name: p.nameHe,
     description: p.descriptionHe,
     image: p.image,
+    sku: p.id,
     brand: { "@type": "Brand", name: "VIKOS Jewelry" },
     offers: {
       "@type": "Offer",
       price: p.price,
       priceCurrency: "ILS",
-      availability: "https://schema.org/InStock",
-      url: `${BASE}/product/${p.id}`,
+      availability: p.inStock === false ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
+      url: `${SITE_URL}/product/${p.id}`,
     },
   } : null;
 

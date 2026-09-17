@@ -1,11 +1,15 @@
 import type { MetadataRoute } from "next";
-import { products, categories } from "@/lib/products";
+import { categories } from "@/lib/products";
+import { getAllProducts } from "@/lib/products-server";
+import { SITE_URL } from "@/lib/site-url";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://vikos-jewelry.com";
+// Products come from Supabase so items added through the admin dashboard
+// are indexed without a redeploy.
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const products = await getAllProducts();
 
-export default function sitemap(): MetadataRoute.Sitemap {
   const productUrls = products.map((p) => ({
-    url: `${BASE}/product/${p.id}`,
+    url: `${SITE_URL}/product/${p.id}`,
     lastModified: new Date(),
     changeFrequency: "weekly" as const,
     priority: 0.8,
@@ -14,17 +18,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const categoryUrls = categories
     .filter((c) => c.id !== "all")
     .map((c) => ({
-      url: `${BASE}/shop?cat=${c.id}`,
+      url: `${SITE_URL}/shop?category=${c.id}`,
       lastModified: new Date(),
       changeFrequency: "weekly" as const,
       priority: 0.7,
     }));
 
   return [
-    { url: BASE, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
-    { url: `${BASE}/shop`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
-    { url: `${BASE}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
-    { url: `${BASE}/gallery`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.6 },
+    { url: SITE_URL, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
+    { url: `${SITE_URL}/shop`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
+    { url: `${SITE_URL}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${SITE_URL}/gallery`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.6 },
+    { url: `${SITE_URL}/custom`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
+    { url: `${SITE_URL}/shipping`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
+    { url: `${SITE_URL}/returns`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
     ...categoryUrls,
     ...productUrls,
   ];

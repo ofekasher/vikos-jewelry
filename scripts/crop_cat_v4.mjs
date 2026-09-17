@@ -36,14 +36,15 @@ async function coverCropToRatio(buf) {
   return sharp(buf).extract({ left, top, width: cropW, height: cropH }).toBuffer();
 }
 
-async function finish(buf, outName) {
+async function finish(buf, outName, outW = OUT_W) {
+  const outH = Math.round(outW / TARGET_RATIO);
   const final = await sharp(buf)
-    .resize(OUT_W, OUT_H, { fit: 'fill' })
+    .resize(outW, outH, { fit: 'fill' })
     .jpeg({ quality: 78, mozjpeg: true })
     .toBuffer();
   await sharp(final).toFile(path.join(OUT_DIR, outName));
   const kb = Math.round(final.length / 1024);
-  console.log('✓', outName, `${kb}KB`);
+  console.log('✓', outName, `${outW}x${outH}`, `${kb}KB`);
 }
 
 async function run() {
@@ -66,22 +67,20 @@ async function run() {
     await finish(cropped, 'cat-earrings-v2.jpg');
   }
 
-  // Ring — band-crop across the diamond row, coords x2 vs v3 (source is 2x now)
+  // Ring — tight crop on just 2 diamonds + prongs, fills the frame completely
   {
     const trimmed = await sharp(path.join(SRC_DIR, 'up_ring.jpg')).trim({ threshold: 15 }).toBuffer();
-    const m = await sharp(trimmed).metadata();
-    console.log('ring trimmed:', m.width, m.height);
-    const cropped = await sharp(trimmed).extract({ left: 0, top: 560, width: m.width, height: 980 }).toBuffer();
+    const cropped = await sharp(trimmed).extract({ left: 0, top: 500, width: 750, height: 562 }).toBuffer();
     await finish(cropped, 'cat-rings-v2.jpg');
   }
 
-  // Necklace — close-up on clasp + VIKOS tag + diamond sweep, coords x2 vs v3
+  // Necklace — dense close-up on the diamond line itself (no plain chain,
+  // no hollow center) instead of the clasp/tag wide shot, which still had
+  // too much bare white next to the busy bracelet/earrings tiles.
   {
     const trimmed = await sharp(path.join(SRC_DIR, 'up_necklace.jpg')).trim({ threshold: 15 }).toBuffer();
-    const m = await sharp(trimmed).metadata();
-    console.log('necklace trimmed:', m.width, m.height);
-    const cropped = await sharp(trimmed).extract({ left: 1190, top: 0, width: 1640, height: 1230 }).toBuffer();
-    await finish(cropped, 'cat-necklaces-v2.jpg');
+    const cropped = await sharp(trimmed).extract({ left: 2380, top: 1750, width: 320, height: 240 }).toBuffer();
+    await finish(cropped, 'cat-necklaces-v2.jpg', 640);
   }
 
   console.log('done');

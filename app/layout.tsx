@@ -54,9 +54,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" dir="ltr" className={`${cormorant.variable} ${inter.variable} ${frankRuhl.variable}`}>
+    <html lang="en" dir="ltr" suppressHydrationWarning className={`${cormorant.variable} ${inter.variable} ${frankRuhl.variable}`}>
       <head>
         <meta name="referrer" content="no-referrer" />
+        {/* Apply the saved language's dir/lang before first paint, so a
+            returning Hebrew visitor doesn't see a flash of LTR layout
+            before LanguageProvider's useEffect runs. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var l=localStorage.getItem("vikos-lang");if(l==="he"){document.documentElement.lang="he";document.documentElement.dir="rtl";}}catch(e){}})();`,
+          }}
+        />
       </head>
       <body className="antialiased">
         <LanguageProvider>

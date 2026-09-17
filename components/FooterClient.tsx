@@ -12,7 +12,8 @@ export default function FooterClient() {
     if (!email || !email.includes("@")) { setStatus("err"); return; }
     setStatus("loading");
     try {
-      await fetch("/api/newsletter", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
+      const res = await fetch("/api/newsletter", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
+      if (!res.ok) throw new Error("newsletter signup failed");
       setStatus("ok");
       setEmail("");
     } catch {
@@ -45,7 +46,7 @@ export default function FooterClient() {
           </p>
           {status === "ok" ? (
             <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "11px", color: "rgba(255,255,255,0.5)", lineHeight: 1.6 }}>
-              ✓ נרשמת בהצלחה!
+              {f.newsletterSuccess}
             </p>
           ) : (
             <div style={{ display: "flex", borderBottom: `1px solid ${status === "err" ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.2)"}`, paddingBottom: "10px", gap: "8px" }}>
@@ -66,6 +67,11 @@ export default function FooterClient() {
                 {status === "loading" ? "..." : `${f.newsletterCta} →`}
               </button>
             </div>
+          )}
+          {status === "err" && (
+            <p style={{ fontFamily: "'Inter',sans-serif", fontSize: "10px", color: "rgba(239,68,68,0.85)", marginTop: "8px" }}>
+              {f.newsletterError}
+            </p>
           )}
         </div>
 

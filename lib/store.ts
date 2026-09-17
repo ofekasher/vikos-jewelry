@@ -14,6 +14,7 @@ interface StoreState {
   isCartOpen: boolean;
   addToCart: (product: Product) => void;
   removeFromCart: (id: string) => void;
+  clearCart: () => void;
   updateQuantity: (id: string, qty: number) => void;
   toggleCart: () => void;
   cartTotal: () => number;
@@ -43,6 +44,8 @@ export const useStore = create<StoreState>()(
 
       removeFromCart: (id) =>
         set({ cart: get().cart.filter((i) => i.product.id !== id) }),
+
+      clearCart: () => set({ cart: [] }),
 
       updateQuantity: (id, qty) => {
         if (qty <= 0) { get().removeFromCart(id); return; }

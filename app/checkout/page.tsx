@@ -34,13 +34,14 @@ const inputStyle: React.CSSProperties = {
   transition: "border-color 0.2s",
 };
 
-function Field({ label, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { label: string }) {
+function Field({ label, id, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { label: string; id: string }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-      <label style={{ fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "#888" }}>
+      <label htmlFor={id} style={{ fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: "#888" }}>
         {label}
       </label>
       <input
+        id={id}
         {...props}
         style={inputStyle}
         onFocus={e => (e.currentTarget.style.borderColor = T.gold)}
@@ -52,12 +53,14 @@ function Field({ label, ...props }: React.InputHTMLAttributes<HTMLInputElement> 
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, cartTotal, cart: cartItems } = useStore();
+  const { cart, cartTotal, cart: cartItems, clearCart } = useStore();
   const total = cartTotal();
   const [step, setStep] = useState<"details" | "payment" | "success">("details");
   const [form, setForm] = useState({ name: "", email: "", phone: "", address: "", city: "", zip: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [summaryOpen, setSummaryOpen] = useState(false);
+  const [orderRef, setOrderRef] = useState<string | null>(null);
+  const [orderSaveFailed, setOrderSaveFailed] = useState(false);
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -78,8 +81,12 @@ export default function CheckoutPage() {
   const handleSuccess = async (paypalOrderId: string) => {
     const orderId = crypto.randomUUID();
     const shipping = total >= 500 ? 0 : 30;
+    // PayPal has already captured payment by the time this runs — the money
+    // is taken regardless of whether our own order-save succeeds. Never show
+    // a fake success if this fails; instead flag it clearly so the customer
+    // knows to follow up, and keep the PayPal reference for support to trace.
     try {
-      await fetch("/api/orders", {
+      const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -99,10 +106,13 @@ export default function CheckoutPage() {
           paypalOrderId,
         }),
       });
+      if (!res.ok) throw new Error("order save failed");
     } catch {
-      // Don't block the success screen if email fails
-      console.error("Order save failed");
+      console.error("Order save failed for PayPal order", paypalOrderId);
+      setOrderSaveFailed(true);
     }
+    setOrderRef(paypalOrderId);
+    clearCart();
     setStep("success");
   };
 
@@ -147,15 +157,36 @@ export default function CheckoutPage() {
           >
             <CheckCircle size={52} color={T.gold} strokeWidth={1} />
             <h2 style={{ fontFamily: T.serif, fontSize: "2rem", fontWeight: 300, color: T.black }}>
-              ההזמנה אושרה!
+              {orderSaveFailed ? "התשלום התקבל!" : "ההזמנה אושרה!"}
             </h2>
-            <p style={{ fontFamily: T.sans, fontSize: "13px", color: T.gray, lineHeight: 1.7, fontWeight: 300 }}>
-              תודה על הרכישה. אישור ישלח לאימייל <strong>{form.email}</strong>.<br />
-              זמן אספקה 3–5 ימי עסקים.
-            </p>
-            <Link href="/shop" style={{ marginTop: "16px", padding: "14px 40px", background: T.gold, color: "#fff", fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", textDecoration: "none" }}>
-              המשך קנייה
-            </Link>
+            {orderSaveFailed ? (
+              <>
+                <p style={{ fontFamily: T.sans, fontSize: "13px", color: T.gray, lineHeight: 1.7, fontWeight: 300 }}>
+                  התשלום שלך התקבל בהצלחה, אך נתקלנו בבעיה טכנית ברישום ההזמנה במערכת שלנו.
+                  <br />
+                  <strong>אנא צרו קשר בוואטסאפ עם המספר הבא</strong> כדי שנוודא את ההזמנה ידנית:
+                </p>
+                <p style={{ fontFamily: T.sans, fontSize: "14px", color: T.black, background: T.warm, padding: "10px 20px", letterSpacing: "0.04em" }}>
+                  {orderRef}
+                </p>
+                <a
+                  href={`https://wa.me/972549784329?text=${encodeURIComponent(`שלום, שילמתי דרך האתר אך ההזמנה לא נרשמה. מספר אסמכתא: ${orderRef}`)}`}
+                  style={{ padding: "14px 40px", background: T.black, color: "#fff", fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", textDecoration: "none" }}
+                >
+                  צור קשר בוואטסאפ →
+                </a>
+              </>
+            ) : (
+              <>
+                <p style={{ fontFamily: T.sans, fontSize: "13px", color: T.gray, lineHeight: 1.7, fontWeight: 300 }}>
+                  תודה על הרכישה. אישור ישלח לאימייל <strong>{form.email}</strong>.<br />
+                  זמן אספקה 3–5 ימי עסקים.
+                </p>
+                <Link href="/shop" style={{ marginTop: "16px", padding: "14px 40px", background: T.gold, color: "#fff", fontFamily: T.sans, fontSize: "10px", letterSpacing: "0.22em", textTransform: "uppercase", textDecoration: "none" }}>
+                  המשך קנייה
+                </Link>
+              </>
+            )}
           </motion.div>
         ) : (
           <motion.main
@@ -202,17 +233,17 @@ export default function CheckoutPage() {
 
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                         <div>
-                          <Field label="שם מלא *" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="ישראל ישראלי" />
+                          <Field id="name" label="שם מלא *" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="ישראל ישראלי" />
                           {errors.name && <p style={{ fontFamily: T.sans, fontSize: "10px", color: "#E55", marginTop: "4px" }}>{errors.name}</p>}
                         </div>
                         <div>
-                          <Field label="אימייל *" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="your@email.com" />
+                          <Field id="email" label="אימייל *" type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="your@email.com" />
                           {errors.email && <p style={{ fontFamily: T.sans, fontSize: "10px", color: "#E55", marginTop: "4px" }}>{errors.email}</p>}
                         </div>
                       </div>
 
                       <div>
-                        <Field label="טלפון *" type="tel" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="050-0000000" />
+                        <Field id="phone" label="טלפון *" type="tel" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="050-0000000" />
                         {errors.phone && <p style={{ fontFamily: T.sans, fontSize: "10px", color: "#E55", marginTop: "4px" }}>{errors.phone}</p>}
                       </div>
 
@@ -221,16 +252,16 @@ export default function CheckoutPage() {
                       </h2>
 
                       <div>
-                        <Field label="רחוב ומספר *" value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} placeholder="רחוב הרצל 1" />
+                        <Field id="address" label="רחוב ומספר *" value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} placeholder="רחוב הרצל 1" />
                         {errors.address && <p style={{ fontFamily: T.sans, fontSize: "10px", color: "#E55", marginTop: "4px" }}>{errors.address}</p>}
                       </div>
 
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                         <div>
-                          <Field label="עיר *" value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} placeholder="תל אביב" />
+                          <Field id="city" label="עיר *" value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} placeholder="תל אביב" />
                           {errors.city && <p style={{ fontFamily: T.sans, fontSize: "10px", color: "#E55", marginTop: "4px" }}>{errors.city}</p>}
                         </div>
-                        <Field label="מיקוד" value={form.zip} onChange={e => setForm(f => ({ ...f, zip: e.target.value }))} placeholder="12345" />
+                        <Field id="zip" label="מיקוד" value={form.zip} onChange={e => setForm(f => ({ ...f, zip: e.target.value }))} placeholder="12345" />
                       </div>
 
                       <button type="submit" style={{

@@ -116,6 +116,8 @@ export const translations = {
       newsletterLabel: "Newsletter",
       newsletterPlaceholder: "Your email",
       newsletterCta: "Join",
+      newsletterSuccess: "✓ You're subscribed!",
+      newsletterError: "Something went wrong — please try again.",
       columns: [
         {
           head: "Shop",
@@ -305,6 +307,8 @@ export const translations = {
       newsletterLabel: "ניוזלטר",
       newsletterPlaceholder: "האימייל שלך",
       newsletterCta: "הצטרף",
+      newsletterSuccess: "✓ נרשמת בהצלחה!",
+      newsletterError: "משהו השתבש — נסו שוב.",
       columns: [
         {
           head: "חנות",

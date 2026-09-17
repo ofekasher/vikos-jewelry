@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import AiChat from "@/components/AiChat";
 import { LanguageProvider } from "@/lib/LanguageContext";
@@ -76,6 +78,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
         </LanguageProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
